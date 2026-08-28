@@ -11,6 +11,7 @@
     "cap:sync": "cap sync"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
     "@capacitor/preferences": "^8.0.1",

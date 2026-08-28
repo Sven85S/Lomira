@@ -9,15 +9,15 @@ import {
 } from '@revenuecat/purchases-capacitor';
 import { ENTITLEMENT_ID, REVENUECAT_API_KEY } from '../config/revenuecat';
 
-/** RevenueCat's iOS SDK only runs on a native shell — guard every call site with this. */
-export const isRevenueCatSupported = Capacitor.getPlatform() === 'ios';
+/** RevenueCat's SDK only runs on a native shell (iOS or Android) — guard every call site with this. */
+export const isRevenueCatSupported = ['ios', 'android'].includes(Capacitor.getPlatform());
 
 let configured = false;
 
 export async function configureRevenueCat(): Promise<void> {
   if (!isRevenueCatSupported || configured) return;
   if (!REVENUECAT_API_KEY) {
-    console.warn('Lomira: VITE_REVENUECAT_IOS_API_KEY is not set — RevenueCat stays unconfigured.');
+    console.warn('Lomira: no RevenueCat API key set for this platform — RevenueCat stays unconfigured.');
     return;
   }
   await Purchases.setLogLevel({ level: LOG_LEVEL.WARN });

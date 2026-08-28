@@ -71,7 +71,7 @@ export default function PaywallScreen({ onClose }: Props) {
           </div>
         ) : purchasingUnsupported ? (
           <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260 }}>
-            Käufe sind nur in der iOS-App verfügbar. Öffne Lomira auf deinem iPhone, um Lomira Plus zu abonnieren.
+            Käufe sind nur in der iOS- oder Android-App verfügbar. Öffne Lomira auf deinem Smartphone, um Lomira Plus zu abonnieren.
           </p>
         ) : (
           <>
