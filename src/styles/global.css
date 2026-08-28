@@ -1,0 +1,40 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: #EDEAE2;
+  font-family: 'Inter', sans-serif;
+  color: #2B2620;
+}
+
+a,
+a:hover {
+  color: #2B2620;
+}
+
+textarea {
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  resize: none;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  background: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
