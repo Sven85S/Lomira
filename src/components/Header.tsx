@@ -9,7 +9,7 @@ const TAB_TITLES: Record<TabId, string> = {
   fortschritt: 'Fortschritt',
 };
 
-const INFO_TABS: TabId[] = ['ritual', 'lektionen', 'fortschritt'];
+const INFO_TABS: TabId[] = ['beruehren', 'ritual', 'lektionen', 'fortschritt'];
 
 interface Props {
   tab: TabId;

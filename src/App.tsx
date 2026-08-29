@@ -55,7 +55,7 @@ function Shell() {
 
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {tab === 'sos' && <AnkerScreen />}
-        {tab === 'beruehren' && <BeruehrenScreen />}
+        {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
         {tab === 'lektionen' && (
           <LektionenScreen showInfo={!!infoOpen.lektionen} onOpenLesson={setOpenLessonId} onOpenPaywall={() => setShowPaywall(true)} />
         )}
