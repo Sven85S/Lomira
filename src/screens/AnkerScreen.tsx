@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { colors, serif } from '../styles/tokens';
 import { useData } from '../context/DataContext';
-import blobTexture from '../assets/blob-texture.png';
+import blobTexture from '../assets/anker/blob-texture-shader.png';
 
 const WORDS: Record<number, string> = {
   2: 'Zwei', 3: 'Drei', 4: 'Vier', 5: 'Fünf', 6: 'Sechs',
@@ -10,6 +10,74 @@ const WORDS: Record<number, string> = {
 
 const clampInhale = (v: number) => Math.max(2, Math.min(10, v));
 const clampExhale = (v: number) => Math.max(2, Math.min(12, v));
+
+const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+
+// Probed once at module load — WebGL support doesn't change at runtime, so this
+// doesn't need to be React state; only a later hard GL failure (glFailed) can
+// still force the CSS fallback after the fact.
+const webglSupported = (() => {
+  try {
+    const c = document.createElement('canvas');
+    return !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+  } catch {
+    return false;
+  }
+})();
+
+const VERTEX_SHADER = `attribute vec2 position;\nvoid main(){ gl_Position = vec4(position,0.0,1.0); }`;
+
+// Domain-warping shader (fbm-based), texture-mapped onto the blob photo. Only the
+// radius uniform is driven externally (per-frame, from the breath phase below).
+const FRAGMENT_SHADER = `precision highp float;
+uniform float iTime;
+uniform float iRadius;
+uniform vec2 iResolution;
+uniform sampler2D iChannel0;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453123); }
+float noise(in vec2 x){
+  vec2 p = floor(x);
+  vec2 f = fract(x);
+  f = f*f*(3.0-2.0*f);
+  float a = hash(p+vec2(0.0,0.0));
+  float b = hash(p+vec2(1.0,0.0));
+  float c = hash(p+vec2(0.0,1.0));
+  float d = hash(p+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
+}
+const mat2 mtx = mat2(0.80,0.60,-0.60,0.80);
+float fbm(vec2 p){
+  float f = 0.0;
+  f += 0.500000*noise(p); p = mtx*p*2.02;
+  f += 0.250000*noise(p); p = mtx*p*2.03;
+  f += 0.125000*noise(p); p = mtx*p*2.01;
+  f += 0.062500*noise(p); p = mtx*p*2.04;
+  f += 0.031250*noise(p); p = mtx*p*2.01;
+  f += 0.015625*noise(p);
+  return f/0.96875;
+}
+void pattern(in vec2 p, in float t, out vec2 q, out vec2 r, out vec2 g){
+  q = vec2(fbm(p), fbm(p+vec2(10.0,1.3)));
+  r = vec2(fbm(p+4.0*q+vec2(t)+vec2(1.7,9.2)), fbm(p+4.0*q+vec2(t)+vec2(8.3,2.8)));
+  g = vec2(fbm(p+2.0*r+vec2(t*2.0)+vec2(2.0,6.0)), fbm(p+2.0*r+vec2(t*1.0)+vec2(5.0,3.0)));
+}
+void main(){
+  vec2 fragCoord = gl_FragCoord.xy;
+  vec2 uv = (fragCoord - 0.5*iResolution.xy) / iResolution.y;
+  float dist = length(uv);
+  float radius = iRadius;
+  vec2 q, r, g;
+  pattern(uv*2.2, iTime*0.06, q, r, g);
+  vec2 warp = (g - 0.5) * 0.16 + (r - 0.5) * 0.09;
+  vec2 texUV = uv / (radius*1.5) * 0.5 + 0.5 + warp;
+  texUV = clamp(texUV, vec2(0.10), vec2(0.90));
+  vec3 col = texture2D(iChannel0, texUV).rgb;
+  float mask = 1.0 - smoothstep(radius-0.004, radius+0.004, dist);
+  gl_FragColor = vec4(col, mask);
+}`;
+
+const MIN_RADIUS = 0.21;
+const MAX_RADIUS = 0.39;
 
 type Phase = 'idle' | 'inhale' | 'exhale';
 
@@ -20,11 +88,22 @@ export default function AnkerScreen() {
   const [phaseTimer, setPhaseTimer] = useState(0);
   const [inhaleDuration, setInhaleDuration] = useState(4);
   const [exhaleDuration, setExhaleDuration] = useState(8);
+  const [glFailed, setGlFailed] = useState(false);
 
   const blobRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const exerciseStart = useRef(0);
   const phaseStart = useRef(0);
+
+  const webglOk = webglSupported && !glFailed;
+  const useCssBlob = !webglSupported || glFailed;
+
+  // Mirrors the latest render's breath state into a ref so the WebGL render
+  // loop (running outside React via requestAnimationFrame) always reads
+  // current values instead of the ones captured when it was scheduled.
+  const liveBreath = useRef({ active, phase, inhaleDuration, exhaleDuration });
+  liveBreath.current = { active, phase, inhaleDuration, exhaleDuration };
 
   const restartBreath = useCallback(() => {
     const total = inhaleDuration + exhaleDuration;
@@ -36,6 +115,125 @@ export default function AnkerScreen() {
       el.style.animation = anim;
     });
   }, [inhaleDuration, exhaleDuration]);
+
+  // Radius range 0.21-0.39, driven by the breath phase (wall-clock, eased) —
+  // big at the end of inhale, small at the end of exhale. Reads liveBreath/
+  // phaseStart refs rather than closed-over state since it's called from the
+  // WebGL render loop below, outside React's render cycle.
+  const currentRadius = useCallback(() => {
+    const { active, phase, inhaleDuration, exhaleDuration } = liveBreath.current;
+    if (!active || !phaseStart.current) return MIN_RADIUS;
+    const target = phase === 'inhale' ? inhaleDuration : exhaleDuration;
+    const elapsed = (Date.now() - phaseStart.current) / 1000;
+    const progress = Math.min(1, Math.max(0, elapsed / target));
+    const eased = easeInOutSine(progress);
+    return phase === 'inhale' ? MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * eased : MAX_RADIUS - (MAX_RADIUS - MIN_RADIUS) * eased;
+  }, []);
+
+  // Compiles the shader once on mount and starts its own requestAnimationFrame
+  // loop; any GL failure (init or mid-render) falls back to the plain CSS blob.
+  useEffect(() => {
+    if (!webglSupported) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let gl: WebGLRenderingContext | null = null;
+    let rafId: number | null = null;
+
+    const glState: {
+      prog: WebGLProgram | null;
+      tex: WebGLTexture | null;
+      iTimeLoc: WebGLUniformLocation | null;
+      iRadiusLoc: WebGLUniformLocation | null;
+      iResLoc: WebGLUniformLocation | null;
+      iChanLoc: WebGLUniformLocation | null;
+      glStart: number;
+    } = { prog: null, tex: null, iTimeLoc: null, iRadiusLoc: null, iResLoc: null, iChanLoc: null, glStart: 0 };
+
+    const renderFrame = (now: number) => {
+      if (!gl) return;
+      try {
+        const t = (now - glState.glStart) / 1000;
+        gl.useProgram(glState.prog);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(glState.iTimeLoc, t);
+        gl.uniform1f(glState.iRadiusLoc, currentRadius());
+        gl.uniform2f(glState.iResLoc, canvas.width, canvas.height);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, glState.tex);
+        gl.uniform1i(glState.iChanLoc, 0);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      } catch (e) {
+        console.warn('Lomira: WebGL render failed, falling back to CSS blob', e);
+        gl = null;
+        setGlFailed(true);
+        return;
+      }
+      rafId = requestAnimationFrame(renderFrame);
+    };
+
+    try {
+      gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+      if (!gl) throw new Error('WebGL not available');
+
+      const compile = (type: number, src: string) => {
+        const s = gl!.createShader(type)!;
+        gl!.shaderSource(s, src);
+        gl!.compileShader(s);
+        if (!gl!.getShaderParameter(s, gl!.COMPILE_STATUS)) throw new Error(gl!.getShaderInfoLog(s) ?? 'shader compile failed');
+        return s;
+      };
+      const prog = gl.createProgram()!;
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERTEX_SHADER));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'program link failed');
+      gl.useProgram(prog);
+      glState.prog = prog;
+
+      const quad = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+      const posLoc = gl.getAttribLocation(prog, 'position');
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+      glState.iTimeLoc = gl.getUniformLocation(prog, 'iTime');
+      glState.iRadiusLoc = gl.getUniformLocation(prog, 'iRadius');
+      glState.iResLoc = gl.getUniformLocation(prog, 'iResolution');
+      glState.iChanLoc = gl.getUniformLocation(prog, 'iChannel0');
+      glState.tex = gl.createTexture();
+
+      const img = new Image();
+      img.onload = () => {
+        if (!gl) return;
+        gl.bindTexture(gl.TEXTURE_2D, glState.tex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.clearColor(0, 0, 0, 0);
+        glState.glStart = performance.now();
+        rafId = requestAnimationFrame(renderFrame);
+      };
+      img.onerror = () => setGlFailed(true);
+      img.src = blobTexture;
+    } catch (e) {
+      console.warn('Lomira: WebGL init failed, falling back to CSS blob', e);
+      setGlFailed(true);
+    }
+
+    return () => {
+      gl = null;
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [currentRadius]);
 
   // Injects the @keyframes rule with the current inhale/exhale split as the
   // growth-to-shrink switch point — can't be expressed as an inline style.
@@ -138,38 +336,45 @@ export default function AnkerScreen() {
               ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
             }}
           />
-          <div
-            ref={blobRef}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              overflow: 'hidden',
-              transformOrigin: 'center center',
-              willChange: 'transform',
-              ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
-            }}
-          >
+          {webglOk && (
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }}>
+              <canvas ref={canvasRef} width={640} height={640} style={{ width: '100%', height: '100%', display: 'block' }} />
+            </div>
+          )}
+          {useCssBlob && (
             <div
+              ref={blobRef}
               style={{
                 position: 'absolute',
                 inset: 0,
-                background:
-                  'radial-gradient(circle at 30% 52%, #E3A93B 0%, rgba(227,169,59,0) 58%), radial-gradient(circle at 68% 26%, #F6F1E2 0%, rgba(246,241,226,0) 55%), radial-gradient(circle at 64% 78%, #8FA07C 0%, rgba(143,160,124,0) 58%), #EFDDA8',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                transformOrigin: 'center center',
+                willChange: 'transform',
+                ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
               }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url(${blobTexture})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                mixBlendMode: 'normal',
-                opacity: 1,
-              }}
-            />
-          </div>
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'radial-gradient(circle at 30% 52%, #E3A93B 0%, rgba(227,169,59,0) 58%), radial-gradient(circle at 68% 26%, #F6F1E2 0%, rgba(246,241,226,0) 55%), radial-gradient(circle at 64% 78%, #8FA07C 0%, rgba(143,160,124,0) 58%), #EFDDA8',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${blobTexture})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  mixBlendMode: 'normal',
+                  opacity: 1,
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
