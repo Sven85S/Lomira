@@ -38,7 +38,12 @@ export default function PaywallScreen({ onClose }: Props) {
   };
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: colors.surface, zIndex: 30, display: 'flex', flexDirection: 'column' }}>
+    <div
+      style={{
+        position: 'absolute', inset: 0, background: colors.surface, zIndex: 30, display: 'flex', flexDirection: 'column',
+        paddingTop: 'env(safe-area-inset-top)',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
         <button style={iconBtnStyle} onClick={onClose} aria-label="Schließen">
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

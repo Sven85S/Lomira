@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { colors, iconBtnStyle, serif } from '../styles/tokens';
 import { LESSON_CONTENT } from '../data/lessons';
 
@@ -6,13 +7,26 @@ interface Props {
   onClose: () => void;
 }
 
+// This screen is an absolutely-positioned overlay covering the whole Shell
+// (see App.tsx), so it doesn't inherit Shell's safe-area-inset-top padding —
+// absolute offsets are resolved against the ancestor's padding box, not its
+// content box. Re-apply the same safe-area padding here, and give the back
+// button the Apple-recommended >=44x44pt tap target (bigger than the shared
+// 32x32 iconBtnStyle used elsewhere) since it now sits right under the notch.
+const backBtnStyle: CSSProperties = { ...iconBtnStyle, width: 44, height: 44 };
+
 export default function LessonDetail({ lessonId, onClose }: Props) {
   const lesson = LESSON_CONTENT[lessonId];
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: colors.surface, zIndex: 25, display: 'flex', flexDirection: 'column' }}>
+    <div
+      style={{
+        position: 'absolute', inset: 0, background: colors.surface, zIndex: 25, display: 'flex', flexDirection: 'column',
+        paddingTop: 'env(safe-area-inset-top)',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={iconBtnStyle} onClick={onClose} aria-label="Zurück">
+        <button style={backBtnStyle} onClick={onClose} aria-label="Zurück">
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
