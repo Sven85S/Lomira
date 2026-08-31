@@ -465,17 +465,34 @@ export default function AnkerScreen({ onNavigate }: Props) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', padding: '8px 20px 10px', gap: 8 }}>
-      <div style={{ height: active ? 58 : 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
-        <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
-          {phaseLabel}
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
+        height: '100%',
+        minHeight: '100%',
+        padding: '8px 20px 10px',
+        gap: 8,
+      }}
+    >
+      {/* Top group: timer + intro copy stay tightly coupled (the intro's negative
+          margin is tuned against the timer block specifically) — only the space
+          around this group as a whole flexes with the viewport. */}
+      <div style={{ flexShrink: 0 }}>
+        <div style={{ height: active ? 58 : 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
+          <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
+            {phaseLabel}
+          </div>
         </div>
-      </div>
 
-      <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '-30px 0 0', flexShrink: 0 }}>
-        {introCopy}
-      </p>
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '-30px 0 0' }}>
+          {introCopy}
+        </p>
+      </div>
 
       {/* Ring navigation around the blob — six shortcuts, fading out while a breath exercise runs */}
       <div style={{ position: 'relative', width: 300, height: 300, margin: '0 auto', flexShrink: 0 }}>
@@ -576,34 +593,38 @@ export default function AnkerScreen({ onNavigate }: Props) {
         )}
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: 15, color: colors.text, minHeight: '2.2em', lineHeight: 1.4, maxWidth: 280, flexShrink: 0, margin: '22px 0 0' }}>
-        {exerciseCopy}
-      </p>
-      <p style={{ textAlign: 'center', fontSize: 12, color: colors.muted, margin: 0, flexShrink: 0 }}>{tapHintLabel}</p>
+      {/* Bottom group: exercise copy, tap hint and steppers stay together as one
+          block; like the top group, only the space around it flexes. */}
+      <div style={{ width: '100%', flexShrink: 0 }}>
+        <p style={{ textAlign: 'center', fontSize: 15, color: colors.text, minHeight: '2.2em', lineHeight: 1.4, maxWidth: 280, margin: '22px auto 0' }}>
+          {exerciseCopy}
+        </p>
+        <p style={{ textAlign: 'center', fontSize: 12, color: colors.muted, margin: 0 }}>{tapHintLabel}</p>
 
-      <div style={{ display: 'flex', gap: 8, width: '100%', flexShrink: 0 }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
-          <span style={{ fontSize: 11, color: colors.muted }}>Einatmen</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label="Einatmen kürzer">
-              −
-            </button>
-            <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{inhaleDuration}s</span>
-            <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v + 1))} aria-label="Einatmen länger">
-              +
-            </button>
+        <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 8 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
+            <span style={{ fontSize: 11, color: colors.muted }}>Einatmen</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label="Einatmen kürzer">
+                −
+              </button>
+              <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{inhaleDuration}s</span>
+              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v + 1))} aria-label="Einatmen länger">
+                +
+              </button>
+            </div>
           </div>
-        </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
-          <span style={{ fontSize: 11, color: colors.muted }}>Ausatmen</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label="Ausatmen kürzer">
-              −
-            </button>
-            <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{exhaleDuration}s</span>
-            <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v + 1))} aria-label="Ausatmen länger">
-              +
-            </button>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
+            <span style={{ fontSize: 11, color: colors.muted }}>Ausatmen</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label="Ausatmen kürzer">
+                −
+              </button>
+              <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{exhaleDuration}s</span>
+              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v + 1))} aria-label="Ausatmen länger">
+                +
+              </button>
+            </div>
           </div>
         </div>
       </div>
