@@ -1,7 +1,143 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { colors, serif } from '../styles/tokens';
 import { useData } from '../context/DataContext';
+import type { TabId } from '../types';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
+
+interface Props {
+  /** Same tab-switch handler the bottom TabBar uses — the ring is extra navigation, not a separate path. */
+  onNavigate: (tab: TabId) => void;
+}
+
+interface RingIcon {
+  tab: TabId | 'hrv';
+  label: string;
+  angle: number;
+  icon: (color: string) => JSX.Element;
+}
+
+const RING_ICONS: RingIcon[] = [
+  {
+    tab: 'sos',
+    label: 'Anker',
+    angle: 0,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx={12} cy={5} r={3} />
+        <line x1={12} y1={22} x2={12} y2={8} />
+        <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+      </svg>
+    ),
+  },
+  {
+    tab: 'beruehren',
+    label: 'Berühren',
+    angle: 60,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 11V4.5a1.5 1.5 0 0 1 3 0V10" />
+        <path d="M11 10V3.5a1.5 1.5 0 0 1 3 0V10" />
+        <path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0v8" />
+        <path d="M17 12v-1.5a1.5 1.5 0 0 1 3 0V16a6 6 0 0 1-6 6h-2c-2.5 0-3.5-1-5-3l-2.7-4.3a1.5 1.5 0 0 1 2.6-1.5L8 12" />
+      </svg>
+    ),
+  },
+  {
+    tab: 'lektionen',
+    label: 'Lektionen',
+    angle: 120,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+    ),
+  },
+  {
+    tab: 'ritual',
+    label: 'Ritual',
+    angle: 180,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx={12} cy={12} r={5} />
+        <line x1={12} y1={1} x2={12} y2={3} />
+        <line x1={12} y1={21} x2={12} y2={23} />
+        <line x1={4.22} y1={4.22} x2={5.64} y2={5.64} />
+        <line x1={18.36} y1={18.36} x2={19.78} y2={19.78} />
+        <line x1={1} y1={12} x2={3} y2={12} />
+        <line x1={21} y1={12} x2={23} y2={12} />
+        <line x1={4.22} y1={19.78} x2={5.64} y2={18.36} />
+        <line x1={18.36} y1={5.64} x2={19.78} y2={4.22} />
+      </svg>
+    ),
+  },
+  {
+    tab: 'hrv',
+    label: 'HRV-Messung',
+    angle: 240,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    ),
+  },
+  {
+    tab: 'fortschritt',
+    label: 'Fortschritt',
+    angle: 300,
+    icon: (color) => (
+      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    ),
+  },
+];
+
+// Ring geometry: 300x300 container, icons on a circle of radius 124 around the
+// center; while a breath exercise is active they fly out to radius 160 and
+// fade away (and become non-interactive) so they don't compete with the blob.
+const RING_HALF = 150;
+const RING_RADIUS = 124;
+const RING_FLY_OUT = 36;
+
+function ringNodeStyle(angleDeg: number, active: boolean): CSSProperties {
+  const rad = (angleDeg * Math.PI) / 180;
+  const baseX = RING_HALF + RING_RADIUS * Math.sin(rad);
+  const baseY = RING_HALF - RING_RADIUS * Math.cos(rad);
+  const outR = RING_RADIUS + RING_FLY_OUT;
+  const outX = RING_HALF + outR * Math.sin(rad);
+  const outY = RING_HALF - outR * Math.cos(rad);
+  const x = active ? outX : baseX;
+  const y = active ? outY : baseY;
+  return {
+    position: 'absolute',
+    left: `${x}px`,
+    top: `${y}px`,
+    transform: 'translate(-50%,-50%)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 4,
+    width: 58,
+    opacity: active ? 0 : 1,
+    pointerEvents: active ? 'none' : 'auto',
+    transition: 'left 0.5s ease, top 0.5s ease, opacity 0.4s ease',
+  };
+}
+
+const ringChipStyle: CSSProperties = {
+  width: 44,
+  height: 44,
+  borderRadius: 9999,
+  background: colors.card,
+  border: `1px solid ${colors.border}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+  cursor: 'pointer',
+  flexShrink: 0,
+};
 
 const WORDS: Record<number, string> = {
   2: 'Zwei', 3: 'Drei', 4: 'Vier', 5: 'Fünf', 6: 'Sechs',
@@ -81,7 +217,7 @@ const MAX_RADIUS = 0.39;
 
 type Phase = 'idle' | 'inhale' | 'exhale';
 
-export default function AnkerScreen() {
+export default function AnkerScreen({ onNavigate }: Props) {
   const { recordAnkerSession } = useData();
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -89,12 +225,26 @@ export default function AnkerScreen() {
   const [inhaleDuration, setInhaleDuration] = useState(4);
   const [exhaleDuration, setExhaleDuration] = useState(8);
   const [glFailed, setGlFailed] = useState(false);
+  const [hrvHintVisible, setHrvHintVisible] = useState(false);
 
   const blobRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const exerciseStart = useRef(0);
   const phaseStart = useRef(0);
+  const hrvHintTimer = useRef<number | null>(null);
+
+  const showHrvHint = useCallback(() => {
+    if (hrvHintTimer.current) window.clearTimeout(hrvHintTimer.current);
+    setHrvHintVisible(true);
+    hrvHintTimer.current = window.setTimeout(() => setHrvHintVisible(false), 2200);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hrvHintTimer.current) window.clearTimeout(hrvHintTimer.current);
+    };
+  }, []);
 
   const webglOk = webglSupported && !glFailed;
   const useCssBlob = !webglSupported || glFailed;
@@ -313,7 +463,7 @@ export default function AnkerScreen() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', boxSizing: 'border-box', padding: '8px 20px 10px', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', padding: '8px 20px 10px', gap: 8 }}>
       <div style={{ height: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
         <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
@@ -321,8 +471,18 @@ export default function AnkerScreen() {
         </div>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-        <div style={{ position: 'relative', height: '100%', aspectRatio: '1', maxWidth: '100%', maxHeight: 260 }}>
+      {/* Ring navigation around the blob — six shortcuts, fading out while a breath exercise runs */}
+      <div style={{ position: 'relative', width: 300, height: 300, margin: '0 auto', flexShrink: 0 }}>
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 300 300"
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: active ? 0 : 1, transition: 'opacity 0.4s ease' }}
+        >
+          <circle cx={150} cy={150} r={RING_RADIUS} fill="none" stroke={colors.border} strokeWidth={1} />
+        </svg>
+
+        <div style={{ position: 'absolute', left: '50%', top: '50%', width: 200, height: 200, transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
           <div
             ref={glowRef}
             style={{
@@ -376,6 +536,35 @@ export default function AnkerScreen() {
             </div>
           )}
         </div>
+
+        {RING_ICONS.map(({ tab, label, angle, icon }) => {
+          const isSelf = tab === 'sos';
+          const color = isSelf ? colors.rust : colors.muted;
+          return (
+            <div key={tab} style={ringNodeStyle(angle, active)}>
+              <button
+                style={ringChipStyle}
+                onClick={() => (tab === 'hrv' ? showHrvHint() : onNavigate(tab))}
+                aria-label={label}
+              >
+                {icon(color)}
+              </button>
+              <span style={{ fontSize: 10, color, whiteSpace: 'nowrap' }}>{label}</span>
+            </div>
+          );
+        })}
+
+        {hrvHintVisible && (
+          <div
+            style={{
+              position: 'absolute', left: '50%', bottom: 10, transform: 'translateX(-50%)', zIndex: 5,
+              background: colors.text, color: colors.surface, fontSize: 13, padding: '10px 20px', borderRadius: 9999,
+              boxShadow: '0 8px 20px rgba(0,0,0,0.18)', whiteSpace: 'nowrap',
+            }}
+          >
+            Bald verfügbar
+          </div>
+        )}
       </div>
 
       <p style={{ textAlign: 'center', fontSize: 15, color: colors.text, minHeight: '2.6em', lineHeight: 1.4, maxWidth: 280, flexShrink: 0 }}>

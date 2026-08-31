@@ -12,6 +12,7 @@ import LessonDetail from './screens/LessonDetail';
 import RitualScreen from './screens/RitualScreen';
 import FortschrittScreen from './screens/FortschrittScreen';
 import PaywallScreen from './screens/PaywallScreen';
+import SettingsScreen from './screens/SettingsScreen';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ function Shell() {
   const [infoOpen, setInfoOpen] = useState<Partial<Record<TabId, boolean>>>({});
   const [openLessonId, setOpenLessonId] = useState<number | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleInfo = useCallback(() => {
@@ -51,10 +53,10 @@ function Shell() {
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
-      <Header tab={tab} onToggleInfo={toggleInfo} />
+      <Header tab={tab} onToggleInfo={toggleInfo} onOpenSettings={() => setShowSettings(true)} />
 
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {tab === 'sos' && <AnkerScreen />}
+        {tab === 'sos' && <AnkerScreen onNavigate={setTab} />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
         {tab === 'lektionen' && (
           <LektionenScreen showInfo={!!infoOpen.lektionen} onOpenLesson={setOpenLessonId} onOpenPaywall={() => setShowPaywall(true)} />
@@ -67,6 +69,7 @@ function Shell() {
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}
+      {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
     </div>
   );
 }
