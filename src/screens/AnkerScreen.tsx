@@ -5,9 +5,12 @@ import type { TabId } from '../types';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
 
 interface Props {
-  /** Same tab-switch handler the bottom TabBar uses — the ring is extra navigation, not a separate path. */
+  /** Same tab-switch handler the bottom OrbitNav uses — the ring is extra navigation, not a separate path. */
   onNavigate: (tab: TabId) => void;
 }
+
+// HRV is a placeholder entry point (ring chip here + the OrbitNav tab) until the
+// real HRV measurement feature ships — tapping it intentionally does nothing yet.
 
 interface RingIcon {
   tab: TabId | 'hrv';
@@ -139,11 +142,6 @@ const ringChipStyle: CSSProperties = {
   flexShrink: 0,
 };
 
-const WORDS: Record<number, string> = {
-  2: 'Zwei', 3: 'Drei', 4: 'Vier', 5: 'Fünf', 6: 'Sechs',
-  7: 'Sieben', 8: 'Acht', 9: 'Neun', 10: 'Zehn', 11: 'Elf', 12: 'Zwölf',
-};
-
 const clampInhale = (v: number) => Math.max(2, Math.min(10, v));
 const clampExhale = (v: number) => Math.max(2, Math.min(12, v));
 
@@ -225,26 +223,12 @@ export default function AnkerScreen({ onNavigate }: Props) {
   const [inhaleDuration, setInhaleDuration] = useState(4);
   const [exhaleDuration, setExhaleDuration] = useState(8);
   const [glFailed, setGlFailed] = useState(false);
-  const [hrvHintVisible, setHrvHintVisible] = useState(false);
 
   const blobRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const exerciseStart = useRef(0);
   const phaseStart = useRef(0);
-  const hrvHintTimer = useRef<number | null>(null);
-
-  const showHrvHint = useCallback(() => {
-    if (hrvHintTimer.current) window.clearTimeout(hrvHintTimer.current);
-    setHrvHintVisible(true);
-    hrvHintTimer.current = window.setTimeout(() => setHrvHintVisible(false), 2200);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (hrvHintTimer.current) window.clearTimeout(hrvHintTimer.current);
-    };
-  }, []);
 
   const webglOk = webglSupported && !glFailed;
   const useCssBlob = !webglSupported || glFailed;
@@ -442,9 +426,6 @@ export default function AnkerScreen({ onNavigate }: Props) {
 
   const bigTimer = active ? String(phaseTimer + 1) : '';
   const phaseLabel = active ? (phase === 'exhale' ? 'Ausatmen' : 'Einatmen') : '';
-  const inW = WORDS[inhaleDuration] ?? inhaleDuration;
-  const outW = String(WORDS[exhaleDuration] ?? exhaleDuration).toLowerCase();
-  const exerciseCopy = `${inW} Sekunden ein, ${outW} Sekunden aus.`;
   const introCopy = active ? '' : 'Wähle, was du heute brauchst';
   const tapHintLabel = active ? 'Ball zum Beenden antippen' : 'Ball zum Starten antippen';
 
@@ -474,7 +455,7 @@ export default function AnkerScreen({ onNavigate }: Props) {
         boxSizing: 'border-box',
         height: '100%',
         minHeight: '100%',
-        padding: '8px 20px 10px',
+        padding: '26px 20px 10px',
         gap: 8,
       }}
     >
@@ -489,7 +470,7 @@ export default function AnkerScreen({ onNavigate }: Props) {
           </div>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '-30px 0 0' }}>
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '-40px 0 0' }}>
           {introCopy}
         </p>
       </div>
@@ -506,7 +487,7 @@ export default function AnkerScreen({ onNavigate }: Props) {
         </svg>
 
         <div
-          style={{ position: 'absolute', left: '50%', top: '50%', width: 190, height: 190, transform: 'translate(-50%,-50%)', cursor: 'pointer' }}
+          style={{ position: 'absolute', left: '50%', top: '50%', width: 338, height: 338, transform: 'translate(-50%,-50%)', cursor: 'pointer' }}
           onClick={toggleExercise}
         >
           <div
@@ -570,7 +551,9 @@ export default function AnkerScreen({ onNavigate }: Props) {
             <div key={tab} style={ringNodeStyle(angle, active)}>
               <button
                 style={ringChipStyle}
-                onClick={() => (tab === 'hrv' ? showHrvHint() : onNavigate(tab))}
+                onClick={() => {
+                  if (tab !== 'hrv') onNavigate(tab);
+                }}
                 aria-label={label}
               >
                 {icon(color)}
@@ -579,27 +562,12 @@ export default function AnkerScreen({ onNavigate }: Props) {
             </div>
           );
         })}
-
-        {hrvHintVisible && (
-          <div
-            style={{
-              position: 'absolute', left: '50%', bottom: 10, transform: 'translateX(-50%)', zIndex: 5,
-              background: colors.text, color: colors.surface, fontSize: 13, padding: '10px 20px', borderRadius: 9999,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.18)', whiteSpace: 'nowrap',
-            }}
-          >
-            Bald verfügbar
-          </div>
-        )}
       </div>
 
       {/* Bottom group: exercise copy, tap hint and steppers stay together as one
           block; like the top group, only the space around it flexes. */}
       <div style={{ width: '100%', flexShrink: 0 }}>
-        <p style={{ textAlign: 'center', fontSize: 15, color: colors.text, minHeight: '2.2em', lineHeight: 1.4, maxWidth: 280, margin: '22px auto 0' }}>
-          {exerciseCopy}
-        </p>
-        <p style={{ textAlign: 'center', fontSize: 12, color: colors.muted, margin: 0 }}>{tapHintLabel}</p>
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.muted, margin: '16px 0 0' }}>{tapHintLabel}</p>
 
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 8 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>

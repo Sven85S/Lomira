@@ -4,7 +4,7 @@ import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import Header from './components/Header';
-import TabBar from './components/TabBar';
+import OrbitNav from './components/OrbitNav';
 import AnkerScreen from './screens/AnkerScreen';
 import BeruehrenScreen from './screens/BeruehrenScreen';
 import LektionenScreen from './screens/LektionenScreen';
@@ -55,7 +55,16 @@ function Shell() {
     >
       <Header tab={tab} onToggleInfo={toggleInfo} onOpenSettings={() => setShowSettings(true)} />
 
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      <div
+        ref={scrollRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
+        }}
+      >
         {tab === 'sos' && <AnkerScreen onNavigate={setTab} />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
         {tab === 'lektionen' && (
@@ -65,7 +74,7 @@ function Shell() {
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
       </div>
 
-      <TabBar active={tab} onChange={setTab} />
+      <OrbitNav active={tab} onChange={setTab} />
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}

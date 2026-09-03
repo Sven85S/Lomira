@@ -2,7 +2,7 @@ import { colors, iconBtnStyle, serif } from '../styles/tokens';
 import type { TabId } from '../types';
 
 const TAB_TITLES: Record<TabId, string> = {
-  sos: 'Anker',
+  sos: '',
   beruehren: 'Berühren',
   lektionen: 'Lektionen',
   ritual: 'Tägliches Ritual',
