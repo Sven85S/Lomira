@@ -23,33 +23,49 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         return capture
     }()
 
+    // load() is called once by the Capacitor bridge when it discovers and
+    // instantiates this plugin — this print is the definitive way to see
+    // whether the native side was ever reached at all, independent of any
+    // single JS call succeeding or failing.
+    override public func load() {
+        print("[PpgCamera] plugin loaded by bridge (jsName=\(jsName))")
+    }
+
     // CAPPlugin already declares these two as `open` stubs (its standard
     // permissions API) — overriding them requires both `override` and `public`
     // (the class is `public`, so an override can't be less visible than that).
     @objc override public func checkPermissions(_ call: CAPPluginCall) {
+        print("[PpgCamera] checkPermissions() called")
         call.resolve(["camera": Self.authorizationState()])
     }
 
     @objc override public func requestPermissions(_ call: CAPPluginCall) {
+        print("[PpgCamera] requestPermissions() called")
         AVCaptureDevice.requestAccess(for: .video) { granted in
             call.resolve(["camera": granted ? "granted" : "denied"])
         }
     }
 
     @objc func isAvailable(_ call: CAPPluginCall) {
-        call.resolve(["available": PpgCameraCapture.isCameraAvailable])
+        let available = PpgCameraCapture.isCameraAvailable
+        print("[PpgCamera] isAvailable() called, result=\(available)")
+        call.resolve(["available": available])
     }
 
     @objc func startCapture(_ call: CAPPluginCall) {
+        print("[PpgCamera] startCapture() called")
         do {
             try capture.start()
+            print("[PpgCamera] startCapture() succeeded")
             call.resolve()
         } catch {
+            print("[PpgCamera] startCapture() failed: \(error)")
             call.reject("Kamera konnte nicht gestartet werden.", "\(error)")
         }
     }
 
     @objc func stopCapture(_ call: CAPPluginCall) {
+        print("[PpgCamera] stopCapture() called")
         capture.stop()
         call.resolve()
     }

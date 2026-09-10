@@ -28,9 +28,16 @@ export default function PpgDebugScreen({ onClose }: Props) {
   useEffect(() => {
     if (!isPpgCameraSupported) return;
     (async () => {
-      const [{ camera }, { available: avail }] = await Promise.all([PpgCamera.checkPermissions(), PpgCamera.isAvailable()]);
-      setPermission(camera);
-      setAvailable(avail);
+      try {
+        const [{ camera }, { available: avail }] = await Promise.all([PpgCamera.checkPermissions(), PpgCamera.isAvailable()]);
+        setPermission(camera);
+        setAvailable(avail);
+      } catch (e) {
+        // Surfaced explicitly — an unhandled rejection here (e.g. the native
+        // plugin isn't registered under this jsName) would otherwise leave
+        // permission/available stuck forever with no visible sign why.
+        setError(e instanceof Error ? e.message : String(e));
+      }
     })();
   }, []);
 
@@ -70,28 +77,37 @@ export default function PpgDebugScreen({ onClose }: Props) {
 
   const handleStart = useCallback(async () => {
     setError(null);
-    let state = permission;
-    if (state !== 'granted') {
-      const res = await PpgCamera.requestPermissions();
-      state = res.camera;
-      setPermission(state);
-    }
-    if (state !== 'granted') {
-      setError('Ohne Kamera-Berechtigung keine Messung möglich.');
-      return;
-    }
+    // The whole flow — requestPermissions() included — is wrapped here. It
+    // wasn't before, so a native-bridge error thrown by requestPermissions()
+    // (e.g. the plugin not being found under its jsName) silently killed the
+    // handler before startCapture() was ever reached, with no visible error.
     try {
+      let state = permission;
+      if (state !== 'granted') {
+        const res = await PpgCamera.requestPermissions();
+        state = res.camera;
+        setPermission(state);
+      }
+      if (state !== 'granted') {
+        setError('Ohne Kamera-Berechtigung keine Messung möglich.');
+        return;
+      }
       setPoints([]);
       await PpgCamera.startCapture();
       setRunning(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Kamera konnte nicht gestartet werden.');
+      setError(e instanceof Error ? e.message : String(e));
     }
   }, [permission]);
 
   const handleStop = useCallback(async () => {
-    await PpgCamera.stopCapture();
-    setRunning(false);
+    try {
+      await PpgCamera.stopCapture();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
   }, []);
 
   const pathD =

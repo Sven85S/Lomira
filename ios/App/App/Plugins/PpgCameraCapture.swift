@@ -43,8 +43,13 @@ final class PpgCameraCapture: NSObject {
     }
 
     func start() throws {
-        guard !isRunning else { return }
+        print("[PpgCameraCapture] start() called")
+        guard !isRunning else {
+            print("[PpgCameraCapture] start() ignored — already running")
+            return
+        }
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+            print("[PpgCameraCapture] start() failed — no main wide-angle back camera on this device")
             throw PpgCaptureError.deviceUnavailable
         }
 
@@ -55,6 +60,7 @@ final class PpgCameraCapture: NSObject {
 
         guard let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else {
             session.commitConfiguration()
+            print("[PpgCameraCapture] start() failed — could not create/add AVCaptureDeviceInput")
             throw PpgCaptureError.inputCreationFailed
         }
         session.addInput(input)
@@ -64,6 +70,7 @@ final class PpgCameraCapture: NSObject {
         videoOutput.setSampleBufferDelegate(self, queue: processingQueue)
         guard session.canAddOutput(videoOutput) else {
             session.commitConfiguration()
+            print("[PpgCameraCapture] start() failed — could not add AVCaptureVideoDataOutput")
             throw PpgCaptureError.sessionConfigurationFailed
         }
         session.addOutput(videoOutput)
@@ -72,16 +79,19 @@ final class PpgCameraCapture: NSObject {
         do {
             try device.lockForConfiguration()
         } catch {
+            print("[PpgCameraCapture] start() failed — lockForConfiguration() threw: \(error)")
             throw PpgCaptureError.torchUnavailable
         }
         defer { device.unlockForConfiguration() }
 
         guard device.isTorchModeSupported(.on) else {
+            print("[PpgCameraCapture] start() failed — torch not supported on this device")
             throw PpgCaptureError.torchUnavailable
         }
         do {
             try device.setTorchModeOn(level: 1.0)
         } catch {
+            print("[PpgCameraCapture] start() failed — setTorchModeOn() threw: \(error)")
             throw PpgCaptureError.torchUnavailable
         }
         if device.isFocusModeSupported(.locked) {
@@ -104,6 +114,7 @@ final class PpgCameraCapture: NSObject {
         let runningSession = session
         processingQueue.async {
             runningSession.startRunning()
+            print("[PpgCameraCapture] session.startRunning() returned, isRunning=\(runningSession.isRunning)")
         }
     }
 
