@@ -7,6 +7,10 @@ import Capacitor
 /// https://capacitorjs.com/docs/ios/custom-code
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
+        // Deliberately independent of everything below — proves capacitorDidLoad()
+        // itself fired at all, regardless of whether registerPluginInstance()
+        // (or PpgCameraPlugin's own load()) succeeds.
+        print("[MainViewController] capacitorDidLoad() called")
         bridge?.registerPluginInstance(PpgCameraPlugin())
     }
 }
