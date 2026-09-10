@@ -52,6 +52,10 @@ final class PpgCameraCapture: NSObject {
             print("[PpgCameraCapture] start() failed — no main wide-angle back camera on this device")
             throw PpgCaptureError.deviceUnavailable
         }
+        guard device.isTorchModeSupported(.on) else {
+            print("[PpgCameraCapture] start() failed — torch not supported on this device")
+            throw PpgCaptureError.torchUnavailable
+        }
 
         session.beginConfiguration()
         session.sessionPreset = .medium
@@ -76,28 +80,6 @@ final class PpgCameraCapture: NSObject {
         session.addOutput(videoOutput)
         session.commitConfiguration()
 
-        do {
-            try device.lockForConfiguration()
-        } catch {
-            print("[PpgCameraCapture] start() failed — lockForConfiguration() threw: \(error)")
-            throw PpgCaptureError.torchUnavailable
-        }
-        defer { device.unlockForConfiguration() }
-
-        guard device.isTorchModeSupported(.on) else {
-            print("[PpgCameraCapture] start() failed — torch not supported on this device")
-            throw PpgCaptureError.torchUnavailable
-        }
-        do {
-            try device.setTorchModeOn(level: 1.0)
-        } catch {
-            print("[PpgCameraCapture] start() failed — setTorchModeOn() threw: \(error)")
-            throw PpgCaptureError.torchUnavailable
-        }
-        if device.isFocusModeSupported(.locked) {
-            device.focusMode = .locked
-        }
-
         sessionStartTimestamp = nil
         pendingSamples.removeAll()
 
@@ -115,42 +97,92 @@ final class PpgCameraCapture: NSObject {
         processingQueue.async {
             runningSession.startRunning()
             print("[PpgCameraCapture] session.startRunning() returned, isRunning=\(runningSession.isRunning)")
+
+            // Testing the theory that torch set BEFORE startRunning() gets reset once
+            // the session's own device-configuration management actually kicks in —
+            // setting it here, right after startRunning() instead of before, per plan.
+            Self.setTorch(on: true, device: device, reason: "start() — right after startRunning()")
+
+            if device.isFocusModeSupported(.locked) {
+                do {
+                    try device.lockForConfiguration()
+                    device.focusMode = .locked
+                    device.unlockForConfiguration()
+                } catch {
+                    print("[PpgCameraCapture] focusMode=.locked failed — lockForConfiguration() threw: \(error)")
+                }
+            }
         }
     }
 
     /// Idempotent — safe to call from a screen's unmount/cleanup without
-    /// tracking whether capture is actually active.
-    func stop() {
+    /// tracking whether capture is actually active. `reason` is purely for the
+    /// print log below, to see on-device which of the three call sites (JS
+    /// stopCapture, session interruption, or app-resign-active) fired.
+    func stop(reason: String = "stop() called directly") {
+        print("[PpgCameraCapture] stop() called, reason=\"\(reason)\", wasRunning=\(isRunning)")
         guard isRunning else { return }
         isRunning = false
         NotificationCenter.default.removeObserver(self)
 
-        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-           device.hasTorch, device.torchMode != .off {
-            try? device.lockForConfiguration()
-            device.torchMode = .off
-            device.unlockForConfiguration()
+        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
+            Self.setTorch(on: false, device: device, reason: reason)
         }
 
         let runningSession = session
         processingQueue.async {
             runningSession.stopRunning()
+            print("[PpgCameraCapture] session.stopRunning() returned")
         }
         pendingSamples.removeAll()
         sessionStartTimestamp = nil
     }
 
     @objc private func handleInterruption() {
+        print("[PpgCameraCapture] AVCaptureSessionWasInterrupted notification received")
         delegate?.ppgCapture(
             self, didFailWith: "sessionInterrupted",
             message: "Die Kamera-Session wurde unterbrochen (z. B. eingehender Anruf)."
         )
-        stop()
+        stop(reason: "AVCaptureSessionWasInterrupted")
     }
 
-    /// Backgrounding the app must never leave the torch on.
+    /// Backgrounding the app must never leave the torch on. Logged with its own
+    /// reason so a spurious/transient willResignActive (e.g. a system HUD) shows
+    /// up clearly instead of looking like an unexplained stop.
     @objc private func handleWillResignActive() {
-        stop()
+        print("[PpgCameraCapture] UIApplication.willResignActiveNotification received")
+        stop(reason: "UIApplication.willResignActiveNotification")
+    }
+
+    private static func setTorch(on: Bool, device: AVCaptureDevice, reason: String) {
+        guard device.hasTorch else {
+            print("[PpgCameraCapture] setTorch(on: \(on)) skipped — device has no torch")
+            return
+        }
+        do {
+            try device.lockForConfiguration()
+        } catch {
+            print("[PpgCameraCapture] setTorch(on: \(on)) failed — lockForConfiguration() threw: \(error) (reason=\(reason))")
+            return
+        }
+        defer { device.unlockForConfiguration() }
+
+        if on {
+            guard device.isTorchModeSupported(.on) else {
+                print("[PpgCameraCapture] setTorch(on: true) skipped — torch mode .on not supported")
+                return
+            }
+            do {
+                try device.setTorchModeOn(level: 1.0)
+                print("[PpgCameraCapture] setTorch(on: true) succeeded (reason=\(reason))")
+            } catch {
+                print("[PpgCameraCapture] setTorch(on: true) failed — setTorchModeOn() threw: \(error) (reason=\(reason))")
+            }
+        } else {
+            device.torchMode = .off
+            print("[PpgCameraCapture] setTorch(on: false) succeeded (reason=\(reason))")
+        }
     }
 }
 

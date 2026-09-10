@@ -66,7 +66,7 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func stopCapture(_ call: CAPPluginCall) {
         print("[PpgCamera] stopCapture() called")
-        capture.stop()
+        capture.stop(reason: "JS PpgCamera.stopCapture()")
         call.resolve()
     }
 
