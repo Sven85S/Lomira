@@ -23,11 +23,14 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         return capture
     }()
 
-    @objc func checkPermissions(_ call: CAPPluginCall) {
+    // CAPPlugin already declares these two as `open` stubs (its standard
+    // permissions API) — overriding them requires both `override` and `public`
+    // (the class is `public`, so an override can't be less visible than that).
+    @objc override public func checkPermissions(_ call: CAPPluginCall) {
         call.resolve(["camera": Self.authorizationState()])
     }
 
-    @objc func requestPermissions(_ call: CAPPluginCall) {
+    @objc override public func requestPermissions(_ call: CAPPluginCall) {
         AVCaptureDevice.requestAccess(for: .video) { granted in
             call.resolve(["camera": granted ? "granted" : "denied"])
         }
