@@ -39,12 +39,12 @@ final class PpgCameraCapture: NSObject {
     private(set) var isRunning = false
 
     static var isCameraAvailable: Bool {
-        AVCaptureDevice.default(.builtinWideAngleCamera, for: .video, position: .back) != nil
+        AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
 
     func start() throws {
         guard !isRunning else { return }
-        guard let device = AVCaptureDevice.default(.builtinWideAngleCamera, for: .video, position: .back) else {
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             throw PpgCaptureError.deviceUnavailable
         }
 
@@ -114,7 +114,7 @@ final class PpgCameraCapture: NSObject {
         isRunning = false
         NotificationCenter.default.removeObserver(self)
 
-        if let device = AVCaptureDevice.default(.builtinWideAngleCamera, for: .video, position: .back),
+        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
            device.hasTorch, device.torchMode != .off {
             try? device.lockForConfiguration()
             device.torchMode = .off
