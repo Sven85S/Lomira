@@ -7,10 +7,9 @@ import blobTexture from '../assets/anker/blob-texture-shader.png';
 interface Props {
   /** Same tab-switch handler the bottom OrbitNav uses — the ring is extra navigation, not a separate path. */
   onNavigate: (tab: TabId) => void;
+  /** Opens the HRV/pulse measurement flow — same entry point the OrbitNav's HRV tab uses. */
+  onOpenHrv: () => void;
 }
-
-// HRV is a placeholder entry point (ring chip here + the OrbitNav tab) until the
-// real HRV measurement feature ships — tapping it intentionally does nothing yet.
 
 interface RingIcon {
   tab: TabId | 'hrv';
@@ -215,7 +214,7 @@ const MAX_RADIUS = 0.39;
 
 type Phase = 'idle' | 'inhale' | 'exhale';
 
-export default function AnkerScreen({ onNavigate }: Props) {
+export default function AnkerScreen({ onNavigate, onOpenHrv }: Props) {
   const { recordAnkerSession } = useData();
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -552,7 +551,8 @@ export default function AnkerScreen({ onNavigate }: Props) {
               <button
                 style={ringChipStyle}
                 onClick={() => {
-                  if (tab !== 'hrv') onNavigate(tab);
+                  if (tab === 'hrv') onOpenHrv();
+                  else onNavigate(tab);
                 }}
                 aria-label={label}
               >

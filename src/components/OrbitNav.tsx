@@ -5,6 +5,8 @@ import type { TabId } from '../types';
 interface Props {
   active: TabId;
   onChange: (tab: TabId) => void;
+  /** Opens the HRV/pulse measurement flow — same entry point the Anker ring's HRV chip uses. */
+  onOpenHrv: () => void;
 }
 
 // Horizontal anchor points as a % of the bar's own width, converted 1:1 from the
@@ -35,7 +37,7 @@ const itemBtnStyle = (left: string): CSSProperties => ({
   padding: 0,
 });
 
-export default function OrbitNav({ active, onChange }: Props) {
+export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(110px + env(safe-area-inset-bottom))', flexShrink: 0 }}>
       <div
@@ -51,8 +53,7 @@ export default function OrbitNav({ active, onChange }: Props) {
         }}
       />
 
-      {/* HRV is a placeholder entry point until the real measurement feature ships — tapping it does nothing yet. */}
-      <button style={itemBtnStyle(POS.hrv)} aria-label="HRV-Messung">
+      <button style={itemBtnStyle(POS.hrv)} onClick={onOpenHrv} aria-label="HRV-Messung">
         <svg width={21} height={21} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
         </svg>
