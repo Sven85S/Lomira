@@ -18,6 +18,7 @@
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		AA11000000000000000A0004 /* PpgCameraPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000A0002 /* PpgCameraPlugin.swift */; };
 		AA11000000000000000A0005 /* PpgCameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000A0003 /* PpgCameraCapture.swift */; };
+		AA11000000000000000A0007 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000A0006 /* MainViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		AA11000000000000000A0002 /* PpgCameraPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpgCameraPlugin.swift; sourceTree = "<group>"; };
 		AA11000000000000000A0003 /* PpgCameraCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpgCameraCapture.swift; sourceTree = "<group>"; };
+		AA11000000000000000A0006 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				AA11000000000000000A0001 /* Plugins */,
+				AA11000000000000000A0006 /* MainViewController.swift */,
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -176,6 +179,7 @@
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				AA11000000000000000A0004 /* PpgCameraPlugin.swift in Sources */,
 				AA11000000000000000A0005 /* PpgCameraCapture.swift in Sources */,
+				AA11000000000000000A0007 /* MainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
