@@ -38,6 +38,12 @@ final class PpgCameraCapture: NSObject {
 
     private(set) var isRunning = false
 
+    // KVO on isAdjustingExposure — lets us wait for auto-exposure to actually
+    // settle under the now-on torch before locking it, instead of locking on
+    // whatever transient value it had at torch-on.
+    private var exposureObservation: NSKeyValueObservation?
+    private var exposureWhiteBalanceLockApplied = false
+
     static var isCameraAvailable: Bool {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
@@ -112,6 +118,76 @@ final class PpgCameraCapture: NSObject {
                     print("[PpgCameraCapture] focusMode=.locked failed — lockForConfiguration() threw: \(error)")
                 }
             }
+
+            self.lockExposureAndWhiteBalanceOnceStable(device: device)
+        }
+    }
+
+    /// The torch turning on kicks continuous auto-exposure/white-balance into
+    /// actively compensating for the new, constant light — exactly the drift
+    /// that was swamping the PPG signal. Lets it settle (watched via KVO on
+    /// isAdjustingExposure, Apple's documented way to know when a change has
+    /// finished) and only then locks both, instead of locking on whatever
+    /// transient value they had right at torch-on.
+    private func lockExposureAndWhiteBalanceOnceStable(device: AVCaptureDevice) {
+        exposureWhiteBalanceLockApplied = false
+        exposureObservation?.invalidate()
+
+        do {
+            try device.lockForConfiguration()
+            if device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposureMode = .continuousAutoExposure
+            }
+            if device.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
+                device.whiteBalanceMode = .continuousAutoWhiteBalance
+            }
+            device.unlockForConfiguration()
+        } catch {
+            print("[PpgCameraCapture] could not (re)set continuous auto exposure/white-balance: \(error)")
+        }
+
+        print("[PpgCameraCapture] waiting for auto-exposure to settle before locking (isAdjustingExposure=\(device.isAdjustingExposure))")
+
+        exposureObservation = device.observe(\.isAdjustingExposure, options: [.initial, .new]) { [weak self] dev, _ in
+            guard !dev.isAdjustingExposure else { return }
+            self?.applyExposureWhiteBalanceLock(device: dev, reason: "isAdjustingExposure settled")
+        }
+
+        // Fallback: on some devices isAdjustingExposure can keep flapping
+        // under torch light and never settle — lock after a bounded wait
+        // regardless, so a measurement never runs on an indefinitely
+        // auto-adjusting camera.
+        processingQueue.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.applyExposureWhiteBalanceLock(device: device, reason: "1.5s settle timeout")
+        }
+    }
+
+    private func applyExposureWhiteBalanceLock(device: AVCaptureDevice, reason: String) {
+        guard !exposureWhiteBalanceLockApplied else { return }
+        exposureWhiteBalanceLockApplied = true
+        exposureObservation?.invalidate()
+        exposureObservation = nil
+
+        do {
+            try device.lockForConfiguration()
+        } catch {
+            print("[PpgCameraCapture] exposure/white-balance lock failed — lockForConfiguration() threw: \(error) (reason=\(reason))")
+            return
+        }
+        defer { device.unlockForConfiguration() }
+
+        if device.isExposureModeSupported(.locked) {
+            device.exposureMode = .locked
+            print("[PpgCameraCapture] exposureMode = .locked (reason=\(reason), exposureDuration=\(device.exposureDuration.seconds)s, ISO=\(device.iso))")
+        } else {
+            print("[PpgCameraCapture] exposureMode .locked not supported on this device")
+        }
+
+        if device.isWhiteBalanceModeSupported(.locked) {
+            device.whiteBalanceMode = .locked
+            print("[PpgCameraCapture] whiteBalanceMode = .locked (reason=\(reason))")
+        } else {
+            print("[PpgCameraCapture] whiteBalanceMode .locked not supported on this device")
         }
     }
 
@@ -124,6 +200,8 @@ final class PpgCameraCapture: NSObject {
         guard isRunning else { return }
         isRunning = false
         NotificationCenter.default.removeObserver(self)
+        exposureObservation?.invalidate()
+        exposureObservation = nil
 
         if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
             Self.setTorch(on: false, device: device, reason: reason)
