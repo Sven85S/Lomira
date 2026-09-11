@@ -3,7 +3,7 @@ import type { SignalQuality } from '../../ppg/types';
 
 interface Props {
   onClose: () => void;
-  result: { bpm: number; quality: SignalQuality; rmssd?: number } | null;
+  result: { bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null;
   onOpenFortschritt: () => void;
   onRemeasure: () => void;
 }
@@ -54,7 +54,9 @@ export default function HrvResultScreen({ onClose, result, onOpenFortschritt, on
                     <span style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text }}>{Math.round(result.rmssd)}</span>
                     <span style={{ fontSize: 13, color: colors.muted }}>ms RMSSD</span>
                   </div>
-                  <span style={{ fontSize: 11, color: colors.muted }}>Kurzfristige Herzratenvariabilität</span>
+                  <span style={{ fontSize: 11, color: colors.muted }}>
+                    Kurzfristige Herzratenvariabilität{result.rmssdEstimated ? ' — geschätzt, mit Vorbehalt' : ''}
+                  </span>
                 </>
               ) : (
                 <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 240 }}>

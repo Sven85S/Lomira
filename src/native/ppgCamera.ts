@@ -21,7 +21,15 @@ export interface PpgSampleBatch {
 }
 
 export interface PpgCaptureError {
-  code: 'sessionInterrupted' | 'deviceUnavailable' | 'torchUnavailable' | string;
+  code:
+    | 'sessionInterrupted'
+    | 'sessionInterruptedSystemPressure'
+    | 'sessionInterruptedDeviceInUse'
+    | 'sessionInterruptedBackground'
+    | 'sessionInterruptedMultitasking'
+    | 'deviceUnavailable'
+    | 'torchUnavailable'
+    | string;
   message: string;
 }
 

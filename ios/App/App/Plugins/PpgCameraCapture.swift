@@ -95,7 +95,7 @@ final class PpgCameraCapture: NSObject {
         pendingSamples.removeAll()
 
         NotificationCenter.default.addObserver(
-            self, selector: #selector(handleInterruption),
+            self, selector: #selector(handleInterruption(_:)),
             name: .AVCaptureSessionWasInterrupted, object: session
         )
         NotificationCenter.default.addObserver(
@@ -224,13 +224,44 @@ final class PpgCameraCapture: NSObject {
         sessionStartTimestamp = nil
     }
 
-    @objc private func handleInterruption() {
-        print("[PpgCameraCapture] AVCaptureSessionWasInterrupted notification received")
-        delegate?.ppgCapture(
-            self, didFailWith: "sessionInterrupted",
-            message: "Die Kamera-Session wurde unterbrochen (z. B. eingehender Anruf)."
-        )
-        stop(reason: "AVCaptureSessionWasInterrupted")
+    /// Reads the real AVCaptureSession.InterruptionReason out of the notification's
+    /// userInfo instead of guessing — a prior version hardcoded "incoming call" in
+    /// the user-facing message, which turned out to be wrong (no call was involved).
+    /// Only a few reasons are common enough on a phone-in-hand PPG measurement to
+    /// get their own message; anything else (including a reason Apple adds later,
+    /// hence the @unknown default) falls back to a neutral message until we've
+    /// actually seen it happen and know what to say.
+    @objc private func handleInterruption(_ notification: Notification) {
+        let rawReason = (notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as? Int)
+        let reason = rawReason.flatMap { AVCaptureSession.InterruptionReason(rawValue: $0) }
+        print("[PpgCameraCapture] AVCaptureSessionWasInterrupted notification received, reason=\(String(describing: reason)) (rawValue=\(String(describing: rawReason)))")
+
+        let (code, message) = Self.interruptionErrorInfo(for: reason)
+        delegate?.ppgCapture(self, didFailWith: code, message: message)
+        stop(reason: "AVCaptureSessionWasInterrupted (reason=\(String(describing: reason)))")
+    }
+
+    private static func interruptionErrorInfo(for reason: AVCaptureSession.InterruptionReason?) -> (code: String, message: String) {
+        guard let reason else {
+            return ("sessionInterrupted", "Die Kamera-Session wurde unterbrochen. Bitte versuche es erneut.")
+        }
+        switch reason {
+        case .videoDeviceNotAvailableDueToSystemPressure:
+            return (
+                "sessionInterruptedSystemPressure",
+                "Das Gerät braucht kurz eine Pause (z. B. durch Wärmeentwicklung von Kamera und Blitz) — bitte in ein paar Sekunden erneut versuchen."
+            )
+        case .videoDeviceInUseByAnotherClient:
+            return ("sessionInterruptedDeviceInUse", "Die Kamera wird gerade von einer anderen App verwendet.")
+        case .videoDeviceNotAvailableInBackground:
+            return ("sessionInterruptedBackground", "Die Kamera-Session wurde unterbrochen, weil die App in den Hintergrund wechselte.")
+        case .videoDeviceNotAvailableWithMultipleForegroundApps:
+            return ("sessionInterruptedMultitasking", "Die Kamera ist im geteilten Bildschirm nicht verfügbar — bitte die App im Vollbild öffnen.")
+        case .audioDeviceInUseByAnotherClient:
+            return ("sessionInterrupted", "Die Kamera-Session wurde unterbrochen. Bitte versuche es erneut.")
+        @unknown default:
+            return ("sessionInterrupted", "Die Kamera-Session wurde unterbrochen. Bitte versuche es erneut.")
+        }
     }
 
     /// Backgrounding the app must never leave the torch on. Logged with its own

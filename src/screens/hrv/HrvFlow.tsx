@@ -5,6 +5,7 @@ import { PpgCamera, isPpgCameraSupported, type CameraPermissionState } from '../
 import { filterRROutliers } from '../../ppg/outlierFilter';
 import { createPpgService } from '../../ppg/ppgService';
 import { computeRmssd } from '../../ppg/rmssd';
+import { classifySnr } from '../../ppg/signalQuality';
 import { DEFAULT_PPG_CONFIG, type PpgResult, type SignalQuality } from '../../ppg/types';
 import HrvStartScreen from './HrvStartScreen';
 import HrvMeasuringScreen from './HrvMeasuringScreen';
@@ -38,13 +39,16 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const [measureRemainingMs, setMeasureRemainingMs] = useState(MEASURE_MS);
   const [liveResult, setLiveResult] = useState<PpgResult | null>(null);
   const [livePoints, setLivePoints] = useState<number[]>([]);
-  const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality; rmssd?: number } | null>(null);
+  const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null>(
+    null,
+  );
 
   const phaseRef = useRef<Phase>('start');
   phaseRef.current = phase;
   const isWarmupRef = useRef(true);
   const lastResultRef = useRef<PpgResult | null>(null);
   const bpmSamplesRef = useRef<number[]>([]);
+  const snrSamplesRef = useRef<number[]>([]);
   const ppgServiceRef = useRef(createPpgService());
   const previewRef = useRef<HTMLDivElement>(null);
   // Always-current reference to the context callback — the interval effect below
@@ -86,6 +90,9 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
         });
         if (!isWarmupRef.current && result.bpm != null) {
           bpmSamplesRef.current.push(result.bpm);
+        }
+        if (!isWarmupRef.current && result.snrDb != null) {
+          snrSamplesRef.current.push(result.snrDb);
         }
       });
       const eh = await PpgCamera.addListener('captureError', (err) => {
@@ -151,6 +158,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const handleContinueToMeasuring = useCallback(() => {
     ppgServiceRef.current.reset();
     bpmSamplesRef.current = [];
+    snrSamplesRef.current = [];
     lastResultRef.current = null;
     isWarmupRef.current = true;
     setIsWarmup(true);
@@ -192,21 +200,51 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
           const bpmSamples = bpmSamplesRef.current;
           if (bpmSamples.length > 0) {
             const avgBpm = Math.round(bpmSamples.reduce((a, b) => a + b, 0) / bpmSamples.length);
-            const quality: SignalQuality = lastResultRef.current?.quality ?? 'poor';
 
-            // RMSSD needs its own, stricter reliability gate — a single bad RR
-            // interval skews it far more than it does a plain BPM average, so
-            // "brauchbar" quality isn't enough here, only "gut", and only with
-            // enough clean intervals left after outlier filtering. One coherent
-            // peak-detection pass over the whole session (not the live 8s
-            // rolling window) avoids double-counting intervals across batches.
+            // Quality from the mean SNR across the whole counting phase, not
+            // just the last live 8s window — a single bad moment near the end
+            // (e.g. a brief capture interruption) shouldn't decide the tag for
+            // the entire measurement. Same classifySnr()/thresholds as before,
+            // just fed a steadier number.
+            const snrSamples = snrSamplesRef.current;
+            const meanSnrDb = snrSamples.length > 0 ? snrSamples.reduce((a, b) => a + b, 0) / snrSamples.length : null;
+            const quality: SignalQuality = meanSnrDb != null ? classifySnr(meanSnrDb, DEFAULT_PPG_CONFIG) : (lastResultRef.current?.quality ?? 'poor');
+
+            // RMSSD needs its own reliability gate — a single bad RR interval
+            // skews it far more than it does a plain BPM average — but a hard
+            // "gut"-only cutoff rejected real, plausible measurements that only
+            // reached "brauchbar" in practice. "brauchbar" is now accepted too,
+            // just flagged as an estimate rather than silently dropped; "schwach"
+            // still yields no RMSSD, since below 0dB SNR there's essentially no
+            // reliable beat-to-beat structure left. One coherent peak-detection
+            // pass over the whole session (not the live 8s rolling window)
+            // avoids double-counting intervals across overlapping batches.
             const sessionRR = ppgServiceRef.current.getSessionRRIntervalsMs();
             const cleanSessionRR = filterRROutliers(sessionRR, DEFAULT_PPG_CONFIG);
-            const rmssdReliable = quality === 'good' && cleanSessionRR.length >= DEFAULT_PPG_CONFIG.minRmssdCleanRRCount;
+            const rmssdReliable = quality !== 'poor' && cleanSessionRR.length >= DEFAULT_PPG_CONFIG.minRmssdCleanRRCount;
             const rmssd = rmssdReliable ? (computeRmssd(cleanSessionRR) ?? undefined) : undefined;
+            const rmssdEstimated = rmssd != null && quality === 'fair';
 
-            setFinalResult({ bpm: avgBpm, quality, rmssd });
-            await recordHrvMeasurementRef.current(avgBpm, quality, rmssd);
+            // Kept for calibration — the 5.0/0.0dB quality thresholds were only
+            // rough starting values, never tuned against real Lomira device
+            // data; comparing meanSnrDb/lastSnrDb across several clean (non-
+            // interrupted) measurements is what a future retuning would need.
+            console.log('[HrvFlow] Messung beendet', {
+              avgBpm,
+              quality,
+              meanSnrDb,
+              lastSnrDb: lastResultRef.current?.snrDb ?? null,
+              minSnrDb: snrSamples.length > 0 ? Math.min(...snrSamples) : null,
+              maxSnrDb: snrSamples.length > 0 ? Math.max(...snrSamples) : null,
+              snrSampleCount: snrSamples.length,
+              sessionRRCount: sessionRR.length,
+              cleanRRCount: cleanSessionRR.length,
+              rmssd,
+              rmssdEstimated,
+            });
+
+            setFinalResult({ bpm: avgBpm, quality, rmssd, rmssdEstimated });
+            await recordHrvMeasurementRef.current(avgBpm, quality, rmssd, rmssdEstimated);
           } else {
             setFinalResult(null);
           }

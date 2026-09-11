@@ -108,8 +108,11 @@ export default function FortschrittScreen({ showInfo }: Props) {
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
               <span style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text }}>{hrvMeasurements[0].bpm}</span>
               <span style={{ fontSize: 13, color: colors.muted }}>
-                bpm{hrvMeasurements[0].rmssd != null ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms` : ''} · zuletzt{' '}
-                {formatEntryDate(hrvMeasurements[0].date)}
+                bpm
+                {hrvMeasurements[0].rmssd != null
+                  ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms${hrvMeasurements[0].rmssdEstimated ? ' (geschätzt)' : ''}`
+                  : ''}{' '}
+                · zuletzt {formatEntryDate(hrvMeasurements[0].date)}
               </span>
               <span
                 style={{ width: 7, height: 7, borderRadius: 9999, background: QUALITY_COLOR[hrvMeasurements[0].quality], marginLeft: 'auto' }}
@@ -124,7 +127,7 @@ export default function FortschrittScreen({ showInfo }: Props) {
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ width: 6, height: 6, borderRadius: 9999, background: QUALITY_COLOR[m.quality] }} />
                     <span style={{ color: colors.text }}>
-                      {m.bpm} bpm{m.rmssd != null ? ` · ${Math.round(m.rmssd)}ms RMSSD` : ''}
+                      {m.bpm} bpm{m.rmssd != null ? ` · ${Math.round(m.rmssd)}ms RMSSD${m.rmssdEstimated ? ' (geschätzt)' : ''}` : ''}
                     </span>
                   </span>
                 </div>
