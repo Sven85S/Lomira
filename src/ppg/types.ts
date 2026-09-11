@@ -14,6 +14,10 @@ export interface PpgConfig {
   fpsWarmupSamples: number;
   /** Physiological upper bound used to derive the peak-detector's minimum spacing. */
   maxBpm: number;
+  /** Minimum number of clean (outlier-filtered) RR intervals required before
+   * RMSSD is considered reliable enough to show — HRV is far more sensitive
+   * to a handful of bad intervals than a plain BPM average is. */
+  minRmssdCleanRRCount: number;
 }
 
 export const DEFAULT_PPG_CONFIG: PpgConfig = {
@@ -26,6 +30,7 @@ export const DEFAULT_PPG_CONFIG: PpgConfig = {
   candidateFps: [24, 25, 30, 60],
   fpsWarmupSamples: 30,
   maxBpm: 200,
+  minRmssdCleanRRCount: 20,
 };
 
 export type SignalQuality = 'good' | 'fair' | 'poor';

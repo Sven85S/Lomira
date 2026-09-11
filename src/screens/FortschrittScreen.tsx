@@ -102,12 +102,15 @@ export default function FortschrittScreen({ showInfo }: Props) {
       </div>
 
       <div style={cardStyle}>
-        <div style={{ fontSize: 14, color: colors.text, marginBottom: 10 }}>Puls (Kamera-Messung)</div>
+        <div style={{ fontSize: 14, color: colors.text, marginBottom: 10 }}>Puls &amp; HRV (Kamera-Messung)</div>
         {hrvMeasurements.length > 0 ? (
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
               <span style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text }}>{hrvMeasurements[0].bpm}</span>
-              <span style={{ fontSize: 13, color: colors.muted }}>bpm · zuletzt {formatEntryDate(hrvMeasurements[0].date)}</span>
+              <span style={{ fontSize: 13, color: colors.muted }}>
+                bpm{hrvMeasurements[0].rmssd != null ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms` : ''} · zuletzt{' '}
+                {formatEntryDate(hrvMeasurements[0].date)}
+              </span>
               <span
                 style={{ width: 7, height: 7, borderRadius: 9999, background: QUALITY_COLOR[hrvMeasurements[0].quality], marginLeft: 'auto' }}
               />
@@ -120,7 +123,9 @@ export default function FortschrittScreen({ showInfo }: Props) {
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ width: 6, height: 6, borderRadius: 9999, background: QUALITY_COLOR[m.quality] }} />
-                    <span style={{ color: colors.text }}>{m.bpm} bpm</span>
+                    <span style={{ color: colors.text }}>
+                      {m.bpm} bpm{m.rmssd != null ? ` · ${Math.round(m.rmssd)}ms RMSSD` : ''}
+                    </span>
                   </span>
                 </div>
               ))}

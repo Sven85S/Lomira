@@ -32,7 +32,7 @@ interface DataContextValue {
   pulseChart: PulseChart | null;
 
   hrvMeasurements: HrvMeasurement[];
-  recordHrvMeasurement: (bpm: number, quality: HrvMeasurement['quality']) => Promise<void>;
+  recordHrvMeasurement: (bpm: number, quality: HrvMeasurement['quality'], rmssd?: number) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -104,8 +104,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [ankerSessionCount]);
 
   const recordHrvMeasurement = useCallback(
-    async (bpm: number, quality: HrvMeasurement['quality']) => {
-      const next = [{ id: uid(), date: todayKey(), createdAt: Date.now(), bpm, quality }, ...hrvMeasurements];
+    async (bpm: number, quality: HrvMeasurement['quality'], rmssd?: number) => {
+      const next = [{ id: uid(), date: todayKey(), createdAt: Date.now(), bpm, quality, rmssd }, ...hrvMeasurements];
       setHrvMeasurements(next);
       await writeJSON(STORAGE_KEYS.hrvMeasurements, next);
     },

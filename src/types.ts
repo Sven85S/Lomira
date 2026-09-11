@@ -30,6 +30,10 @@ export interface HrvMeasurement {
   createdAt: number;
   bpm: number;
   quality: 'good' | 'fair' | 'poor';
+  /** RMSSD in ms — only set when signal quality was 'good' and enough clean
+   * RR intervals survived outlier filtering; absent otherwise rather than a
+   * number that looks precise but isn't trustworthy. */
+  rmssd?: number;
 }
 
 export type TabId = 'sos' | 'beruehren' | 'lektionen' | 'ritual' | 'fortschritt';

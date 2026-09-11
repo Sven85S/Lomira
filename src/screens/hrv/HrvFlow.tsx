@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { useData } from '../../context/DataContext';
 import { PpgCamera, isPpgCameraSupported, type CameraPermissionState } from '../../native/ppgCamera';
+import { filterRROutliers } from '../../ppg/outlierFilter';
 import { createPpgService } from '../../ppg/ppgService';
-import type { PpgResult, SignalQuality } from '../../ppg/types';
+import { computeRmssd } from '../../ppg/rmssd';
+import { DEFAULT_PPG_CONFIG, type PpgResult, type SignalQuality } from '../../ppg/types';
 import HrvStartScreen from './HrvStartScreen';
 import HrvMeasuringScreen from './HrvMeasuringScreen';
 import HrvResultScreen from './HrvResultScreen';
@@ -36,7 +38,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const [measureRemainingMs, setMeasureRemainingMs] = useState(MEASURE_MS);
   const [liveResult, setLiveResult] = useState<PpgResult | null>(null);
   const [livePoints, setLivePoints] = useState<number[]>([]);
-  const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality } | null>(null);
+  const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality; rmssd?: number } | null>(null);
 
   const phaseRef = useRef<Phase>('start');
   phaseRef.current = phase;
@@ -191,8 +193,20 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
           if (bpmSamples.length > 0) {
             const avgBpm = Math.round(bpmSamples.reduce((a, b) => a + b, 0) / bpmSamples.length);
             const quality: SignalQuality = lastResultRef.current?.quality ?? 'poor';
-            setFinalResult({ bpm: avgBpm, quality });
-            await recordHrvMeasurementRef.current(avgBpm, quality);
+
+            // RMSSD needs its own, stricter reliability gate — a single bad RR
+            // interval skews it far more than it does a plain BPM average, so
+            // "brauchbar" quality isn't enough here, only "gut", and only with
+            // enough clean intervals left after outlier filtering. One coherent
+            // peak-detection pass over the whole session (not the live 8s
+            // rolling window) avoids double-counting intervals across batches.
+            const sessionRR = ppgServiceRef.current.getSessionRRIntervalsMs();
+            const cleanSessionRR = filterRROutliers(sessionRR, DEFAULT_PPG_CONFIG);
+            const rmssdReliable = quality === 'good' && cleanSessionRR.length >= DEFAULT_PPG_CONFIG.minRmssdCleanRRCount;
+            const rmssd = rmssdReliable ? (computeRmssd(cleanSessionRR) ?? undefined) : undefined;
+
+            setFinalResult({ bpm: avgBpm, quality, rmssd });
+            await recordHrvMeasurementRef.current(avgBpm, quality, rmssd);
           } else {
             setFinalResult(null);
           }

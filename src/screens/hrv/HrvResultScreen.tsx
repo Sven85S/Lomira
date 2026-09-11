@@ -3,7 +3,7 @@ import type { SignalQuality } from '../../ppg/types';
 
 interface Props {
   onClose: () => void;
-  result: { bpm: number; quality: SignalQuality } | null;
+  result: { bpm: number; quality: SignalQuality; rmssd?: number } | null;
   onOpenFortschritt: () => void;
   onRemeasure: () => void;
 }
@@ -45,6 +45,22 @@ export default function HrvResultScreen({ onClose, result, onOpenFortschritt, on
             >
               <span style={{ width: 8, height: 8, borderRadius: 9999, background: QUALITY_COLOR[result.quality] }} />
               <span style={{ fontSize: 13, color: colors.text }}>Signalqualität: {QUALITY_LABEL[result.quality]}</span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              {result.rmssd != null ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text }}>{Math.round(result.rmssd)}</span>
+                    <span style={{ fontSize: 13, color: colors.muted }}>ms RMSSD</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: colors.muted }}>Kurzfristige Herzratenvariabilität</span>
+                </>
+              ) : (
+                <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 240 }}>
+                  HRV (RMSSD) nicht verlässlich berechenbar — dafür war das Signal nicht sauber und stabil genug.
+                </p>
+              )}
             </div>
 
             <button style={{ ...primaryBtnStyle, marginTop: 8 }} onClick={onOpenFortschritt}>

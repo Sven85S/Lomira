@@ -14,6 +14,16 @@ const WINDOW_MS = 8000;
 export interface PpgService {
   /** Feeds one native sample batch through the pipeline and returns the current reading. */
   pushBatch(batch: PpgSampleBatch): PpgResult;
+  /**
+   * Runs frame-rate detection, the bandpass filter and peak detection once
+   * over the *entire* untrimmed session buffer (everything pushed since the
+   * last reset()), and returns the resulting raw RR intervals in ms. Used
+   * for HRV metrics like RMSSD that need one coherent detection pass across
+   * the whole measurement rather than concatenated results from the live
+   * pushBatch()'s short rolling window (which would double-count intervals
+   * as the window slides). Caller still owns outlier-filtering the result.
+   */
+  getSessionRRIntervalsMs(): number[];
   reset(): void;
 }
 
@@ -33,6 +43,12 @@ const NOT_READY_RESULT: Omit<PpgResult, 'isFingerDetected' | 'isFpsStable' | 'fp
 export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgService {
   let rawValues: number[] = [];
   let timestampsMs: number[] = [];
+  // Never trimmed within a session (only reset() clears it) — a second,
+  // parallel record of the same samples purely for the end-of-measurement
+  // RMSSD pass; a ~60s session at typical camera frame rates is a trivial
+  // amount of memory.
+  let sessionRawValues: number[] = [];
+  let sessionTimestampsMs: number[] = [];
 
   function trimToWindow(): void {
     if (timestampsMs.length === 0) return;
@@ -49,6 +65,8 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     for (const sample of batch.samples) {
       rawValues.push(sample.redMean);
       timestampsMs.push(sample.timestampMs);
+      sessionRawValues.push(sample.redMean);
+      sessionTimestampsMs.push(sample.timestampMs);
     }
     trimToWindow();
 
@@ -77,12 +95,28 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     return { bpm, quality, snrDb, isFingerDetected: fingerDetected, isFpsStable: isStable, fps };
   }
 
+  function getSessionRRIntervalsMs(): number[] {
+    const { fps, isStable } = detectFrameRate(sessionTimestampsMs, config);
+    if (!isStable || fps === null || sessionRawValues.length < 8) return [];
+
+    const filtered = bandpassFilter(sessionRawValues, fps);
+    const peaks = detectPeaks(filtered, sessionTimestampsMs, fps, config.maxBpm);
+
+    const rrIntervalsMs: number[] = [];
+    for (let i = 1; i < peaks.length; i++) {
+      rrIntervalsMs.push(peaks[i].timestampMs - peaks[i - 1].timestampMs);
+    }
+    return rrIntervalsMs;
+  }
+
   function reset(): void {
     rawValues = [];
     timestampsMs = [];
+    sessionRawValues = [];
+    sessionTimestampsMs = [];
   }
 
-  return { pushBatch, reset };
+  return { pushBatch, getSessionRRIntervalsMs, reset };
 }
 
 function mean(values: number[]): number {
