@@ -268,11 +268,11 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   // fire once, on a genuine unmount, never from a changing dependency. The
   // only way HrvFlow unmounts during phase==='measuring' is onClose() firing
   // (App.tsx's only other showHrvFlow-false path, onOpenFortschritt, is only
-  // reachable from the result screen) — this wrapper logs exactly when/if
-  // that happens, to tell an intentional cancel-button tap apart from
-  // anything else invoking it.
+  // reachable from the result screen). handleClose is shared by all three
+  // screens, so a plain log can't tell which one's onClick actually reached
+  // it — console.trace() prints the real JS call stack instead, which does.
   const handleClose = useCallback(() => {
-    console.log('[HrvFlow] onClose invoked', { phase: phaseRef.current });
+    console.trace('[HrvFlow] onClose invoked', { phase: phaseRef.current });
     onClose();
   }, [onClose]);
 
