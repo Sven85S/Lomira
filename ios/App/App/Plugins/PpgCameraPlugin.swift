@@ -60,15 +60,23 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve(["available": available])
     }
 
+    // capture.start()'s completion only fires once the camera is actually,
+    // fully ready (session running, torch on, exposure/white-balance
+    // settled and locked) — not just once its synchronous setup is done — so
+    // by the time this call resolves, JS code that waits on it (like HrvFlow
+    // calling attachPreview() right after) is guaranteed to be looking at an
+    // already-fully-configured session, not racing its own setup.
     @objc func startCapture(_ call: CAPPluginCall) {
         print("[PpgCamera] startCapture() called")
-        do {
-            try capture.start()
-            print("[PpgCamera] startCapture() succeeded")
-            call.resolve()
-        } catch {
-            print("[PpgCamera] startCapture() failed: \(error)")
-            call.reject("Kamera konnte nicht gestartet werden.", "\(error)")
+        capture.start { result in
+            switch result {
+            case .success:
+                print("[PpgCamera] startCapture() succeeded")
+                call.resolve()
+            case .failure(let error):
+                print("[PpgCamera] startCapture() failed: \(error)")
+                call.reject("Kamera konnte nicht gestartet werden.", "\(error)")
+            }
         }
     }
 

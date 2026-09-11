@@ -53,19 +53,36 @@ final class PpgCameraCapture: NSObject {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
 
-    func start() throws {
+    /// Only resolves `completion` once the camera is actually, fully ready —
+    /// session running, torch on, exposure/white-balance settled and locked —
+    /// not just once the synchronous session setup is done. Two regressions
+    /// were traced back to that distinction: a call to attachPreview() right
+    /// after JS awaited the old (synchronously-resolving) startCapture() could
+    /// land before torch/exposure setup had even started on processingQueue,
+    /// and reasserting torch/exposure from within attachPreview() as a
+    /// workaround then raced the *original* start() sequence on the same
+    /// AVCaptureDevice, which AVFoundation reported as
+    /// videoDeviceInUseByAnotherClient — not a real other app, just our own
+    /// two unsynchronized configuration attempts. Making completion wait for
+    /// the real end of the async block removes the race at its source: by the
+    /// time JS's `await startCapture()` returns, there is nothing left for
+    /// attachPreview() (or anything else) to race against.
+    func start(completion: @escaping (Result<Void, Error>) -> Void) {
         print("[PpgCameraCapture] start() called")
         guard !isRunning else {
             print("[PpgCameraCapture] start() ignored — already running")
+            completion(.success(()))
             return
         }
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             print("[PpgCameraCapture] start() failed — no main wide-angle back camera on this device")
-            throw PpgCaptureError.deviceUnavailable
+            completion(.failure(PpgCaptureError.deviceUnavailable))
+            return
         }
         guard device.isTorchModeSupported(.on) else {
             print("[PpgCameraCapture] start() failed — torch not supported on this device")
-            throw PpgCaptureError.torchUnavailable
+            completion(.failure(PpgCaptureError.torchUnavailable))
+            return
         }
 
         session.beginConfiguration()
@@ -76,7 +93,8 @@ final class PpgCameraCapture: NSObject {
         guard let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else {
             session.commitConfiguration()
             print("[PpgCameraCapture] start() failed — could not create/add AVCaptureDeviceInput")
-            throw PpgCaptureError.inputCreationFailed
+            completion(.failure(PpgCaptureError.inputCreationFailed))
+            return
         }
         session.addInput(input)
 
@@ -86,7 +104,8 @@ final class PpgCameraCapture: NSObject {
         guard session.canAddOutput(videoOutput) else {
             session.commitConfiguration()
             print("[PpgCameraCapture] start() failed — could not add AVCaptureVideoDataOutput")
-            throw PpgCaptureError.sessionConfigurationFailed
+            completion(.failure(PpgCaptureError.sessionConfigurationFailed))
+            return
         }
         session.addOutput(videoOutput)
         session.commitConfiguration()
@@ -124,7 +143,13 @@ final class PpgCameraCapture: NSObject {
                 }
             }
 
-            self.lockExposureAndWhiteBalanceOnceStable(device: device)
+            // completion only fires once the exposure/white-balance lock has
+            // actually been applied (see onLocked below) — matching original
+            // behavior, a failure to lock is logged but non-fatal, so this
+            // always resolves .success once that cycle has run its course.
+            self.lockExposureAndWhiteBalanceOnceStable(device: device) {
+                completion(.success(()))
+            }
         }
     }
 
@@ -134,7 +159,11 @@ final class PpgCameraCapture: NSObject {
     /// isAdjustingExposure, Apple's documented way to know when a change has
     /// finished) and only then locks both, instead of locking on whatever
     /// transient value they had right at torch-on.
-    private func lockExposureAndWhiteBalanceOnceStable(device: AVCaptureDevice) {
+    /// `onLocked` fires exactly once, on whichever of the two racing paths
+    /// below (KVO-settled or the timeout fallback) actually applies the lock
+    /// — see the idempotency guard in applyExposureWhiteBalanceLock(), which
+    /// both paths call.
+    private func lockExposureAndWhiteBalanceOnceStable(device: AVCaptureDevice, onLocked: @escaping () -> Void) {
         exposureWhiteBalanceLockApplied = false
         exposureObservation?.invalidate()
 
@@ -155,7 +184,7 @@ final class PpgCameraCapture: NSObject {
 
         exposureObservation = device.observe(\.isAdjustingExposure, options: [.initial, .new]) { [weak self] dev, _ in
             guard !dev.isAdjustingExposure else { return }
-            self?.applyExposureWhiteBalanceLock(device: dev, reason: "isAdjustingExposure settled")
+            self?.applyExposureWhiteBalanceLock(device: dev, reason: "isAdjustingExposure settled", onLocked: onLocked)
         }
 
         // Fallback: on some devices isAdjustingExposure can keep flapping
@@ -163,15 +192,21 @@ final class PpgCameraCapture: NSObject {
         // regardless, so a measurement never runs on an indefinitely
         // auto-adjusting camera.
         processingQueue.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.applyExposureWhiteBalanceLock(device: device, reason: "1.5s settle timeout")
+            self?.applyExposureWhiteBalanceLock(device: device, reason: "1.5s settle timeout", onLocked: onLocked)
         }
     }
 
-    private func applyExposureWhiteBalanceLock(device: AVCaptureDevice, reason: String) {
+    /// The idempotency guard below means only the first of the two racing
+    /// callers actually runs this body — `onLocked` is deferred so it fires
+    /// exactly once on that first call, regardless of which return path is
+    /// taken (including lockForConfiguration() itself throwing), so a caller
+    /// waiting on it (start()'s completion) can never hang.
+    private func applyExposureWhiteBalanceLock(device: AVCaptureDevice, reason: String, onLocked: @escaping () -> Void) {
         guard !exposureWhiteBalanceLockApplied else { return }
         exposureWhiteBalanceLockApplied = true
         exposureObservation?.invalidate()
         exposureObservation = nil
+        defer { onLocked() }
 
         do {
             try device.lockForConfiguration()
@@ -305,20 +340,11 @@ final class PpgCameraCapture: NSObject {
     /// Adds a live preview of the same session as a sublayer of `containerView`.
     /// Safe to call again with a different/resized containerView (or the same
     /// one after a layout change) — replaces any existing layer rather than
-    /// stacking a second one.
-    ///
-    /// Regression fix: constructing an AVCaptureVideoPreviewLayer(session:)
-    /// establishes a new preview connection on the session, and AVFoundation
-    /// folds that into its own implicit device reconfiguration — which was
-    /// silently resetting torch (the exact "torch turns on then immediately
-    /// off again" symptom the original start()-ordering fix solved) back to
-    /// its default. Worse, start()'s startCapture()-facing promise already
-    /// resolves right after the *synchronous* part of start() — before
-    /// session.startRunning()/setTorch(on: true) even run on processingQueue
-    /// — so JS awaiting startCapture() before calling attachPreview() never
-    /// actually guaranteed torch was on yet either. Reasserting torch and the
-    /// exposure/white-balance lock right after the preview layer is in place
-    /// fixes it regardless of that ordering.
+    /// stacking a second one. Back to its original, simple job — start()
+    /// waiting for its own async work to finish before resolving (see start())
+    /// means whoever calls attachPreview() after that is guaranteed to be
+    /// looking at an already-fully-configured session, so there's nothing left
+    /// here to race or reassert.
     func attachPreview(to containerView: UIView) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -330,21 +356,6 @@ final class PpgCameraCapture: NSObject {
             containerView.layer.insertSublayer(layer, at: 0)
             self.previewLayer = layer
             print("[PpgCameraCapture] attachPreview() — layer added, frame=\(layer.frame)")
-
-            self.reapplyTorchAndExposureLockAfterReconfiguration(reason: "attachPreview()")
-        }
-    }
-
-    /// Re-applies torch-on and re-runs the exposure/white-balance settle-then-
-    /// lock cycle — used after any session change (currently: attachPreview())
-    /// that risks AVFoundation silently discarding those settings as a side
-    /// effect of its own internal reconfiguration. No-op if the session isn't
-    /// actually running (e.g. attachPreview() called before startCapture()).
-    private func reapplyTorchAndExposureLockAfterReconfiguration(reason: String) {
-        guard isRunning, let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
-        processingQueue.async {
-            Self.setTorch(on: true, device: device, reason: "\(reason) — reasserting after session reconfiguration")
-            self.lockExposureAndWhiteBalanceOnceStable(device: device)
         }
     }
 
