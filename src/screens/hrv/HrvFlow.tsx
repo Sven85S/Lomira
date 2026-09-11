@@ -116,6 +116,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   // Safety net for every exit path (close button, swipe-back, unmount mid-flow).
   useEffect(() => {
     return () => {
+      console.log('[HrvFlow] stopCapture called from: unmount safety-net cleanup', { phase: phaseRef.current });
       void PpgCamera.stopCapture();
       void PpgCamera.detachPreview();
     };
@@ -196,6 +197,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
       if (elapsed >= totalMs) {
         window.clearInterval(id);
         void (async () => {
+          console.log('[HrvFlow] stopCapture called from: measurement countdown finished', { elapsed, totalMs });
           await PpgCamera.stopCapture();
           const bpmSamples = bpmSamplesRef.current;
           if (bpmSamples.length > 0) {

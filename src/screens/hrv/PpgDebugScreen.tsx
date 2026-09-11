@@ -80,7 +80,10 @@ export default function PpgDebugScreen({ onClose }: Props) {
       void errorHandle.current?.remove();
       // Screen unmount is the safety net for "user navigated away mid-measurement" —
       // stopCapture() is idempotent, so this is harmless if already stopped.
-      if (runningRef.current) void PpgCamera.stopCapture();
+      if (runningRef.current) {
+        console.log('[PpgDebugScreen] stopCapture called from: unmount cleanup (was running)');
+        void PpgCamera.stopCapture();
+      }
     };
   }, []);
 
@@ -113,6 +116,7 @@ export default function PpgDebugScreen({ onClose }: Props) {
 
   const handleStop = useCallback(async () => {
     try {
+      console.log('[PpgDebugScreen] stopCapture called from: handleStop() button');
       await PpgCamera.stopCapture();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
