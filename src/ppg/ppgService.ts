@@ -100,7 +100,15 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     if (!isStable || fps === null || sessionRawValues.length < 8) return [];
 
     const filtered = bandpassFilter(sessionRawValues, fps);
-    const peaks = detectPeaks(filtered, sessionTimestampsMs, fps, config.maxBpm);
+    // detectPeaks' default (one global std over the whole array) is right for
+    // the live path's own short ~8s window, but on this ~60s buffer it lets a
+    // single brief artifact (motion, an exposure glitch) inflate the
+    // threshold enough to bury real peaks everywhere else — passing a window
+    // here switches it to a rolling std instead, sized to roughly match the
+    // live path's own calibration granularity. See peakDetector.ts for the
+    // synthetic reproduction (77→1 peaks global vs. 65 rolling).
+    const localStdWindowSamples = Math.round(fps * 8);
+    const peaks = detectPeaks(filtered, sessionTimestampsMs, fps, config.maxBpm, 0.5, localStdWindowSamples);
 
     const rrIntervalsMs: number[] = [];
     for (let i = 1; i < peaks.length; i++) {
