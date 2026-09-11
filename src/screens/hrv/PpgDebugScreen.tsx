@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { colors, iconBtnStyle, primaryBtnStyle, serif } from '../../styles/tokens';
 import { PpgCamera, isPpgCameraSupported, type CameraPermissionState, type PpgSample } from '../../native/ppgCamera';
+import { createPpgService } from '../../ppg/ppgService';
+import type { PpgResult } from '../../ppg/types';
 
 interface Props {
   onClose: () => void;
@@ -19,11 +21,15 @@ export default function PpgDebugScreen({ onClose }: Props) {
   const [latest, setLatest] = useState<PpgSample | null>(null);
   const [points, setPoints] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [ppgResult, setPpgResult] = useState<PpgResult | null>(null);
 
   const sampleHandle = useRef<PluginListenerHandle | null>(null);
   const errorHandle = useRef<PluginListenerHandle | null>(null);
   const runningRef = useRef(false);
   runningRef.current = running;
+  // One service instance per screen lifetime, reset (not recreated) on each start —
+  // the ring buffer it holds internally should not survive across separate measurements.
+  const ppgServiceRef = useRef(createPpgService());
 
   useEffect(() => {
     if (!isPpgCameraSupported) return;
@@ -52,6 +58,9 @@ export default function PpgDebugScreen({ onClose }: Props) {
           const next = [...prev, ...batch.samples.map((s) => s.redMean)];
           return next.length > MAX_POINTS ? next.slice(next.length - MAX_POINTS) : next;
         });
+        // Additive, not a replacement for the raw curve above — lets us compare
+        // the computed BPM against the visible raw rhythm before Step 3's screens exist.
+        setPpgResult(ppgServiceRef.current.pushBatch(batch));
       });
       const eh = await PpgCamera.addListener('captureError', (err) => {
         setError(err.message);
@@ -93,6 +102,8 @@ export default function PpgDebugScreen({ onClose }: Props) {
         return;
       }
       setPoints([]);
+      setPpgResult(null);
+      ppgServiceRef.current.reset();
       await PpgCamera.startCapture();
       setRunning(true);
     } catch (e) {
@@ -163,6 +174,23 @@ export default function PpgDebugScreen({ onClose }: Props) {
             <svg width="100%" height={100} viewBox="0 0 300 100" style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}` }}>
               {pathD && <path d={pathD} fill="none" stroke={colors.rust} strokeWidth={1.5} />}
             </svg>
+
+            {/* Step 2 verification: the computed pipeline output, shown alongside — not
+                instead of — the raw curve above, so a plausible BPM can be sanity-checked
+                against the visible rhythm before Step 3's real screens replace this. */}
+            <div style={{ borderRadius: 16, border: `1px solid ${colors.border}`, background: colors.card, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+                <span style={{ fontFamily: serif, fontSize: 32, color: colors.text }}>
+                  {ppgResult?.bpm != null ? Math.round(ppgResult.bpm) : '--'}
+                </span>
+                <span style={{ fontSize: 13, color: colors.muted }}>bpm (ppgService)</span>
+              </div>
+              <p style={{ fontSize: 11, color: colors.muted, textAlign: 'center', margin: 0 }}>
+                quality: {ppgResult?.quality ?? '--'} · snr: {ppgResult?.snrDb != null ? `${ppgResult.snrDb.toFixed(1)}dB` : '--'} · fps:{' '}
+                {ppgResult?.fps ?? '--'} ({ppgResult?.isFpsStable ? 'stabil' : 'wärmt auf'}) · finger:{' '}
+                {ppgResult ? (ppgResult.isFingerDetected ? 'erkannt' : 'nicht erkannt') : '--'}
+              </p>
+            </div>
           </>
         )}
       </div>
