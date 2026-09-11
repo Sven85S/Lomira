@@ -12,18 +12,31 @@ interface Props {
 }
 
 const MAX_POINTS = 150;
+// Floor under the buffer's real min/max span so a near-silent stretch (e.g.
+// right as the finger settles) doesn't blow tiny noise up into a wild line.
+const MIN_RANGE = 6;
 
 export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingMs, measureRemainingMs, totalMeasureMs, liveResult, livePoints }: Props) {
-  const pathD =
-    livePoints.length > 1
-      ? livePoints
-          .map((v, i) => {
-            const x = (i / (MAX_POINTS - 1)) * 280;
-            const y = 60 - Math.min(60, Math.max(0, v / 4.25));
-            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-          })
-          .join(' ')
-      : '';
+  let pathD = '';
+  if (livePoints.length > 1) {
+    // Scale to the currently visible buffer's own min/max (with padding) so
+    // the actual pulse wave reads clearly, instead of a fixed range that
+    // flattens it out — purely a display transform, the underlying samples
+    // and BPM calculation are untouched.
+    const min = Math.min(...livePoints);
+    const max = Math.max(...livePoints);
+    const range = Math.max(max - min, MIN_RANGE);
+    const padding = range * 0.15;
+    const paddedMin = min - padding;
+    const paddedRange = range + padding * 2;
+    pathD = livePoints
+      .map((v, i) => {
+        const x = (i / (MAX_POINTS - 1)) * 280;
+        const y = 60 - ((v - paddedMin) / paddedRange) * 60;
+        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+  }
 
   const progress = isWarmup ? 0 : 1 - measureRemainingMs / totalMeasureMs;
 

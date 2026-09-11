@@ -19,7 +19,7 @@ type Phase = 'start' | 'measuring' | 'result';
 // discarded entirely (bandpass/peak-detection needs a moment on fresh camera
 // exposure/white-balance-locked signal before its output means anything).
 const WARMUP_MS = 7000;
-const MEASURE_MS = 45000;
+const MEASURE_MS = 60000;
 const MAX_LIVE_POINTS = 150;
 
 export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {

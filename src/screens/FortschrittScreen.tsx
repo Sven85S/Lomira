@@ -1,13 +1,17 @@
-import { colors, cardStyle } from '../styles/tokens';
+import { colors, cardStyle, serif } from '../styles/tokens';
 import { useData } from '../context/DataContext';
 import { STATE_COLORS } from '../store/ritualSelectors';
+import { formatEntryDate } from '../lib/date';
+import type { SignalQuality } from '../ppg/types';
 
 interface Props {
   showInfo: boolean;
 }
 
+const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: colors.gold, poor: colors.rust };
+
 export default function FortschrittScreen({ showInfo }: Props) {
-  const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart } = useData();
+  const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements } = useData();
 
   return (
     <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -93,6 +97,38 @@ export default function FortschrittScreen({ showInfo }: Props) {
         ) : (
           <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
             Noch keine Messungen — miss deinen Puls vor/nach der nächsten Anker-Übung.
+          </p>
+        )}
+      </div>
+
+      <div style={cardStyle}>
+        <div style={{ fontSize: 14, color: colors.text, marginBottom: 10 }}>Puls (Kamera-Messung)</div>
+        {hrvMeasurements.length > 0 ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text }}>{hrvMeasurements[0].bpm}</span>
+              <span style={{ fontSize: 13, color: colors.muted }}>bpm · zuletzt {formatEntryDate(hrvMeasurements[0].date)}</span>
+              <span
+                style={{ width: 7, height: 7, borderRadius: 9999, background: QUALITY_COLOR[hrvMeasurements[0].quality], marginLeft: 'auto' }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {hrvMeasurements.slice(0, 6).map((m) => (
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+                  <span style={{ color: colors.muted }}>
+                    {formatEntryDate(m.date)}, {new Date(m.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 9999, background: QUALITY_COLOR[m.quality] }} />
+                    <span style={{ color: colors.text }}>{m.bpm} bpm</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
+            Noch keine Kamera-Messung — probiere &quot;Puls messen&quot; über den Anker-Bereich.
           </p>
         )}
       </div>
