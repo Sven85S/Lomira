@@ -49,6 +49,17 @@ final class PpgCameraCapture: NSObject {
     // thread attach/detach/update is called from.
     private var previewLayer: AVCaptureVideoPreviewLayer?
 
+    // Torch/brightness health monitor — see startTorchHealthMonitor(). All
+    // read/written only on processingQueue, same as the sample-batching state.
+    private var torchHealthTimer: DispatchSourceTimer?
+    private var recentRedMeanEma: Double?
+    private var peakRedMean: Double = 0
+    private var healthCheckSamplesSeen = 0
+    private static let recentEmaAlpha = 0.2
+    private static let minSamplesBeforeHealthChecks = 60
+    private static let minPlausiblePeakRedMean = 60.0
+    private static let dimmedRatioThreshold = 0.25
+
     static var isCameraAvailable: Bool {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
@@ -112,6 +123,9 @@ final class PpgCameraCapture: NSObject {
 
         sessionStartTimestamp = nil
         pendingSamples.removeAll()
+        recentRedMeanEma = nil
+        peakRedMean = 0
+        healthCheckSamplesSeen = 0
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(handleInterruption(_:)),
@@ -132,6 +146,7 @@ final class PpgCameraCapture: NSObject {
             // the session's own device-configuration management actually kicks in —
             // setting it here, right after startRunning() instead of before, per plan.
             Self.setTorch(on: true, device: device, reason: "start() — right after startRunning()")
+            self.startTorchHealthMonitor(device: device)
 
             if device.isFocusModeSupported(.locked) {
                 do {
@@ -242,6 +257,7 @@ final class PpgCameraCapture: NSObject {
         NotificationCenter.default.removeObserver(self)
         exposureObservation?.invalidate()
         exposureObservation = nil
+        stopTorchHealthMonitor()
         // Defensive — the normal flow detaches the preview explicitly before
         // stopping, but a stray preview layer must never outlive the session.
         detachPreview()
@@ -337,6 +353,72 @@ final class PpgCameraCapture: NSObject {
         }
     }
 
+    /// iOS can silently dim the torch LED to a faint residual brightness —
+    /// observed on-device: a stable redMean of ~176 abruptly dropped to
+    /// ~19-40 about 18s into a measurement and stayed there for 15+s, with
+    /// zero events (no captureError, no interruption) ever firing. Likely
+    /// thermal/power throttling that AVFoundation doesn't surface — nothing
+    /// tells the app this happened, so it has to notice on its own. Checked
+    /// periodically (not per-frame) so a single noisy frame can't trip it.
+    ///
+    /// Two independent signals: isTorchActive going false while torchMode is
+    /// still .on is the more authoritative one (a real, documented
+    /// AVCaptureDevice property for exactly this); the redMean-vs-peak ratio
+    /// is the fallback in case isTorchActive doesn't reflect a partial dim.
+    /// Deliberately does NOT try to re-assert the torch — if this is thermal,
+    /// forcing it back on would just reproduce the same failure; a clean stop
+    /// with a clear reason is the right response, not another workaround.
+    private func startTorchHealthMonitor(device: AVCaptureDevice) {
+        torchHealthTimer?.cancel()
+        let timer = DispatchSource.makeTimerSource(queue: processingQueue)
+        timer.schedule(deadline: .now() + 1.5, repeating: 1.5)
+        timer.setEventHandler { [weak self] in
+            self?.checkTorchHealth(device: device)
+        }
+        timer.resume()
+        torchHealthTimer = timer
+    }
+
+    private func stopTorchHealthMonitor() {
+        torchHealthTimer?.cancel()
+        torchHealthTimer = nil
+        recentRedMeanEma = nil
+        peakRedMean = 0
+        healthCheckSamplesSeen = 0
+    }
+
+    private func checkTorchHealth(device: AVCaptureDevice) {
+        guard isRunning else { return }
+
+        if device.torchMode == .on, !device.isTorchActive {
+            print("[PpgCameraCapture] torch health check — isTorchActive=false while torchMode=.on")
+            reportTorchDimmedOrFailed()
+            return
+        }
+
+        // Give the peak a couple of seconds to reflect the real, lit level
+        // (exposure/white-balance are still settling early on), and don't
+        // flag a session that never got bright in the first place — that's
+        // a finger-placement problem the JS-side finger-detection already
+        // covers, not a dimming event.
+        guard healthCheckSamplesSeen >= Self.minSamplesBeforeHealthChecks,
+              peakRedMean >= Self.minPlausiblePeakRedMean,
+              let recent = recentRedMeanEma else { return }
+
+        if recent < peakRedMean * Self.dimmedRatioThreshold {
+            print("[PpgCameraCapture] torch health check — redMean dropped to \(recent), peak was \(peakRedMean)")
+            reportTorchDimmedOrFailed()
+        }
+    }
+
+    private func reportTorchDimmedOrFailed() {
+        delegate?.ppgCapture(
+            self, didFailWith: "torchDimmedOrFailed",
+            message: "Blitz wurde schwächer — bitte Gerät kurz abkühlen lassen und erneut versuchen."
+        )
+        stop(reason: "torch health check — dimmed or failed")
+    }
+
     /// Adds a live preview of the same session as a sublayer of `containerView`.
     /// Safe to call again with a different/resized containerView (or the same
     /// one after a layout change) — replaces any existing layer rather than
@@ -383,6 +465,10 @@ extension PpgCameraCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
         let relativeMs = (presentationSeconds - (sessionStartTimestamp ?? presentationSeconds)) * 1000.0
 
         guard let redMean = Self.redChannelMean(from: pixelBuffer) else { return }
+
+        recentRedMeanEma = recentRedMeanEma.map { $0 * (1 - Self.recentEmaAlpha) + redMean * Self.recentEmaAlpha } ?? redMean
+        peakRedMean = max(peakRedMean, redMean)
+        healthCheckSamplesSeen += 1
 
         pendingSamples.append(PpgSample(redMean: redMean, timestampMs: relativeMs))
 
