@@ -264,10 +264,22 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
     setPhase('start');
   }, []);
 
+  // The safety-net cleanup's dependency array is already [] — it can only
+  // fire once, on a genuine unmount, never from a changing dependency. The
+  // only way HrvFlow unmounts during phase==='measuring' is onClose() firing
+  // (App.tsx's only other showHrvFlow-false path, onOpenFortschritt, is only
+  // reachable from the result screen) — this wrapper logs exactly when/if
+  // that happens, to tell an intentional cancel-button tap apart from
+  // anything else invoking it.
+  const handleClose = useCallback(() => {
+    console.log('[HrvFlow] onClose invoked', { phase: phaseRef.current });
+    onClose();
+  }, [onClose]);
+
   if (phase === 'measuring') {
     return (
       <HrvMeasuringScreen
-        onClose={onClose}
+        onClose={handleClose}
         isWarmup={isWarmup}
         warmupRemainingMs={warmupRemainingMs}
         measureRemainingMs={measureRemainingMs}
@@ -279,12 +291,12 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   }
 
   if (phase === 'result') {
-    return <HrvResultScreen onClose={onClose} result={finalResult} onOpenFortschritt={onOpenFortschritt} onRemeasure={handleRemeasure} />;
+    return <HrvResultScreen onClose={handleClose} result={finalResult} onOpenFortschritt={onOpenFortschritt} onRemeasure={handleRemeasure} />;
   }
 
   return (
     <HrvStartScreen
-      onClose={onClose}
+      onClose={handleClose}
       isSupported={isPpgCameraSupported}
       permission={permission}
       available={available}
