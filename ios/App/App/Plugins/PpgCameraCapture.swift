@@ -306,6 +306,19 @@ final class PpgCameraCapture: NSObject {
     /// Safe to call again with a different/resized containerView (or the same
     /// one after a layout change) — replaces any existing layer rather than
     /// stacking a second one.
+    ///
+    /// Regression fix: constructing an AVCaptureVideoPreviewLayer(session:)
+    /// establishes a new preview connection on the session, and AVFoundation
+    /// folds that into its own implicit device reconfiguration — which was
+    /// silently resetting torch (the exact "torch turns on then immediately
+    /// off again" symptom the original start()-ordering fix solved) back to
+    /// its default. Worse, start()'s startCapture()-facing promise already
+    /// resolves right after the *synchronous* part of start() — before
+    /// session.startRunning()/setTorch(on: true) even run on processingQueue
+    /// — so JS awaiting startCapture() before calling attachPreview() never
+    /// actually guaranteed torch was on yet either. Reasserting torch and the
+    /// exposure/white-balance lock right after the preview layer is in place
+    /// fixes it regardless of that ordering.
     func attachPreview(to containerView: UIView) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -317,6 +330,21 @@ final class PpgCameraCapture: NSObject {
             containerView.layer.insertSublayer(layer, at: 0)
             self.previewLayer = layer
             print("[PpgCameraCapture] attachPreview() — layer added, frame=\(layer.frame)")
+
+            self.reapplyTorchAndExposureLockAfterReconfiguration(reason: "attachPreview()")
+        }
+    }
+
+    /// Re-applies torch-on and re-runs the exposure/white-balance settle-then-
+    /// lock cycle — used after any session change (currently: attachPreview())
+    /// that risks AVFoundation silently discarding those settings as a side
+    /// effect of its own internal reconfiguration. No-op if the session isn't
+    /// actually running (e.g. attachPreview() called before startCapture()).
+    private func reapplyTorchAndExposureLockAfterReconfiguration(reason: String) {
+        guard isRunning, let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
+        processingQueue.async {
+            Self.setTorch(on: true, device: device, reason: "\(reason) — reasserting after session reconfiguration")
+            self.lockExposureAndWhiteBalanceOnceStable(device: device)
         }
     }
 
