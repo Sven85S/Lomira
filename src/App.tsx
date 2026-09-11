@@ -13,7 +13,9 @@ import RitualScreen from './screens/RitualScreen';
 import FortschrittScreen from './screens/FortschrittScreen';
 import PaywallScreen from './screens/PaywallScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import PpgDebugScreen from './screens/hrv/PpgDebugScreen';
+import HrvFlow from './screens/hrv/HrvFlow';
+// PpgDebugScreen stays in the codebase for later on-device signal-processing
+// tuning, but is no longer wired to a regular entry point — see HrvFlow.
 
 export default function App() {
   return (
@@ -31,8 +33,7 @@ function Shell() {
   const [openLessonId, setOpenLessonId] = useState<number | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  // Step 1 of the HRV feature: a raw-signal debug screen, not the real flow yet.
-  const [showHrvDebug, setShowHrvDebug] = useState(false);
+  const [showHrvFlow, setShowHrvFlow] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleInfo = useCallback(() => {
@@ -68,7 +69,7 @@ function Shell() {
           maskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
         }}
       >
-        {tab === 'sos' && <AnkerScreen onNavigate={setTab} onOpenHrv={() => setShowHrvDebug(true)} />}
+        {tab === 'sos' && <AnkerScreen onNavigate={setTab} onOpenHrv={() => setShowHrvFlow(true)} />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
         {tab === 'lektionen' && (
           <LektionenScreen showInfo={!!infoOpen.lektionen} onOpenLesson={setOpenLessonId} onOpenPaywall={() => setShowPaywall(true)} />
@@ -77,12 +78,20 @@ function Shell() {
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
       </div>
 
-      <OrbitNav active={tab} onChange={setTab} onOpenHrv={() => setShowHrvDebug(true)} />
+      <OrbitNav active={tab} onChange={setTab} onOpenHrv={() => setShowHrvFlow(true)} />
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}
       {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
-      {showHrvDebug && <PpgDebugScreen onClose={() => setShowHrvDebug(false)} />}
+      {showHrvFlow && (
+        <HrvFlow
+          onClose={() => setShowHrvFlow(false)}
+          onOpenFortschritt={() => {
+            setShowHrvFlow(false);
+            setTab('fortschritt');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
   ritualEntries: 'lomira.ritualEntries.v1',
   ankerSessionCount: 'lomira.ankerSessionCount.v1',
   pulseEntries: 'lomira.pulseEntries.v1',
+  hrvMeasurements: 'lomira.hrvMeasurements.v1',
   firstName: 'lomira.firstName.v1',
   remindersEnabled: 'lomira.remindersEnabled.v1',
   reminderTime: 'lomira.reminderTime.v1',

@@ -44,6 +44,11 @@ final class PpgCameraCapture: NSObject {
     private var exposureObservation: NSKeyValueObservation?
     private var exposureWhiteBalanceLockApplied = false
 
+    // The same session also drives an on-screen live preview when attached —
+    // CALayer work, so always touched on the main thread regardless of which
+    // thread attach/detach/update is called from.
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+
     static var isCameraAvailable: Bool {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
     }
@@ -202,6 +207,9 @@ final class PpgCameraCapture: NSObject {
         NotificationCenter.default.removeObserver(self)
         exposureObservation?.invalidate()
         exposureObservation = nil
+        // Defensive — the normal flow detaches the preview explicitly before
+        // stopping, but a stray preview layer must never outlive the session.
+        detachPreview()
 
         if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
             Self.setTorch(on: false, device: device, reason: reason)
@@ -260,6 +268,33 @@ final class PpgCameraCapture: NSObject {
         } else {
             device.torchMode = .off
             print("[PpgCameraCapture] setTorch(on: false) succeeded (reason=\(reason))")
+        }
+    }
+
+    /// Adds a live preview of the same session as a sublayer of `containerView`.
+    /// Safe to call again with a different/resized containerView (or the same
+    /// one after a layout change) — replaces any existing layer rather than
+    /// stacking a second one.
+    func attachPreview(to containerView: UIView) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.previewLayer?.removeFromSuperlayer()
+
+            let layer = AVCaptureVideoPreviewLayer(session: self.session)
+            layer.videoGravity = .resizeAspectFill
+            layer.frame = containerView.bounds
+            containerView.layer.insertSublayer(layer, at: 0)
+            self.previewLayer = layer
+            print("[PpgCameraCapture] attachPreview() — layer added, frame=\(layer.frame)")
+        }
+    }
+
+    func detachPreview() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.previewLayer?.removeFromSuperlayer()
+            self.previewLayer = nil
+            print("[PpgCameraCapture] detachPreview() — layer removed")
         }
     }
 }

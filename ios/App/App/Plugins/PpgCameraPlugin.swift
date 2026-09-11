@@ -1,6 +1,7 @@
 import AVFoundation
 import Capacitor
 import Foundation
+import UIKit
 
 /// Thin Capacitor bridge over PpgCameraCapture — deliberately has no signal
 /// processing of its own. It only starts/stops the capture session and relays
@@ -15,6 +16,8 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "isAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "startCapture", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stopCapture", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "attachPreview", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "detachPreview", returnType: CAPPluginReturnPromise),
     ]
 
     private lazy var capture: PpgCameraCapture = {
@@ -22,6 +25,11 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         capture.delegate = self
         return capture
     }()
+
+    // The native container view holding the preview layer, inserted directly
+    // below the WebView in the same view hierarchy. Only exists while a
+    // preview is attached.
+    private var previewContainerView: UIView?
 
     // load() is called once by the Capacitor bridge when it discovers and
     // instantiates this plugin — this print is the definitive way to see
@@ -67,7 +75,72 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func stopCapture(_ call: CAPPluginCall) {
         print("[PpgCamera] stopCapture() called")
         capture.stop(reason: "JS PpgCamera.stopCapture()")
+        previewContainerView?.removeFromSuperview()
+        previewContainerView = nil
         call.resolve()
+    }
+
+    /// Positions a native live-preview layer of the running session behind
+    /// the (made-transparent) WebView, clipped to the rect a JS-side
+    /// placeholder <div> reports via getBoundingClientRect() — same session,
+    /// so no second AVCaptureSession competing for the camera. Call again
+    /// with a new rect to reposition an already-attached preview (e.g. after
+    /// a layout change) instead of stacking a second one.
+    @objc func attachPreview(_ call: CAPPluginCall) {
+        guard let x = call.getDouble("x"), let y = call.getDouble("y"),
+              let width = call.getDouble("width"), let height = call.getDouble("height") else {
+            call.reject("attachPreview benötigt x, y, width und height (in CSS-Pixeln).")
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard let webView = self.bridge?.webView, let hostView = self.bridge?.viewController?.view else {
+                call.reject("Keine WebView/ViewController verfügbar.")
+                return
+            }
+
+            let frame = CGRect(x: x, y: y, width: width, height: height)
+
+            if let existing = self.previewContainerView {
+                existing.frame = frame
+            } else {
+                let container = UIView(frame: frame)
+                container.backgroundColor = .black
+                hostView.insertSubview(container, belowSubview: webView)
+                self.previewContainerView = container
+
+                // The WebView must become transparent for the native layer behind it
+                // to show through — only where our own HTML deliberately leaves a
+                // gap (the placeholder <div>), since every other screen still paints
+                // its own opaque background.
+                webView.isOpaque = false
+                webView.backgroundColor = .clear
+                webView.scrollView.backgroundColor = .clear
+                print("[PpgCamera] attachPreview() — WebView made transparent, container inserted below it")
+            }
+
+            self.capture.attachPreview(to: self.previewContainerView!)
+            print("[PpgCamera] attachPreview() — frame=\(frame)")
+            call.resolve()
+        }
+    }
+
+    @objc func detachPreview(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.capture.detachPreview()
+            self.previewContainerView?.removeFromSuperview()
+            self.previewContainerView = nil
+
+            if let webView = self.bridge?.webView {
+                webView.isOpaque = true
+                webView.backgroundColor = nil
+                webView.scrollView.backgroundColor = nil
+            }
+            print("[PpgCamera] detachPreview() — WebView opacity restored, container removed")
+            call.resolve()
+        }
     }
 
     private static func authorizationState() -> String {

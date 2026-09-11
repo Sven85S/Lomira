@@ -25,6 +25,15 @@ export interface PpgCaptureError {
   message: string;
 }
 
+/** CSS pixels of a placeholder element's getBoundingClientRect() — 1:1 with
+ * native points in a Capacitor WebView (viewport initial-scale=1, no manual zoom). */
+export interface PpgPreviewRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface PpgCameraPlugin {
   checkPermissions(): Promise<{ camera: CameraPermissionState }>;
   requestPermissions(): Promise<{ camera: 'granted' | 'denied' }>;
@@ -32,8 +41,13 @@ export interface PpgCameraPlugin {
   isAvailable(): Promise<{ available: boolean }>;
   /** Opens the capture session and turns the torch on. Rejects if either fails. */
   startCapture(): Promise<void>;
-  /** Idempotent — safe to call even if capture was never started. */
+  /** Idempotent — safe to call even if capture was never started. Also detaches any live preview. */
   stopCapture(): Promise<void>;
+  /** Shows a native live preview of the running session behind the (made-transparent)
+   * WebView, clipped to `rect`. Call again with a new rect to reposition. */
+  attachPreview(rect: PpgPreviewRect): Promise<void>;
+  /** Removes the preview and restores normal WebView opacity. */
+  detachPreview(): Promise<void>;
   addListener(eventName: 'ppgSample', listenerFunc: (batch: PpgSampleBatch) => void): Promise<PluginListenerHandle>;
   addListener(eventName: 'captureError', listenerFunc: (error: PpgCaptureError) => void): Promise<PluginListenerHandle>;
 }

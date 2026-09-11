@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { PulseEntry, RitualEntry, RitualState } from '../types';
+import type { HrvMeasurement, PulseEntry, RitualEntry, RitualState } from '../types';
 import { STORAGE_KEYS, readJSON, writeJSON } from '../lib/storage';
 import { todayKey } from '../lib/date';
 import {
@@ -30,6 +30,9 @@ interface DataContextValue {
 
   pulseEntries: PulseEntry[];
   pulseChart: PulseChart | null;
+
+  hrvMeasurements: HrvMeasurement[];
+  recordHrvMeasurement: (bpm: number, quality: HrvMeasurement['quality']) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -45,17 +48,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [ritualEntries, setRitualEntries] = useState<RitualEntry[]>([]);
   const [ankerSessionCount, setAnkerSessionCount] = useState(0);
   const [pulseEntries, setPulseEntries] = useState<PulseEntry[]>([]);
+  const [hrvMeasurements, setHrvMeasurements] = useState<HrvMeasurement[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [entries, ankerCount, pulses] = await Promise.all([
+      const [entries, ankerCount, pulses, hrvs] = await Promise.all([
         readJSON<RitualEntry[]>(STORAGE_KEYS.ritualEntries, []),
         readJSON<number>(STORAGE_KEYS.ankerSessionCount, 0),
         readJSON<PulseEntry[]>(STORAGE_KEYS.pulseEntries, []),
+        readJSON<HrvMeasurement[]>(STORAGE_KEYS.hrvMeasurements, []),
       ]);
       setRitualEntries(entries);
       setAnkerSessionCount(ankerCount);
       setPulseEntries(pulses);
+      setHrvMeasurements(hrvs);
       setLoading(false);
     })();
   }, []);
@@ -97,6 +103,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await writeJSON(STORAGE_KEYS.ankerSessionCount, next);
   }, [ankerSessionCount]);
 
+  const recordHrvMeasurement = useCallback(
+    async (bpm: number, quality: HrvMeasurement['quality']) => {
+      const next = [{ id: uid(), date: todayKey(), createdAt: Date.now(), bpm, quality }, ...hrvMeasurements];
+      setHrvMeasurements(next);
+      await writeJSON(STORAGE_KEYS.hrvMeasurements, next);
+    },
+    [hrvMeasurements],
+  );
+
   const value = useMemo<DataContextValue>(() => {
     const sortedEntries = [...ritualEntries].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
     return {
@@ -114,6 +129,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recordAnkerSession,
       pulseEntries,
       pulseChart: buildPulseChart(pulseEntries),
+      hrvMeasurements,
+      recordHrvMeasurement,
     };
   }, [
     loading,
@@ -124,6 +141,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ankerSessionCount,
     recordAnkerSession,
     pulseEntries,
+    hrvMeasurements,
+    recordHrvMeasurement,
   ]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
