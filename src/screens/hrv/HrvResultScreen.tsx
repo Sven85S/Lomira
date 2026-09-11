@@ -48,6 +48,7 @@ export default function HrvResultScreen({ onClose, result, onOpenFortschritt, on
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ fontFamily: serif, fontSize: 15, color: colors.muted }}>Deine HRV</div>
               {result.rmssd != null ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
