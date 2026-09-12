@@ -4,10 +4,6 @@ import type { SignalQuality } from '../../ppg/types';
 interface Props {
   onClose: () => void;
   result: { bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null;
-  /** Set when the measurement was cut short by a specific native error (e.g.
-   * the torch dimming) — shown instead of the generic "no reliable
-   * measurement" text, since here we actually know why and what to do. */
-  abortReason?: string | null;
   onOpenFortschritt: () => void;
   onRemeasure: () => void;
 }
@@ -15,7 +11,7 @@ interface Props {
 const QUALITY_LABEL: Record<SignalQuality, string> = { good: 'gut', fair: 'brauchbar', poor: 'schwach' };
 const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: colors.gold, poor: colors.rust };
 
-export default function HrvResultScreen({ onClose, result, abortReason, onOpenFortschritt, onRemeasure }: Props) {
+export default function HrvResultScreen({ onClose, result, onOpenFortschritt, onRemeasure }: Props) {
   return (
     <div
       style={{
@@ -82,11 +78,9 @@ export default function HrvResultScreen({ onClose, result, abortReason, onOpenFo
           </>
         ) : (
           <>
-            <div style={{ fontFamily: serif, fontSize: 18, color: colors.text, textAlign: 'center' }}>
-              {abortReason ? 'Messung abgebrochen' : 'Keine zuverlässige Messung'}
-            </div>
+            <div style={{ fontFamily: serif, fontSize: 18, color: colors.text, textAlign: 'center' }}>Keine zuverlässige Messung</div>
             <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 260 }}>
-              {abortReason ?? 'Der Puls konnte nicht sicher erkannt werden. Bitte lege den Finger vollständig auf Kamera und Blitz und halte ihn ruhig.'}
+              Der Puls konnte nicht sicher erkannt werden. Bitte lege den Finger vollständig auf Kamera und Blitz und halte ihn ruhig.
             </p>
             <button style={primaryBtnStyle} onClick={onRemeasure}>
               Erneut versuchen

@@ -42,10 +42,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null>(
     null,
   );
-  // Set only when a measurement was cut short by a native torchDimmedOrFailed
-  // error — shown on the result screen instead of the generic "no reliable
-  // measurement" text, since the actual reason (and remedy) is more specific.
-  const [abortReason, setAbortReason] = useState<string | null>(null);
 
   const phaseRef = useRef<Phase>('start');
   phaseRef.current = phase;
@@ -100,19 +96,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
         }
       });
       const eh = await PpgCamera.addListener('captureError', (err) => {
-        // The native side already stops itself right before firing this (see
-        // PpgCameraCapture.reportTorchDimmedOrFailed()) — deliberately not
-        // re-asserting the torch or retrying here either; a dimmed/failing
-        // LED (likely thermal) would just fail the same way again. Clean
-        // abort with a specific reason instead of running until the user
-        // notices and cancels manually.
-        if (err.code === 'torchDimmedOrFailed' && phaseRef.current === 'measuring') {
-          console.log('[HrvFlow] captureError torchDimmedOrFailed — aborting measurement', { phase: phaseRef.current });
-          setAbortReason(err.message);
-          setFinalResult(null);
-          setPhase('result');
-          return;
-        }
         setError(err.message);
       });
       if (cancelled) {
@@ -178,7 +161,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
     bpmSamplesRef.current = [];
     snrSamplesRef.current = [];
     lastResultRef.current = null;
-    setAbortReason(null);
     isWarmupRef.current = true;
     setIsWarmup(true);
     setWarmupRemainingMs(WARMUP_MS);
@@ -278,7 +260,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
 
   const handleRemeasure = useCallback(() => {
     setFinalResult(null);
-    setAbortReason(null);
     setPreviewActive(false);
     setPhase('start');
   }, []);
@@ -310,15 +291,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   }
 
   if (phase === 'result') {
-    return (
-      <HrvResultScreen
-        onClose={handleClose}
-        result={finalResult}
-        abortReason={abortReason}
-        onOpenFortschritt={onOpenFortschritt}
-        onRemeasure={handleRemeasure}
-      />
-    );
+    return <HrvResultScreen onClose={handleClose} result={finalResult} onOpenFortschritt={onOpenFortschritt} onRemeasure={handleRemeasure} />;
   }
 
   return (

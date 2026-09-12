@@ -29,7 +29,6 @@ export interface PpgCaptureError {
     | 'sessionInterruptedMultitasking'
     | 'deviceUnavailable'
     | 'torchUnavailable'
-    | 'torchDimmedOrFailed'
     | string;
   message: string;
 }
