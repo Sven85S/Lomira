@@ -55,6 +55,7 @@ final class PpgCameraCapture: NSObject {
     private var recentRedMeanEma: Double?
     private var peakRedMean: Double = 0
     private var healthCheckSamplesSeen = 0
+    private var torchOnAt: Date?
     private static let recentEmaAlpha = 0.2
     private static let minSamplesBeforeHealthChecks = 60
     private static let minPlausiblePeakRedMean = 60.0
@@ -370,6 +371,7 @@ final class PpgCameraCapture: NSObject {
     /// with a clear reason is the right response, not another workaround.
     private func startTorchHealthMonitor(device: AVCaptureDevice) {
         torchHealthTimer?.cancel()
+        torchOnAt = Date()
         let timer = DispatchSource.makeTimerSource(queue: processingQueue)
         timer.schedule(deadline: .now() + 1.5, repeating: 1.5)
         timer.setEventHandler { [weak self] in
@@ -385,14 +387,24 @@ final class PpgCameraCapture: NSObject {
         recentRedMeanEma = nil
         peakRedMean = 0
         healthCheckSamplesSeen = 0
+        torchOnAt = nil
     }
 
+    // DIAGNOSTIC ROUND: a false trip was reported on a device that wasn't
+    // warm, firing almost immediately rather than after ~18s like the
+    // original thermal-dimming case — suspected false positive from
+    // isTorchActive briefly still reading false right after setTorchModeOn(),
+    // before the LED has physically caught up (no grace period on that check
+    // currently, unlike the redMean fallback's minSamplesBeforeHealthChecks).
+    // Logging which signal fired and the exact ms-since-torch-on before
+    // building that fix, rather than guessing at the grace period's length.
     private func checkTorchHealth(device: AVCaptureDevice) {
         guard isRunning else { return }
+        let msSinceTorchOn = torchOnAt.map { Date().timeIntervalSince($0) * 1000 } ?? -1
 
         if device.torchMode == .on, !device.isTorchActive {
-            print("[PpgCameraCapture] torch health check — isTorchActive=false while torchMode=.on")
-            reportTorchDimmedOrFailed()
+            print("[PpgCameraCapture] torch health check — signal=isTorchActive, isTorchActive=false while torchMode=.on, msSinceTorchOn=\(Int(msSinceTorchOn))")
+            reportTorchDimmedOrFailed(signal: "isTorchActive", msSinceTorchOn: msSinceTorchOn)
             return
         }
 
@@ -406,17 +418,18 @@ final class PpgCameraCapture: NSObject {
               let recent = recentRedMeanEma else { return }
 
         if recent < peakRedMean * Self.dimmedRatioThreshold {
-            print("[PpgCameraCapture] torch health check — redMean dropped to \(recent), peak was \(peakRedMean)")
-            reportTorchDimmedOrFailed()
+            print("[PpgCameraCapture] torch health check — signal=redMean, recent=\(recent), peak=\(peakRedMean), msSinceTorchOn=\(Int(msSinceTorchOn))")
+            reportTorchDimmedOrFailed(signal: "redMean", msSinceTorchOn: msSinceTorchOn)
         }
     }
 
-    private func reportTorchDimmedOrFailed() {
+    private func reportTorchDimmedOrFailed(signal: String, msSinceTorchOn: Double) {
+        print("[PpgCameraCapture] reportTorchDimmedOrFailed — signal=\(signal), msSinceTorchOn=\(Int(msSinceTorchOn))")
         delegate?.ppgCapture(
             self, didFailWith: "torchDimmedOrFailed",
             message: "Blitz wurde schwächer — bitte Gerät kurz abkühlen lassen und erneut versuchen."
         )
-        stop(reason: "torch health check — dimmed or failed")
+        stop(reason: "torch health check — dimmed or failed (signal=\(signal), msSinceTorchOn=\(Int(msSinceTorchOn)))")
     }
 
     /// Adds a live preview of the same session as a sublayer of `containerView`.
