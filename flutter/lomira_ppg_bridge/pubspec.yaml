@@ -24,3 +24,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: false
+  module:
+    androidX: true
+    androidPackage: com.lomira.lomira_ppg_bridge
+    iosBundleIdentifier: com.lomira.lomiraPpgBridge
