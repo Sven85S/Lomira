@@ -4,6 +4,10 @@ import type { SignalQuality } from '../../ppg/types';
 interface Props {
   onClose: () => void;
   result: { bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null;
+  /** Set when the counting phase ran to completion but the finger wasn't
+   * reliably detected — shown instead of the generic "no reliable
+   * measurement" text, since here the reason is specific and actionable. */
+  noFingerDetected?: boolean;
   onOpenFortschritt: () => void;
   onRemeasure: () => void;
 }
@@ -11,7 +15,7 @@ interface Props {
 const QUALITY_LABEL: Record<SignalQuality, string> = { good: 'gut', fair: 'brauchbar', poor: 'schwach' };
 const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: colors.gold, poor: colors.rust };
 
-export default function HrvResultScreen({ onClose, result, onOpenFortschritt, onRemeasure }: Props) {
+export default function HrvResultScreen({ onClose, result, noFingerDetected, onOpenFortschritt, onRemeasure }: Props) {
   return (
     <div
       style={{
@@ -78,9 +82,13 @@ export default function HrvResultScreen({ onClose, result, onOpenFortschritt, on
           </>
         ) : (
           <>
-            <div style={{ fontFamily: serif, fontSize: 18, color: colors.text, textAlign: 'center' }}>Keine zuverlässige Messung</div>
+            <div style={{ fontFamily: serif, fontSize: 18, color: colors.text, textAlign: 'center' }}>
+              {noFingerDetected ? 'Kein Finger erkannt' : 'Keine zuverlässige Messung'}
+            </div>
             <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 260 }}>
-              Der Puls konnte nicht sicher erkannt werden. Bitte lege den Finger vollständig auf Kamera und Blitz und halte ihn ruhig.
+              {noFingerDetected
+                ? 'Der Finger lag während der Messung nicht zuverlässig auf Kamera und Blitz. Bitte beide vollständig bedecken und ruhig halten.'
+                : 'Der Puls konnte nicht sicher erkannt werden. Bitte lege den Finger vollständig auf Kamera und Blitz und halte ihn ruhig.'}
             </p>
             <button style={primaryBtnStyle} onClick={onRemeasure}>
               Erneut versuchen

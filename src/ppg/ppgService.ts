@@ -99,6 +99,16 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     const { fps, isStable } = detectFrameRate(sessionTimestampsMs, config);
     if (!isStable || fps === null || sessionRawValues.length < 8) return [];
 
+    // A bandpass filter tuned to the pulse band plus physiologically-bounded
+    // peak spacing will produce plausible-looking "beats" out of pure sensor
+    // noise once enough dark/no-finger samples exist — confirmed
+    // synthetically: a session with the finger never detected still yielded
+    // 100 "clean" RR intervals implying ~107bpm. A single instantaneous
+    // isFingerDetected() check per sample isn't the real gate; requiring the
+    // finger to have been present for most of the *whole* session is.
+    const fingerDetectedCount = sessionRawValues.reduce((count, v) => count + (isFingerDetected(v, config) ? 1 : 0), 0);
+    if (fingerDetectedCount / sessionRawValues.length < config.minFingerPresenceFraction) return [];
+
     const filtered = bandpassFilter(sessionRawValues, fps);
     // detectPeaks' default (one global std over the whole array) is right for
     // the live path's own short ~8s window, but on this ~60s buffer it lets a

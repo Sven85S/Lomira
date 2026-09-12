@@ -18,6 +18,17 @@ export interface PpgConfig {
    * RMSSD is considered reliable enough to show — HRV is far more sensitive
    * to a handful of bad intervals than a plain BPM average is. */
   minRmssdCleanRRCount: number;
+  /** Minimum fraction of samples that must satisfy isFingerDetected() before
+   * a whole recording (session buffer or a live measurement) is trusted at
+   * all — a single instantaneous per-sample check isn't enough on its own: a
+   * bandpass filter tuned to 0.7-3Hz plus physiologically-bounded peak
+   * spacing will produce plausible-looking "beats" out of pure sensor noise
+   * whenever enough dark/no-finger samples happen to leak through (confirmed
+   * synthetically: a session with the finger never detected still yielded
+   * 100 "clean" RR intervals and a 107bpm-equivalent rate from pure noise).
+   * Requiring the finger to have actually been present for most of the
+   * recording — not just "at least once" — is the real gate. */
+  minFingerPresenceFraction: number;
 }
 
 export const DEFAULT_PPG_CONFIG: PpgConfig = {
@@ -31,6 +42,7 @@ export const DEFAULT_PPG_CONFIG: PpgConfig = {
   fpsWarmupSamples: 30,
   maxBpm: 200,
   minRmssdCleanRRCount: 20,
+  minFingerPresenceFraction: 0.8,
 };
 
 export type SignalQuality = 'good' | 'fair' | 'poor';

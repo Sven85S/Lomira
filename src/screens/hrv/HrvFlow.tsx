@@ -42,6 +42,10 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const [finalResult, setFinalResult] = useState<{ bpm: number; quality: SignalQuality; rmssd?: number; rmssdEstimated?: boolean } | null>(
     null,
   );
+  // Set when the counting phase ran to completion but the finger wasn't
+  // reliably present — shown instead of the generic "no reliable
+  // measurement" text, since here the reason is specific and actionable.
+  const [noFingerDetected, setNoFingerDetected] = useState(false);
 
   const phaseRef = useRef<Phase>('start');
   phaseRef.current = phase;
@@ -49,6 +53,16 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   const lastResultRef = useRef<PpgResult | null>(null);
   const bpmSamplesRef = useRef<number[]>([]);
   const snrSamplesRef = useRef<number[]>([]);
+  // Aggregate finger-presence over the whole counting phase — see the
+  // fingerPresenceFraction gate at measurement end. A single instantaneous
+  // per-sample brightness check isn't enough on its own: a bandpass filter
+  // tuned to the pulse band plus physiologically-bounded peak spacing
+  // produces plausible-looking "beats" out of pure sensor noise once enough
+  // dark/no-finger samples leak through the per-window gate (confirmed
+  // synthetically — a session with the finger never detected still yielded
+  // a 107bpm-equivalent rate from noise alone).
+  const fingerDetectedCountRef = useRef(0);
+  const totalCountingSamplesRef = useRef(0);
   const ppgServiceRef = useRef(createPpgService());
   const previewRef = useRef<HTMLDivElement>(null);
   // Always-current reference to the context callback — the interval effect below
@@ -93,6 +107,10 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
         }
         if (!isWarmupRef.current && result.snrDb != null) {
           snrSamplesRef.current.push(result.snrDb);
+        }
+        if (!isWarmupRef.current) {
+          totalCountingSamplesRef.current += 1;
+          if (result.isFingerDetected) fingerDetectedCountRef.current += 1;
         }
       });
       const eh = await PpgCamera.addListener('captureError', (err) => {
@@ -160,7 +178,10 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
     ppgServiceRef.current.reset();
     bpmSamplesRef.current = [];
     snrSamplesRef.current = [];
+    fingerDetectedCountRef.current = 0;
+    totalCountingSamplesRef.current = 0;
     lastResultRef.current = null;
+    setNoFingerDetected(false);
     isWarmupRef.current = true;
     setIsWarmup(true);
     setWarmupRemainingMs(WARMUP_MS);
@@ -200,7 +221,28 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
           console.log('[HrvFlow] stopCapture called from: measurement countdown finished', { elapsed, totalMs });
           await PpgCamera.stopCapture();
           const bpmSamples = bpmSamplesRef.current;
-          if (bpmSamples.length > 0) {
+
+          // The real gate against "plausible-looking BPM/RMSSD computed from
+          // pure sensor noise while the lens was uncovered" — a bandpass
+          // filter tuned to the pulse band plus physiologically-bounded peak
+          // spacing will produce exactly such fake "beats" once enough dark/
+          // no-finger samples leak through the per-sample brightness check
+          // (confirmed synthetically: 0 fingerDetected batches still yielded
+          // a 107bpm-equivalent rate from getSessionRRIntervalsMs()). Requires
+          // the finger to have been present for most of the whole counting
+          // phase, not just "at least one valid sample somewhere".
+          const totalCountingSamples = totalCountingSamplesRef.current;
+          const fingerPresenceFraction = totalCountingSamples > 0 ? fingerDetectedCountRef.current / totalCountingSamples : 0;
+          const fingerReliable = fingerPresenceFraction >= DEFAULT_PPG_CONFIG.minFingerPresenceFraction;
+
+          console.log('[HrvFlow] finger presence over counting phase', {
+            fingerDetectedCount: fingerDetectedCountRef.current,
+            totalCountingSamples,
+            fingerPresenceFraction,
+            fingerReliable,
+          });
+
+          if (bpmSamples.length > 0 && fingerReliable) {
             const avgBpm = Math.round(bpmSamples.reduce((a, b) => a + b, 0) / bpmSamples.length);
 
             // Quality from the mean SNR across the whole counting phase, not
@@ -248,6 +290,10 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
             setFinalResult({ bpm: avgBpm, quality, rmssd, rmssdEstimated });
             await recordHrvMeasurementRef.current(avgBpm, quality, rmssd, rmssdEstimated);
           } else {
+            if (totalCountingSamples > 0 && !fingerReliable) {
+              console.log('[HrvFlow] measurement rejected — finger not reliably detected', { fingerPresenceFraction });
+              setNoFingerDetected(true);
+            }
             setFinalResult(null);
           }
           setPhase('result');
@@ -260,6 +306,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
 
   const handleRemeasure = useCallback(() => {
     setFinalResult(null);
+    setNoFingerDetected(false);
     setPreviewActive(false);
     setPhase('start');
   }, []);
@@ -291,7 +338,15 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   }
 
   if (phase === 'result') {
-    return <HrvResultScreen onClose={handleClose} result={finalResult} onOpenFortschritt={onOpenFortschritt} onRemeasure={handleRemeasure} />;
+    return (
+      <HrvResultScreen
+        onClose={handleClose}
+        result={finalResult}
+        noFingerDetected={noFingerDetected}
+        onOpenFortschritt={onOpenFortschritt}
+        onRemeasure={handleRemeasure}
+      />
+    );
   }
 
   return (
