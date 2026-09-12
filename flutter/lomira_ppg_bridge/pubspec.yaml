@@ -1,0 +1,26 @@
+name: lomira_ppg_bridge
+description: >
+  Headless Flutter add-to-app module — no UI of its own. Wraps camera capture
+  + flutter_ppg's camera-frame-to-red-channel extraction and exposes it to the
+  native iOS host via a single MethodChannel. Only PPGSignal.rawIntensity and
+  its timestamp are forwarded; the package's own bpm/quality/RR-interval/SNR
+  computations are intentionally not used — that logic already lives in the
+  host app's TypeScript src/ppg/ pipeline and must not be duplicated here.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.12.0+2
+  flutter_ppg: ^0.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: false
