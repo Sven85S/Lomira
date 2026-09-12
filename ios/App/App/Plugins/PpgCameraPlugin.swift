@@ -80,12 +80,23 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    // capture.stop() itself is UIKit-free (pure AVFoundation/session work), so
+    // it runs directly on whatever thread this call arrives on, same as every
+    // other call site (handleInterruption, willResignActive). Only the
+    // preview container's removeFromSuperview() — a UIKit operation — needs
+    // the main thread; Xcode caught this running on the Capacitor bridge
+    // queue ("These UI changes are not supported off the main thread"),
+    // exactly the kind of silent-crash-or-hang that could plausibly explain
+    // some of the earlier "torch goes off immediately" symptoms as a crash
+    // right after stop(), not a torch/hardware problem.
     @objc func stopCapture(_ call: CAPPluginCall) {
         print("[PpgCamera] stopCapture() called")
         capture.stop(reason: "JS PpgCamera.stopCapture()")
-        previewContainerView?.removeFromSuperview()
-        previewContainerView = nil
-        call.resolve()
+        DispatchQueue.main.async { [weak self] in
+            self?.previewContainerView?.removeFromSuperview()
+            self?.previewContainerView = nil
+            call.resolve()
+        }
     }
 
     /// Positions a native live-preview layer of the running session behind
