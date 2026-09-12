@@ -10,6 +10,7 @@ import 'dart:io' show Platform;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ppg/flutter_ppg.dart';
 
 const MethodChannel _channel = MethodChannel('com.lomira/ppgSpike');
