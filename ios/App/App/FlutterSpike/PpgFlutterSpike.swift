@@ -71,6 +71,14 @@ final class PpgFlutterSpike {
     /// should already be set to the desired preview frame.
     func attachPreview(to hostViewController: UIViewController, container: UIView) {
         if previewViewController != nil { return }
+        // Diagnostic: container's own geometry BEFORE anything is inserted,
+        // so a zero/degenerate container frame (hypothesis 1) is
+        // distinguishable from a correctly-sized-but-not-actually-visible one.
+        print("[PpgFlutterSpike] attachPreview() vorher: container.frame=\(container.frame) "
+            + "container.bounds=\(container.bounds) container.isHidden=\(container.isHidden) "
+            + "container.alpha=\(container.alpha) container.window != nil=\(container.window != nil) "
+            + "container.superview=\(String(describing: container.superview))")
+
         let flutterVC = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
         hostViewController.addChild(flutterVC)
         flutterVC.view.frame = container.bounds
@@ -78,6 +86,16 @@ final class PpgFlutterSpike {
         container.addSubview(flutterVC.view)
         flutterVC.didMove(toParent: hostViewController)
         previewViewController = flutterVC
+
+        // Diagnostic: the FlutterViewController's view geometry and z-order
+        // AFTER insertion — if this frame is non-zero and it's the topmost
+        // subview, hypothesis 1 (native embedding) is cleared and the issue
+        // is on the Dart/rendering side (hypothesis 2).
+        print("[PpgFlutterSpike] attachPreview() nachher: flutterVC.view.frame=\(flutterVC.view.frame) "
+            + "flutterVC.view.isHidden=\(flutterVC.view.isHidden) "
+            + "flutterVC.view.window != nil=\(flutterVC.view.window != nil) "
+            + "container.subviews.count=\(container.subviews.count) "
+            + "flutterVC.view is topmost subview=\(container.subviews.last === flutterVC.view)")
         print("[PpgFlutterSpike] attachPreview() — FlutterViewController eingehängt")
     }
 

@@ -225,14 +225,27 @@ class _PreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[lomira_ppg_bridge][preview] _PreviewScreen.build() aufgerufen '
+        '(läuft im selben Dart-Isolat wie Capture, unabhängig davon, ob/wann '
+        'ein natives FlutterViewController gerade angehängt ist)');
     return Scaffold(
       backgroundColor: Colors.black,
       body: ValueListenableBuilder<CameraController?>(
         valueListenable: activeController,
         builder: (context, controller, _) {
+          // Diagnostic for hypothesis 2: is the shared controller actually
+          // null/uninitialized at the moment this widget tries to render,
+          // as opposed to the native embedding (hypothesis 1) being the
+          // problem instead.
+          debugPrint('[lomira_ppg_bridge][preview] builder: controller=$controller '
+              'isInitialized=${controller?.value.isInitialized} '
+              'previewSize=${controller?.value.previewSize}');
           if (controller == null || !controller.value.isInitialized) {
+            debugPrint('[lomira_ppg_bridge][preview] → zeige SizedBox.shrink() '
+                '(kein/kein initialisierter Controller)');
             return const SizedBox.shrink();
           }
+          debugPrint('[lomira_ppg_bridge][preview] → zeige CameraPreview(controller)');
           return CameraPreview(controller);
         },
       ),
