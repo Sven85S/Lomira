@@ -1,0 +1,4 @@
+# Built locally via `flutter build ios-framework` — large, Flutter-SDK-version-
+# specific binary artifacts, not source. See Package.swift for the expected
+# layout and flutter/lomira_ppg_bridge/SPM_INTEGRATION.md for how to build them.
+Frameworks/
