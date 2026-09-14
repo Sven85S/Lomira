@@ -66,12 +66,19 @@ final class PpgFlutterEngineBridge: NSObject {
     private var debugLastLogTime = Date()
 
     override private init() {
-        super.init()
+        // Both of these only touch self.engine (already set via its own
+        // property initializer above) — not self itself — so they're valid
+        // before super.init(), unlike everything below that captures or
+        // passes `self`, which Swift's two-phase init requires to happen
+        // only after super.init() has run.
+        //
         // Headless: run() alone never shows a FlutterViewController or any
         // UI surface — this only starts the Dart isolate/engine.
         engine.run()
-        GeneratedPluginRegistrant.register(with: engine)
         channel = FlutterMethodChannel(name: "com.lomira/ppgSpike", binaryMessenger: engine.binaryMessenger)
+        super.init()
+
+        GeneratedPluginRegistrant.register(with: engine)
         channel.setMethodCallHandler { [weak self] call, result in
             self?.handle(call, result: result)
         }
