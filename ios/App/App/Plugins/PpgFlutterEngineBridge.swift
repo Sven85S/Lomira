@@ -55,16 +55,6 @@ final class PpgFlutterEngineBridge: NSObject {
     /// onCaptureError is guaranteed to arrive first when there is one.
     private var startupError: (code: String, message: String)?
 
-    // DEBUG-only spike controls (button/box in MainViewController) share
-    // this same engine/channel — must not be exercised at the same time as
-    // a real HRV measurement (both would call startCapture on the same Dart
-    // isolate, racing to create two CameraControllers). Remove together
-    // with those buttons once the real path is confirmed end-to-end
-    // (step 4).
-    private var isDebugSpikeRunning = false
-    private var debugSampleCount = 0
-    private var debugLastLogTime = Date()
-
     override private init() {
         // Both of these only touch self.engine (already set via its own
         // property initializer above) — not self itself — so they're valid
@@ -155,21 +145,6 @@ final class PpgFlutterEngineBridge: NSObject {
         print("[PpgFlutterEngineBridge] detachPreview() — FlutterViewController entfernt")
     }
 
-    // MARK: - DEBUG-only spike controls
-
-    func debugToggle() {
-        if isDebugSpikeRunning {
-            print("[PpgFlutterEngineBridge] (debug) stopCapture() → Dart (samples received this run: \(debugSampleCount))")
-            isDebugSpikeRunning = false
-            channel.invokeMethod("stopCapture", arguments: nil)
-        } else {
-            print("[PpgFlutterEngineBridge] (debug) startCapture() → Dart")
-            isDebugSpikeRunning = true
-            debugSampleCount = 0
-            channel.invokeMethod("startCapture", arguments: nil)
-        }
-    }
-
     // MARK: - Dart → native
 
     private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -187,14 +162,6 @@ final class PpgFlutterEngineBridge: NSObject {
                 let batch = pendingSamples
                 pendingSamples.removeAll(keepingCapacity: true)
                 onSampleBatch?(batch)
-            }
-
-            if isDebugSpikeRunning {
-                debugSampleCount += 1
-                if Date().timeIntervalSince(debugLastLogTime) >= 1.0 {
-                    debugLastLogTime = Date()
-                    print("[PpgFlutterEngineBridge] (debug) samples=\(debugSampleCount) letzter redMean=\(redMean)")
-                }
             }
             result(nil)
         case "onCaptureError":
