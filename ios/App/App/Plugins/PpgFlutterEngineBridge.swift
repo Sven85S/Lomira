@@ -65,7 +65,7 @@ final class PpgFlutterEngineBridge: NSObject {
     private var debugSampleCount = 0
     private var debugLastLogTime = Date()
 
-    private init() {
+    override private init() {
         super.init()
         // Headless: run() alone never shows a FlutterViewController or any
         // UI surface — this only starts the Dart isolate/engine.
