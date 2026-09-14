@@ -66,18 +66,26 @@ final class PpgCameraCapture: NSObject {
         )
 
         isRunning = true
-        bridge.start { [weak self] result in
-            switch result {
-            case .success:
-                print("[PpgCameraCapture] start() succeeded via Flutter bridge")
-                completion(.success(()))
-            case .failure(let error):
-                print("[PpgCameraCapture] start() failed via Flutter bridge: \(error)")
-                if let self {
-                    self.isRunning = false
-                    NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        // PpgCameraPlugin.startCapture() calls this from Capacitor's plugin
+        // background queue, not the main thread — but PpgFlutterEngineBridge
+        // methods that touch the platform channel (channel.invokeMethod
+        // inside bridge.start()) must be called on the main thread, or
+        // Flutter's own platform_task_runner_ check crashes the app.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.bridge.start { [weak self] result in
+                switch result {
+                case .success:
+                    print("[PpgCameraCapture] start() succeeded via Flutter bridge")
+                    completion(.success(()))
+                case .failure(let error):
+                    print("[PpgCameraCapture] start() failed via Flutter bridge: \(error)")
+                    if let self {
+                        self.isRunning = false
+                        NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+                    }
+                    completion(.failure(error))
                 }
-                completion(.failure(error))
             }
         }
     }
@@ -93,7 +101,14 @@ final class PpgCameraCapture: NSObject {
         // Defensive — the normal flow detaches the preview explicitly before
         // stopping, but a stray preview must never outlive the capture.
         detachPreview()
-        bridge.stop()
+        // Same main-thread requirement as bridge.start() above — stop(reason:)
+        // is called from multiple contexts (JS stopCapture on Capacitor's
+        // background queue, willResignActive on main, a bridge onCaptureError
+        // callback), none of which is guaranteed to already be the main
+        // thread.
+        DispatchQueue.main.async { [weak self] in
+            self?.bridge.stop()
+        }
     }
 
     /// Reads the real AVCaptureSession.InterruptionReason — called from
