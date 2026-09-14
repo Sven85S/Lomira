@@ -1,24 +1,28 @@
 import Flutter
 import FlutterPluginRegistrant
 import Foundation
+import UIKit
 
-/// SPIKE — throwaway harness to answer one question before any of the real
-/// integration work (SPM packaging, preview embedding, PpgCameraCapture
-/// rewiring) is built on top of it: does camera+torch stay reliable across
-/// repeated measurements when driven through Flutter's `camera` plugin
-/// instead of raw AVFoundation? Talks directly to the embedded
-/// lomira_ppg_bridge Flutter module over its own MethodChannel — completely
-/// separate from PpgCameraPlugin/PpgCameraCapture, whose public interface
-/// this must not touch. Delete this whole file (and its call site in
-/// MainViewController) once the real PpgCameraCapture rewrite lands.
+/// Owns the single embedded Flutter engine for the whole PPG migration —
+/// started here in step 1 (spike) to prove camera+torch reliability, now
+/// also hosting the step-2 preview ViewController. Step 3
+/// (PpgCameraCapture's real rewrite) will consume this same engine/channel
+/// instead of AVFoundation; at that point this class gets renamed out of
+/// "Spike" and the DEBUG-only call sites in MainViewController go away, but
+/// the engine/channel plumbing itself stays — it's already the real thing,
+/// not throwaway.
+///
+/// Deliberately still separate from PpgCameraPlugin/PpgCameraCapture, whose
+/// public interface this does not touch (that's step 3's job).
 final class PpgFlutterSpike {
     static let shared = PpgFlutterSpike()
 
-    private let engine = FlutterEngine(name: "lomira_ppg_bridge_engine")
+    let engine = FlutterEngine(name: "lomira_ppg_bridge_engine")
     private let channel: FlutterMethodChannel
     private var isRunning = false
     private var sampleCount = 0
     private var lastLogTime = Date()
+    private var previewViewController: FlutterViewController?
 
     private init() {
         // Headless: run() alone never shows a FlutterViewController or any
@@ -53,6 +57,38 @@ final class PpgFlutterSpike {
         print("[PpgFlutterSpike] stopCapture() → Dart (samples received this run: \(sampleCount))")
         isRunning = false
         channel.invokeMethod("stopCapture", arguments: nil)
+    }
+
+    /// Embeds a FlutterViewController bound to the SAME running engine as
+    /// capture — deliberately not a second, independent engine/camera
+    /// session, since flutter_ppg's Dart-side CameraController is the one
+    /// and only camera user this module ever creates (see
+    /// lib/main.dart's `activeController`). The preview widget renders
+    /// nothing until that controller exists, so calling this before/without
+    /// an active capture just shows black, not a crash.
+    ///
+    /// Must be called on the main thread (UIKit). `container`'s bounds
+    /// should already be set to the desired preview frame.
+    func attachPreview(to hostViewController: UIViewController, container: UIView) {
+        if previewViewController != nil { return }
+        let flutterVC = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+        hostViewController.addChild(flutterVC)
+        flutterVC.view.frame = container.bounds
+        flutterVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        container.addSubview(flutterVC.view)
+        flutterVC.didMove(toParent: hostViewController)
+        previewViewController = flutterVC
+        print("[PpgFlutterSpike] attachPreview() — FlutterViewController eingehängt")
+    }
+
+    /// Must be called on the main thread (UIKit), same as attachPreview().
+    func detachPreview() {
+        guard let flutterVC = previewViewController else { return }
+        flutterVC.willMove(toParent: nil)
+        flutterVC.view.removeFromSuperview()
+        flutterVC.removeFromParent()
+        previewViewController = nil
+        print("[PpgFlutterSpike] detachPreview() — FlutterViewController entfernt")
     }
 
     private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

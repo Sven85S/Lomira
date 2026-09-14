@@ -56,22 +56,27 @@ Hand gepflegt.
 
 Die Debug/Release-Weiche (`.when(configuration:)`) ist SwiftPMs dafür
 vorgesehener, dokumentierter Mechanismus — aber ungetestet, weil diese
-Sandbox kein Xcode hat. Bitte vor Schritt 2 (Preview-Integration) kurz
-verifizieren:
+Sandbox kein Xcode hat.
 
-1. **Debug-Build** wie gehabt auf dem Gerät laufen lassen (Scheme-Konfiguration
-   Debug) — Spike-Button sollte weiter funktionieren wie zuvor.
-2. **Release-Build**: Scheme bearbeiten → Run → Build Configuration →
-   *Release* → auf dem Gerät starten, dann in Xcode **Debug → Detach**
-   (Debugger trennen) und die App direkt über das Icon auf dem Gerät neu
-   öffnen (nicht über Xcodes Play-Button) — das ist der reale "kein Debugger
-   angehängt"-Fall, der laut Flutter-Doku bei fälschlich eingebetteten
+**Verschoben auf Schritt 4 (End-to-End-Test):** Ein Release-Build lässt sich
+aktuell nicht sinnvoll prüfen — der RevenueCat-Test-Key-Schutz schließt jeden
+Release-Build sofort (bekanntes, ohnehin für später vorgesehenes Thema), und
+bis Schritt 3 landet, gibt es im Release-Build noch keinen Code-Pfad, der die
+Flutter-Engine überhaupt anfasst (der `#if DEBUG`-Spike-Button existiert dort
+nicht, `PpgCameraCapture.swift` nutzt noch AVFoundation direkt). Der Test ist
+erst aussagekräftig, sobald der reguläre HRV-Tab tatsächlich über die
+Flutter-Bridge läuft — siehe Schritt 4:
+
+1. **Debug-Build** wie gehabt auf dem Gerät laufen lassen — sollte weiter
+   funktionieren wie zuvor.
+2. **Release-Build** (nach Schritt 3, über den echten HRV-Tab, RevenueCat-
+   Test-Key-Problem vorher lösen): App normal starten, in Xcode
+   **Debug → Detach** (Debugger trennen), App direkt über das Icon auf dem
+   Gerät neu öffnen (nicht über Xcodes Play-Button) — das ist der reale
+   "kein Debugger angehängt"-Fall, der bei fälschlich eingebetteten
    Debug-Frameworks abstürzt.
-   - **Kein Absturz** → Release-Frameworks sind korrekt eingebettet, die
-     Weiche funktioniert wie geplant.
+   - **Kein Absturz** → Release-Frameworks korrekt eingebettet, Weiche
+     funktioniert wie geplant.
    - **Absturz** (z. B. "Library not loaded"/Debug-Engine-bezogen) → die
-     `.when(configuration:)`-Bedingung hat nicht gegriffen; dann bitte den
-     genauen Fehlertext mitteilen, bevor mit Schritt 2 weitergemacht wird.
-
-Erst nach dieser Bestätigung geht es mit Schritt 2 (Preview-Integration)
-weiter.
+     `.when(configuration:)`-Bedingung hat nicht gegriffen; genauen
+     Fehlertext mitteilen.
