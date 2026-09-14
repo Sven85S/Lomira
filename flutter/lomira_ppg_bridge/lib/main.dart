@@ -25,9 +25,20 @@ const MethodChannel _channel = MethodChannel('com.lomira/ppgSpike');
 final ValueNotifier<CameraController?> activeController = ValueNotifier(null);
 
 void main() {
+  // Unconditional, first statement — if this line is missing from the log,
+  // main() itself never ran (ruled out already: capture works over this
+  // same isolate, which requires main() to have executed). If it IS present
+  // but nothing below it is, the failure is somewhere between here and
+  // runApp(), not "a second entrypoint never starting" — there is only one
+  // engine/entrypoint in this architecture, shared by capture and preview.
+  debugPrint('[lomira_ppg_bridge][main] main() gestartet');
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('[lomira_ppg_bridge][main] WidgetsFlutterBinding.ensureInitialized() abgeschlossen');
   _CaptureController();
+  debugPrint('[lomira_ppg_bridge][main] _CaptureController() erstellt, rufe jetzt runApp() auf');
   runApp(const _PreviewRoot());
+  debugPrint('[lomira_ppg_bridge][main] runApp() zurückgekehrt (Widget-Tree ist aufgebaut, '
+      'garantiert aber noch keinen gerenderten Frame — das prüft _PreviewRoot.build() unten)');
 }
 
 /// Same lens-selection logic as ppg_test_app's _selectMainWideBackCamera(),
@@ -213,6 +224,13 @@ class _PreviewRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If this prints but _PreviewScreen.build() never does, MaterialApp
+    // itself is stuck (e.g. never got a Navigator/first route rendered) —
+    // narrows the problem to below this point. If this never prints either,
+    // runApp()'s widget tree never got its first build scheduled at all,
+    // which is the "no FlutterView existed yet when runApp() ran" timing
+    // question directly.
+    debugPrint('[lomira_ppg_bridge][main] _PreviewRoot.build() aufgerufen');
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: _PreviewScreen(),
