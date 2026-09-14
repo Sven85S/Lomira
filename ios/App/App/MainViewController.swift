@@ -15,25 +15,18 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(PpgCameraPlugin())
 
         #if DEBUG
-        // SPIKE — remove this block together with FlutterSpike/PpgFlutterSpike.swift
-        // once the Flutter-camera reliability question is answered. Not wired
-        // into PpgCameraPlugin/PpgCameraCapture at all; only exists to trigger
-        // PpgFlutterSpike by hand on a real device for repeated test runs.
+        // DEBUG-only manual test harness for PpgFlutterEngineBridge,
+        // independent of PpgCameraPlugin's real previewContainerView. Now
+        // that PpgCameraCapture (step 3) drives real HRV measurements
+        // through this same engine, these buttons and the real HRV tab
+        // share one Dart isolate/CameraController — do not use both at the
+        // same time. Remove this whole block once the real HRV tab is
+        // confirmed working end-to-end over the bridge (step 4).
         addSpikeTriggerButton()
         #endif
     }
 
     #if DEBUG
-    // SPIKE — this whole box+button pair, isolated from PpgCameraPlugin's
-    // real previewContainerView. Step 2's on-device test: does the
-    // Flutter-hosted CameraPreview actually render/update here while
-    // capture is toggled via the other button, sharing the one camera
-    // session correctly (see lib/main.dart's activeController)? Real
-    // wiring into PpgCameraPlugin.attachPreview()/detachPreview() happens
-    // together with step 3, since only then does PpgCameraCapture actually
-    // drive capture through this same engine — attaching this preview to
-    // the production path any earlier would fight AVFoundation for the
-    // camera device, the exact conflict this migration exists to avoid.
     private var previewSpikeBox: UIView?
 
     private func addSpikeTriggerButton() {
@@ -65,15 +58,15 @@ class MainViewController: CAPBridgeViewController {
     }
 
     @objc private func spikeButtonTapped() {
-        PpgFlutterSpike.shared.toggle()
+        PpgFlutterEngineBridge.shared.debugToggle()
     }
 
     @objc private func previewSpikeButtonTapped() {
         guard let box = previewSpikeBox else { return }
         if box.subviews.isEmpty {
-            PpgFlutterSpike.shared.attachPreview(to: self, container: box)
+            PpgFlutterEngineBridge.shared.attachPreview(to: self, container: box)
         } else {
-            PpgFlutterSpike.shared.detachPreview()
+            PpgFlutterEngineBridge.shared.detachPreview()
         }
     }
     #endif
