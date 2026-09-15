@@ -6,7 +6,14 @@ import AnimatedBlob, { isWebglSupported } from './AnimatedBlob';
 // Fixed, not breath-coupled and not oscillating — the tab bar button is a
 // small fixed-size nav icon, not a breathing exercise; only the shader's
 // color/texture drift (iTime) should move, never the circle's size.
-const ANKER_BUTTON_RADIUS = 0.32;
+//
+// The shader masks its own disc at `radius` (in the canvas's normalized UV
+// space, where the button's circular clip boundary sits at exactly 0.5) —
+// 0.32 left a visible gap between the blob's edge and the button's edge,
+// showing the pill's card color through as a ring. >=0.5 makes the disc
+// reach the clip boundary everywhere, so the button's own circular
+// overflow:hidden — not the shader's smoothstep fade — defines the edge.
+const ANKER_BUTTON_RADIUS = 0.55;
 const constantRadius = () => ANKER_BUTTON_RADIUS;
 
 interface Props {
