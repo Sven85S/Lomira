@@ -26,7 +26,7 @@ const tabWeight = (active: TabId, key: TabId) => (active === key ? 2.2 : 1.8);
 const itemBtnStyle = (left: string): CSSProperties => ({
   position: 'absolute',
   left,
-  bottom: 'calc(18px + env(safe-area-inset-bottom))',
+  bottom: 'calc(26px + env(safe-area-inset-bottom))',
   transform: 'translateX(-50%)',
   display: 'flex',
   flexDirection: 'column',
@@ -39,17 +39,22 @@ const itemBtnStyle = (left: string): CSSProperties => ({
 
 export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
   return (
-    <div style={{ position: 'relative', width: '100%', height: 'calc(110px + env(safe-area-inset-bottom))', flexShrink: 0 }}>
+    <div style={{ position: 'relative', width: '100%', height: 'calc(118px + env(safe-area-inset-bottom))', flexShrink: 0 }}>
+      {/* Floating pill, not edge-to-edge — inset from both sides and lifted
+          off the bottom edge, with all four corners rounded, matching the
+          redesign mockups (round 1 had this flush with the screen edges and
+          only rounded on top, like a docked bar rather than a free-floating
+          element). */}
       <div
         style={{
           position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 'calc(73px + env(safe-area-inset-bottom))',
+          left: 16,
+          right: 16,
+          bottom: 'calc(8px + env(safe-area-inset-bottom))',
+          height: 73,
           background: colors.card,
-          borderRadius: '30px 30px 0 0',
-          borderTop: `1px solid ${colors.border}`,
+          borderRadius: 9999,
+          border: `1px solid ${colors.border}`,
         }}
       />
 
@@ -83,7 +88,7 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
         style={{
           position: 'absolute',
           left: POS.anker,
-          bottom: 'calc(18px + env(safe-area-inset-bottom))',
+          bottom: 'calc(26px + env(safe-area-inset-bottom))',
           transform: 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
@@ -100,11 +105,11 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
             // Flat recolor onto the new blue accent — the blob-texture-thumbnail
             // treatment from the redesign mockups is a deliberately separate,
             // later step ("animierter Home-Button"), not part of this round.
-            background: 'radial-gradient(circle at 34% 30%, #5B7C9A, #3B5A78 65%, #223B52 100%)',
+            background: 'radial-gradient(circle at 34% 30%, #638098, #41607E 65%, #2A4257 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 10px 24px rgba(59,90,120,0.45), 0 0 0 6px ${colors.surface}`,
+            boxShadow: `0 10px 24px rgba(65,96,126,0.45), 0 0 0 6px ${colors.surface}`,
             border: 'none',
             padding: 0,
           }}

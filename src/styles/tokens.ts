@@ -15,20 +15,24 @@ export const colors = {
   green: '#6E7D66',
   gold: '#C8A84B',
   sage: '#8B9A82',
-  // New primary accent (buttons, active nav states, chart bars) — a visual
-  // estimate from the redesign screenshots, not a measured value; expect to
-  // adjust once it's actually on a device.
-  blue: '#3B5A78',
+  // New primary accent (buttons, active nav states, chart bars). Round-1
+  // estimate (#3B5A78) read too flat/gray on a real device against the
+  // mockups' softer, warmer navy — nudged warmer/lighter here; still a
+  // visual estimate, not a measured value.
+  blue: '#41607E',
   // Bottom stop of the new cream-to-blue background gradient (see bgGradient
-  // below) — same caveat as `blue` above.
-  blueMist: '#D3DEE5',
+  // below). Same round-1-too-gray issue as `blue` — lightened and warmed.
+  blueMist: '#DDE7ED',
 };
 
 export const serif = "'Instrument Serif', serif";
 export const sans = "'Instrument Sans', sans-serif";
 
-// Replaces the flat colors.surface background on the app shell.
-export const bgGradient = `linear-gradient(180deg, ${colors.surface} 0%, ${colors.blueMist} 100%)`;
+// Replaces the flat colors.surface background on the app shell. Stays flat
+// cream through the upper half (mockups keep the blue mist confined to
+// roughly the bottom third, not a straight top-to-bottom blend) and only
+// eases into blueMist over the lower half, for a softer, later transition.
+export const bgGradient = `linear-gradient(180deg, ${colors.surface} 0%, ${colors.surface} 52%, ${colors.blueMist} 100%)`;
 
 export const iconBtnStyle: CSSProperties = {
   width: 32,

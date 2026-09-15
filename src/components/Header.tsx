@@ -22,7 +22,7 @@ export default function Header({ tab, onToggleInfo, onOpenSettings, onOpenLektio
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px 14px', flexShrink: 0 }}>
       <div>
-        <div style={{ fontFamily: serif, fontSize: 10, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase' }}>lomira</div>
+        <div style={{ fontFamily: serif, fontSize: 14, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase' }}>lomira</div>
         <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text, marginTop: 2, whiteSpace: 'nowrap' }}>{TAB_TITLES[tab]}</div>
       </div>
       {INFO_TABS.includes(tab) && (
