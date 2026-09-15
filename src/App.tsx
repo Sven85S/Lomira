@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { colors } from './styles/tokens';
+import { bgGradient } from './styles/tokens';
 import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
@@ -7,7 +7,7 @@ import Header from './components/Header';
 import OrbitNav from './components/OrbitNav';
 import AnkerScreen from './screens/AnkerScreen';
 import BeruehrenScreen from './screens/BeruehrenScreen';
-import LektionenScreen from './screens/LektionenScreen';
+import LektionenOverlay from './screens/LektionenOverlay';
 import LessonDetail from './screens/LessonDetail';
 import RitualScreen from './screens/RitualScreen';
 import FortschrittScreen from './screens/FortschrittScreen';
@@ -33,6 +33,7 @@ function Shell() {
   const [openLessonId, setOpenLessonId] = useState<number | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLektionen, setShowLektionen] = useState(false);
   const [showHrvFlow, setShowHrvFlow] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +50,7 @@ function Shell() {
       style={{
         width: '100%',
         height: '100dvh',
-        background: colors.surface,
+        background: bgGradient,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -57,7 +58,7 @@ function Shell() {
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
-      <Header tab={tab} onToggleInfo={toggleInfo} onOpenSettings={() => setShowSettings(true)} />
+      <Header tab={tab} onToggleInfo={toggleInfo} onOpenSettings={() => setShowSettings(true)} onOpenLektionen={() => setShowLektionen(true)} />
 
       <div
         ref={scrollRef}
@@ -69,11 +70,8 @@ function Shell() {
           maskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
         }}
       >
-        {tab === 'sos' && <AnkerScreen onNavigate={setTab} onOpenHrv={() => setShowHrvFlow(true)} />}
+        {tab === 'sos' && <AnkerScreen />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
-        {tab === 'lektionen' && (
-          <LektionenScreen showInfo={!!infoOpen.lektionen} onOpenLesson={setOpenLessonId} onOpenPaywall={() => setShowPaywall(true)} />
-        )}
         {tab === 'ritual' && <RitualScreen showInfo={!!infoOpen.ritual} />}
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
       </div>
@@ -81,6 +79,13 @@ function Shell() {
       <OrbitNav active={tab} onChange={setTab} onOpenHrv={() => setShowHrvFlow(true)} />
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
+      {showLektionen && (
+        <LektionenOverlay
+          onClose={() => setShowLektionen(false)}
+          onOpenLesson={setOpenLessonId}
+          onOpenPaywall={() => setShowPaywall(true)}
+        />
+      )}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}
       {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
       {showHrvFlow && (

@@ -39,4 +39,6 @@ export interface HrvMeasurement {
   rmssdEstimated?: boolean;
 }
 
-export type TabId = 'sos' | 'beruehren' | 'lektionen' | 'ritual' | 'fortschritt';
+// 'lektionen' deliberately not a tab anymore — it's a header-icon overlay now
+// (see LektionenOverlay.tsx), like Settings.
+export type TabId = 'sos' | 'beruehren' | 'ritual' | 'fortschritt';

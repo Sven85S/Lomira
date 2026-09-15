@@ -20,7 +20,7 @@ const POS = {
   fortschritt: '89.88%',
 };
 
-const tabColor = (active: TabId, key: TabId) => (active === key ? colors.rust : colors.muted);
+const tabColor = (active: TabId, key: TabId) => (active === key ? colors.blue : colors.muted);
 const tabWeight = (active: TabId, key: TabId) => (active === key ? 2.2 : 1.8);
 
 const itemBtnStyle = (left: string): CSSProperties => ({
@@ -60,7 +60,7 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
         <span style={{ fontSize: 10, color: colors.muted }}>HRV</span>
       </button>
 
-      <button style={itemBtnStyle(POS.beruehren)} onClick={() => onChange('beruehren')} aria-label="Berühren">
+      <button style={itemBtnStyle(POS.beruehren)} onClick={() => onChange('beruehren')} aria-label="Übungen">
         <svg
           width={21}
           height={21}
@@ -76,7 +76,7 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
           <path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0v8" />
           <path d="M17 12v-1.5a1.5 1.5 0 0 1 3 0V16a6 6 0 0 1-6 6h-2c-2.5 0-3.5-1-5-3l-2.7-4.3a1.5 1.5 0 0 1 2.6-1.5L8 12" />
         </svg>
-        <span style={{ fontSize: 10, color: tabColor(active, 'beruehren') }}>Berühren</span>
+        <span style={{ fontSize: 10, color: tabColor(active, 'beruehren') }}>Übungen</span>
       </button>
 
       <div
@@ -97,11 +97,14 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
             width: 68,
             height: 68,
             borderRadius: 9999,
-            background: 'radial-gradient(circle at 34% 30%, #D98A57, #B0532B 65%, #8A3D1F 100%)',
+            // Flat recolor onto the new blue accent — the blob-texture-thumbnail
+            // treatment from the redesign mockups is a deliberately separate,
+            // later step ("animierter Home-Button"), not part of this round.
+            background: 'radial-gradient(circle at 34% 30%, #5B7C9A, #3B5A78 65%, #223B52 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 10px 24px rgba(176,83,43,0.45), 0 0 0 6px ${colors.surface}`,
+            boxShadow: `0 10px 24px rgba(59,90,120,0.45), 0 0 0 6px ${colors.surface}`,
             border: 'none',
             padding: 0,
           }}
@@ -114,7 +117,7 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
             <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
           </svg>
         </button>
-        <span style={{ fontSize: 11, color: colors.rust, fontWeight: 500 }}>Anker</span>
+        <span style={{ fontSize: 11, color: colors.blue, fontWeight: 500 }}>Anker</span>
       </div>
 
       <button style={itemBtnStyle(POS.ritual)} onClick={() => onChange('ritual')} aria-label="Ritual">
