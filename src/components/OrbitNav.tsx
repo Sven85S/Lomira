@@ -1,6 +1,16 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { colors } from '../styles/tokens';
 import type { TabId } from '../types';
+import AnimatedBlob, { isWebglSupported, MIN_RADIUS, MAX_RADIUS } from './AnimatedBlob';
+
+// Ambient, not breath-coupled — the tab bar button isn't tied to an active
+// exercise, so it just breathes on its own slow, gentle cycle.
+const AMBIENT_CYCLE_SECONDS = 6;
+const ambientRadius = (elapsedSeconds: number) => {
+  const phase = (elapsedSeconds % AMBIENT_CYCLE_SECONDS) / AMBIENT_CYCLE_SECONDS;
+  const eased = 0.5 - 0.5 * Math.cos(2 * Math.PI * phase);
+  return MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * eased;
+};
 
 interface Props {
   active: TabId;
@@ -36,6 +46,9 @@ const itemBtnStyle = (left: string): CSSProperties => ({
 });
 
 export default function OrbitNav({ active, onChange }: Props) {
+  const [ankerGlFailed, setAnkerGlFailed] = useState(false);
+  const showAnkerBlob = isWebglSupported && !ankerGlFailed;
+
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(118px + env(safe-area-inset-bottom))', flexShrink: 0 }}>
       {/* Floating pill, not edge-to-edge — inset from both sides and lifted
@@ -109,10 +122,12 @@ export default function OrbitNav({ active, onChange }: Props) {
             width: 68,
             height: 68,
             borderRadius: 9999,
-            // Flat recolor onto the new blue accent — the blob-texture-thumbnail
-            // treatment from the redesign mockups is a deliberately separate,
-            // later step ("animierter Home-Button"), not part of this round.
-            background: 'radial-gradient(circle at 34% 30%, #638098, #41607E 65%, #2A4257 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+            // Flat gradient fallback for devices without WebGL, or if the
+            // shared shader hits a runtime error — same treatment as the
+            // big Anker blob's own CSS fallback.
+            ...(showAnkerBlob ? {} : { background: 'radial-gradient(circle at 34% 30%, #638098, #41607E 65%, #2A4257 100%)' }),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -123,7 +138,22 @@ export default function OrbitNav({ active, onChange }: Props) {
           onClick={() => onChange('sos')}
           aria-label="Anker"
         >
-          <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#F9F1E4" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          {showAnkerBlob && (
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <AnimatedBlob resolution={96} maxFps={18} getRadius={ambientRadius} onGlFailed={() => setAnkerGlFailed(true)} />
+            </div>
+          )}
+          <svg
+            style={{ position: 'relative', zIndex: 1 }}
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#F9F1E4"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx={12} cy={5} r={3} />
             <line x1={12} y1={22} x2={12} y2={8} />
             <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
