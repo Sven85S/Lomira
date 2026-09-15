@@ -35,7 +35,7 @@ export default function FortschrittScreen({ showInfo }: Props) {
           { value: `${reguliertPercent}%`, label: 'Reguliert-Anteil' },
         ].map((stat) => (
           <div key={stat.label} style={{ ...cardStyle, padding: '12px 8px 14px', textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Fraunces',serif", fontSize: 22, fontWeight: 500, color: colors.text }}>{stat.value}</div>
+            <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text }}>{stat.value}</div>
             <div style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>{stat.label}</div>
           </div>
         ))}

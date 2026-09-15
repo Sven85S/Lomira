@@ -13,8 +13,8 @@ export const colors = {
   sage: '#8B9A82',
 };
 
-export const serif = "'Fraunces', serif";
-export const sans = "'Inter', sans-serif";
+export const serif = "'Instrument Serif', serif";
+export const sans = "'Instrument Sans', sans-serif";
 
 export const iconBtnStyle: CSSProperties = {
   width: 32,

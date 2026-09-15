@@ -13,7 +13,7 @@ body,
 
 body {
   background: #EDEAE2;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   color: #2B2620;
 }
 
@@ -23,7 +23,7 @@ a:hover {
 }
 
 textarea {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   outline: none;
   resize: none;
 }
@@ -31,7 +31,7 @@ textarea {
 button {
   border: none;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   background: none;
 }
 
