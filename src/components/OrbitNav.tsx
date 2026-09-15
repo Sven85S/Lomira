@@ -5,8 +5,6 @@ import type { TabId } from '../types';
 interface Props {
   active: TabId;
   onChange: (tab: TabId) => void;
-  /** Opens the HRV/pulse measurement flow — same entry point the Anker ring's HRV chip uses. */
-  onOpenHrv: () => void;
 }
 
 // Horizontal anchor points as a % of the bar's own width, converted 1:1 from the
@@ -37,7 +35,7 @@ const itemBtnStyle = (left: string): CSSProperties => ({
   padding: 0,
 });
 
-export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
+export default function OrbitNav({ active, onChange }: Props) {
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(118px + env(safe-area-inset-bottom))', flexShrink: 0 }}>
       {/* Floating pill, not edge-to-edge — inset from both sides and lifted
@@ -58,11 +56,20 @@ export default function OrbitNav({ active, onChange, onOpenHrv }: Props) {
         }}
       />
 
-      <button style={itemBtnStyle(POS.hrv)} onClick={onOpenHrv} aria-label="HRV-Messung">
-        <svg width={21} height={21} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <button style={itemBtnStyle(POS.hrv)} onClick={() => onChange('hrv')} aria-label="HRV-Messung">
+        <svg
+          width={21}
+          height={21}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={tabColor(active, 'hrv')}
+          strokeWidth={tabWeight(active, 'hrv')}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
         </svg>
-        <span style={{ fontSize: 10, color: colors.muted }}>HRV</span>
+        <span style={{ fontSize: 10, color: tabColor(active, 'hrv') }}>HRV</span>
       </button>
 
       <button style={itemBtnStyle(POS.beruehren)} onClick={() => onChange('beruehren')} aria-label="Übungen">

@@ -34,7 +34,6 @@ function Shell() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLektionen, setShowLektionen] = useState(false);
-  const [showHrvFlow, setShowHrvFlow] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleInfo = useCallback(() => {
@@ -72,11 +71,12 @@ function Shell() {
       >
         {tab === 'sos' && <AnkerScreen />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
+        {tab === 'hrv' && <HrvFlow onClose={() => setTab('sos')} onOpenFortschritt={() => setTab('fortschritt')} />}
         {tab === 'ritual' && <RitualScreen showInfo={!!infoOpen.ritual} />}
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
       </div>
 
-      <OrbitNav active={tab} onChange={setTab} onOpenHrv={() => setShowHrvFlow(true)} />
+      <OrbitNav active={tab} onChange={setTab} />
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
       {showLektionen && (
@@ -88,15 +88,6 @@ function Shell() {
       )}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}
       {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
-      {showHrvFlow && (
-        <HrvFlow
-          onClose={() => setShowHrvFlow(false)}
-          onOpenFortschritt={() => {
-            setShowHrvFlow(false);
-            setTab('fortschritt');
-          }}
-        />
-      )}
     </div>
   );
 }

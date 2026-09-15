@@ -340,7 +340,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   if (phase === 'result') {
     return (
       <HrvResultScreen
-        onClose={handleClose}
         result={finalResult}
         noFingerDetected={noFingerDetected}
         onOpenFortschritt={onOpenFortschritt}
@@ -351,7 +350,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
 
   return (
     <HrvStartScreen
-      onClose={handleClose}
       isSupported={isPpgCameraSupported}
       permission={permission}
       available={available}

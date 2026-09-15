@@ -1,9 +1,8 @@
 import type { RefObject } from 'react';
-import { colors, iconBtnStyle, primaryBtnStyle, serif } from '../../styles/tokens';
+import { colors, primaryBtnStyle, serif } from '../../styles/tokens';
 import type { CameraPermissionState } from '../../native/ppgCamera';
 
 interface Props {
-  onClose: () => void;
   isSupported: boolean;
   permission: CameraPermissionState | 'unknown';
   available: boolean | null;
@@ -14,8 +13,11 @@ interface Props {
   onContinue: () => void;
 }
 
+// No back/close button — HRV is a regular tab now (like Anker/Übungen/...),
+// so switching to another tab is the exit, same as everywhere else. Only
+// HrvMeasuringScreen keeps an explicit button, since it doubles as
+// "cancel a running measurement", not just "leave".
 export default function HrvStartScreen({
-  onClose,
   isSupported,
   permission,
   available,
@@ -28,20 +30,7 @@ export default function HrvStartScreen({
   const simulatorLikely = isSupported && available === false;
 
   return (
-    <div
-      style={{
-        position: 'absolute', inset: 0, background: colors.surface, zIndex: 35, display: 'flex', flexDirection: 'column',
-        paddingTop: 'env(safe-area-inset-top)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={iconBtnStyle} onClick={onClose} aria-label="Zurück">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-      </div>
-
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text, alignSelf: 'flex-start' }}>Puls messen</div>
 

@@ -40,5 +40,7 @@ export interface HrvMeasurement {
 }
 
 // 'lektionen' deliberately not a tab anymore — it's a header-icon overlay now
-// (see LektionenOverlay.tsx), like Settings.
-export type TabId = 'sos' | 'beruehren' | 'ritual' | 'fortschritt';
+// (see LektionenOverlay.tsx), like Settings. 'hrv' is back as a real tab
+// (HrvFlow used to be a full-screen overlay reached via a ring chip, from
+// before the tab bar existed) — see HrvFlow.tsx / App.tsx.
+export type TabId = 'sos' | 'beruehren' | 'hrv' | 'ritual' | 'fortschritt';

@@ -41,12 +41,11 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
   const progress = isWarmup ? 0 : 1 - measureRemainingMs / totalMeasureMs;
 
   return (
-    <div
-      style={{
-        position: 'absolute', inset: 0, background: colors.surface, zIndex: 35, display: 'flex', flexDirection: 'column',
-        paddingTop: 'env(safe-area-inset-top)',
-      }}
-    >
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* The one HRV sub-screen that keeps its own explicit button — it's not
+          just "leave" here, it's "cancel a running measurement" (camera/torch
+          active), which tapping a different tab would do too but far less
+          visibly than an on-screen Abbrechen button. */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
         <button style={iconBtnStyle} onClick={onClose} aria-label="Abbrechen">
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

@@ -1,9 +1,13 @@
 import { colors, iconBtnStyle, serif } from '../styles/tokens';
 import type { TabId } from '../types';
 
+// 'hrv' stays empty like 'sos' — its three phases (Start/Measuring/Result)
+// each render their own differing heading already, unlike the other tabs'
+// single fixed title.
 const TAB_TITLES: Record<TabId, string> = {
   sos: '',
   beruehren: 'Übungen',
+  hrv: '',
   ritual: 'Tägliches Ritual',
   fortschritt: 'Fortschritt',
 };
