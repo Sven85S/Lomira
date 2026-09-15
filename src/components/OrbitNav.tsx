@@ -1,16 +1,13 @@
 import { useState, type CSSProperties } from 'react';
 import { colors } from '../styles/tokens';
 import type { TabId } from '../types';
-import AnimatedBlob, { isWebglSupported, MIN_RADIUS, MAX_RADIUS } from './AnimatedBlob';
+import AnimatedBlob, { isWebglSupported } from './AnimatedBlob';
 
-// Ambient, not breath-coupled — the tab bar button isn't tied to an active
-// exercise, so it just breathes on its own slow, gentle cycle.
-const AMBIENT_CYCLE_SECONDS = 6;
-const ambientRadius = (elapsedSeconds: number) => {
-  const phase = (elapsedSeconds % AMBIENT_CYCLE_SECONDS) / AMBIENT_CYCLE_SECONDS;
-  const eased = 0.5 - 0.5 * Math.cos(2 * Math.PI * phase);
-  return MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * eased;
-};
+// Fixed, not breath-coupled and not oscillating — the tab bar button is a
+// small fixed-size nav icon, not a breathing exercise; only the shader's
+// color/texture drift (iTime) should move, never the circle's size.
+const ANKER_BUTTON_RADIUS = 0.32;
+const constantRadius = () => ANKER_BUTTON_RADIUS;
 
 interface Props {
   active: TabId;
@@ -104,23 +101,27 @@ export default function OrbitNav({ active, onChange }: Props) {
         <span style={{ fontSize: 10, color: tabColor(active, 'beruehren') }}>Übungen</span>
       </button>
 
+      {/* Sized and vertically centered against the pill's own box (bottom+height),
+          not the icon columns' bottom-anchor — a 56px button fully contained
+          within the 73px pill, unlike the icon columns' bottom:26px anchor
+          which only fits their much shorter icon+label stack. */}
       <div
         style={{
           position: 'absolute',
           left: POS.anker,
-          bottom: 'calc(26px + env(safe-area-inset-bottom))',
+          bottom: 'calc(8px + env(safe-area-inset-bottom))',
+          height: 73,
           transform: 'translateX(-50%)',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: 8,
+          justifyContent: 'center',
           zIndex: 2,
         }}
       >
         <button
           style={{
-            width: 68,
-            height: 68,
+            width: 56,
+            height: 56,
             borderRadius: 9999,
             position: 'relative',
             overflow: 'hidden',
@@ -131,7 +132,7 @@ export default function OrbitNav({ active, onChange }: Props) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 10px 24px rgba(65,96,126,0.45), 0 0 0 6px ${colors.surface}`,
+            boxShadow: '0 6px 14px rgba(65,96,126,0.35)',
             border: 'none',
             padding: 0,
           }}
@@ -140,13 +141,13 @@ export default function OrbitNav({ active, onChange }: Props) {
         >
           {showAnkerBlob && (
             <div style={{ position: 'absolute', inset: 0 }}>
-              <AnimatedBlob resolution={96} maxFps={18} getRadius={ambientRadius} onGlFailed={() => setAnkerGlFailed(true)} />
+              <AnimatedBlob resolution={96} maxFps={18} getRadius={constantRadius} onGlFailed={() => setAnkerGlFailed(true)} />
             </div>
           )}
           <svg
             style={{ position: 'relative', zIndex: 1 }}
-            width={24}
-            height={24}
+            width={22}
+            height={22}
             viewBox="0 0 24 24"
             fill="none"
             stroke="#F9F1E4"
@@ -159,7 +160,6 @@ export default function OrbitNav({ active, onChange }: Props) {
             <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
           </svg>
         </button>
-        <span style={{ fontSize: 11, color: colors.blue, fontWeight: 500 }}>Anker</span>
       </div>
 
       <button style={itemBtnStyle(POS.ritual)} onClick={() => onChange('ritual')} aria-label="Ritual">
