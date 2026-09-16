@@ -21,15 +21,24 @@ interface Props {
   onChange: (tab: TabId) => void;
 }
 
-// Horizontal anchor points as a % of the bar's own width, converted 1:1 from the
-// design mock's fixed 336px-wide phone-screen frame (34/92/168/244/302px) — Anker
-// lands exactly centered, and the other four are symmetric around it.
+// Horizontal anchor points as a fraction of the pill's own width, converted
+// 1:1 from the design mock's fixed 336px-wide phone-screen frame
+// (34/92/168/244/302px) — Anker lands exactly centered, the other four
+// symmetric around it. Expressed as calc(F% + Npx) rather than a plain F%
+// because these buttons are positioned relative to the full nav container
+// (100% width), while the pill itself is inset by PILL_INSET on each side —
+// a plain percentage anchors against the wrong (wider) box, and the margin
+// this leaves shrinks as the viewport narrows, since the fixed inset eats a
+// growing share of it. The calc() term corrects for that at any width.
+const PILL_INSET = 16;
+const pillPos = (fraction: number) => `calc(${(fraction * 100).toFixed(4)}% + ${(PILL_INSET - 2 * PILL_INSET * fraction).toFixed(4)}px)`;
+
 const POS = {
-  hrv: '10.12%',
-  beruehren: '27.38%',
-  anker: '50%',
-  ritual: '72.62%',
-  fortschritt: '89.88%',
+  hrv: pillPos(0.1012),
+  beruehren: pillPos(0.2738),
+  anker: pillPos(0.5),
+  ritual: pillPos(0.7262),
+  fortschritt: pillPos(0.8988),
 };
 
 const tabColor = (active: TabId, key: TabId) => (active === key ? colors.blue : colors.muted);
@@ -151,21 +160,6 @@ export default function OrbitNav({ active, onChange }: Props) {
               <AnimatedBlob resolution={96} maxFps={18} getRadius={constantRadius} onGlFailed={() => setAnkerGlFailed(true)} />
             </div>
           )}
-          <svg
-            style={{ position: 'relative', zIndex: 1 }}
-            width={22}
-            height={22}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#F9F1E4"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx={12} cy={5} r={3} />
-            <line x1={12} y1={22} x2={12} y2={8} />
-            <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
-          </svg>
         </button>
       </div>
 
