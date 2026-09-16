@@ -123,7 +123,7 @@ export default function SettingsScreen({ onClose }: Props) {
               value={firstName}
               onChange={handleNameChange}
               placeholder="z.B. Michael"
-              style={{ fontSize: 14, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '6px 10px', width: 140, textAlign: 'right' }}
+              style={{ fontSize: 16, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '6px 10px', width: 140, textAlign: 'right' }}
             />
           </div>
 
@@ -167,7 +167,7 @@ export default function SettingsScreen({ onClose }: Props) {
                 type="time"
                 value={reminderTime}
                 onChange={handleTimeChange}
-                style={{ fontSize: 14, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '5px 8px' }}
+                style={{ fontSize: 16, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '5px 8px' }}
               />
             </div>
           )}
