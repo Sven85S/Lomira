@@ -39,6 +39,22 @@ export interface HrvMeasurement {
   rmssdEstimated?: boolean;
 }
 
+/**
+ * A single completed Anker or Übungen session, used only for the Fortschritt
+ * 4-week practiced-minutes chart. Deliberately separate from ankerSessionCount
+ * (a bare counter with no date/duration) and from BeruehrenScreen's exercise
+ * timer (previously pure local component state, never persisted).
+ */
+export interface PracticeSession {
+  id: string;
+  /** ISO date string (yyyy-mm-dd), local day the session belongs to. */
+  date: string;
+  /** ms since epoch when the session was recorded. */
+  createdAt: number;
+  minutes: number;
+  source: 'anker' | 'beruehren';
+}
+
 // 'lektionen' deliberately not a tab anymore — it's a header-icon overlay now
 // (see LektionenOverlay.tsx), like Settings. 'hrv' is back as a real tab
 // (HrvFlow used to be a full-screen overlay reached via a ring chip, from

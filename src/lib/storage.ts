@@ -24,6 +24,7 @@ export const STORAGE_KEYS = {
   ankerSessionCount: 'lomira.ankerSessionCount.v1',
   pulseEntries: 'lomira.pulseEntries.v1',
   hrvMeasurements: 'lomira.hrvMeasurements.v1',
+  practiceSessions: 'lomira.practiceSessions.v1',
   firstName: 'lomira.firstName.v1',
   remindersEnabled: 'lomira.remindersEnabled.v1',
   reminderTime: 'lomira.reminderTime.v1',

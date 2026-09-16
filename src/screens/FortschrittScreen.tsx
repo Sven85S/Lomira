@@ -11,7 +11,9 @@ interface Props {
 const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: colors.gold, poor: colors.rust };
 
 export default function FortschrittScreen({ showInfo }: Props) {
-  const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements } = useData();
+  const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements, weeklyMinutesChart } = useData();
+  const maxWeeklyMinutes = Math.max(1, ...weeklyMinutesChart.map((w) => w.minutes));
+  const hasAnyPracticeMinutes = weeklyMinutesChart.some((w) => w.minutes > 0);
 
   return (
     <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -59,6 +61,32 @@ export default function FortschrittScreen({ showInfo }: Props) {
             </div>
           ))}
         </div>
+      </div>
+
+      <div style={cardStyle}>
+        <div style={{ fontSize: 14, color: colors.text, marginBottom: 12 }}>Geübte Minuten (4 Wochen)</div>
+        {hasAnyPracticeMinutes ? (
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 90 }}>
+            {weeklyMinutesChart.map((w) => (
+              <div key={w.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: 36,
+                    height: Math.max(4, (w.minutes / maxWeeklyMinutes) * 64),
+                    borderRadius: 6,
+                    background: w.isCurrent ? colors.blue : 'rgba(65,96,126,0.25)',
+                  }}
+                />
+                <span style={{ fontSize: 10, color: colors.muted }}>{w.label}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
+            Noch keine geübten Minuten erfasst — probiere eine Anker- oder Übungen-Session.
+          </p>
+        )}
       </div>
 
       <div style={cardStyle}>

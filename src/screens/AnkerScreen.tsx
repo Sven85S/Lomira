@@ -103,7 +103,7 @@ export default function AnkerScreen() {
       setActive(false);
       setPhase('idle');
       setPhaseTimer(0);
-      await recordAnkerSession();
+      await recordAnkerSession(Date.now() - exerciseStart.current);
     } else {
       exerciseStart.current = Date.now();
       phaseStart.current = Date.now();
@@ -152,29 +152,9 @@ export default function AnkerScreen() {
         gap: 8,
       }}
     >
-      {/* Top group: timer + intro copy stay tightly coupled — only the space
-          around this group as a whole flexes with the viewport. Both idle
-          ("Bereit") and active (the countdown) now show real text in the big
-          slot, so it keeps one fixed height in both states — it used to
-          collapse to 20px specifically because idle showed nothing here,
-          which the intro copy's negative margin compensated for; now that
-          idle has real content too, that trick would make the two overlap. */}
-      <div style={{ flexShrink: 0 }}>
-        <div style={{ height: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
-          <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
-            {phaseLabel}
-          </div>
-        </div>
-
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '4px 0 0' }}>
-          {introCopy}
-        </p>
-      </div>
-
-      {/* Breath blob — the icon ring that used to surround it is gone; this is
-          now the screen's sole focus, no longer sharing space with navigation. */}
-      <div style={{ position: 'relative', width: 338, height: 338, margin: '0 auto', flexShrink: 0, cursor: 'pointer' }} onClick={toggleExercise}>
+      {/* Breath blob first, directly under the header — the screen's sole
+          focus, no longer sharing space with navigation. */}
+      <div style={{ position: 'relative', width: 450, height: 450, margin: '0 auto', flexShrink: 0, cursor: 'pointer' }} onClick={toggleExercise}>
         <div
           ref={glowRef}
           style={{
@@ -185,7 +165,11 @@ export default function AnkerScreen() {
             filter: 'blur(20px)',
             transformOrigin: 'center center',
             willChange: 'transform',
-            ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
+            transition: 'opacity 0.3s',
+            // Only shown during an active breath cycle — in the idle "Bereit"
+            // state it's fully hidden rather than just scaled down, per the
+            // "no glow at rest" fix.
+            ...(active ? {} : { animation: 'none', transform: 'scale(0.62)', opacity: 0 }),
           }}
         />
         {webglOk && (
@@ -229,8 +213,25 @@ export default function AnkerScreen() {
         )}
       </div>
 
+      {/* Timer + intro copy, below the ball now — tightly coupled, only the
+          space around this group as a whole flexes with the viewport. Both
+          idle ("Bereit") and active (the countdown) show real text in the
+          big slot, so it keeps one fixed height in both states. */}
+      <div style={{ flexShrink: 0 }}>
+        <div style={{ height: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
+          <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
+            {phaseLabel}
+          </div>
+        </div>
+
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '4px 0 0' }}>
+          {introCopy}
+        </p>
+      </div>
+
       {/* Bottom group: exercise copy, tap hint and steppers stay together as one
-          block; like the top group, only the space around it flexes. */}
+          block; like the timer group, only the space around it flexes. */}
       <div style={{ width: '100%', flexShrink: 0 }}>
         <p style={{ textAlign: 'center', fontSize: 14, color: colors.muted, margin: '16px 0 0' }}>{tapHintLabel}</p>
 

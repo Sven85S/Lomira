@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Pause, Play } from 'lucide-react';
 import { colors, sans, serif } from '../styles/tokens';
+import { useData } from '../context/DataContext';
 import handImage from '../assets/beruehren/hand.webp';
 import butterflyImage from '../assets/beruehren/butterfly.webp';
 import bilateralImage from '../assets/beruehren/bilateral.webp';
@@ -228,6 +229,7 @@ function Silhouette({ type, points, activeIndex }: { type: SilhouetteType; point
 }
 
 function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () => void }) {
+  const { recordExerciseSession } = useData();
   const [playing, setPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -254,8 +256,31 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
     };
   }, [playing]);
 
+  // Safety net for leaving mid-exercise without an explicit Pause tap (e.g.
+  // the back button) — mirrors HrvFlow's unmount cleanup pattern: refs so
+  // this effect only ever runs once, reading whatever the latest playing/
+  // seconds/recordExerciseSession values were at the moment of unmount.
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
+  const secondsRef = useRef(seconds);
+  secondsRef.current = seconds;
+  const recordExerciseSessionRef = useRef(recordExerciseSession);
+  recordExerciseSessionRef.current = recordExerciseSession;
+
+  useEffect(() => {
+    return () => {
+      if (playingRef.current) {
+        void recordExerciseSessionRef.current(secondsRef.current);
+      }
+    };
+  }, []);
+
   const toggle = () => {
-    if (!playing) setSeconds(0);
+    if (!playing) {
+      setSeconds(0);
+    } else {
+      void recordExerciseSession(seconds);
+    }
     setPlaying(!playing);
   };
 
