@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { colors, iconBtnStyle, serif } from '../styles/tokens';
+import { cardStyle, colors, iconBtnStyle, serif } from '../styles/tokens';
 import { useData } from '../context/DataContext';
 import { STATE_COLORS } from '../store/ritualSelectors';
 import { formatEntryDate } from '../lib/date';
@@ -41,7 +41,7 @@ export default function RitualScreen({ showInfo }: Props) {
   return (
     <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {showInfo && (
-        <div style={{ width: '100%', padding: '14px 16px', borderRadius: 16, background: colors.card, border: `1px solid ${colors.border}`, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ ...cardStyle, width: '100%', marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, margin: 0 }}>
             Eine Emotion zu benennen, beruhigt nachweislich das Nervensystem — Studien zeigen, dass allein das In-Worte-Fassen eines
             Gefühlszustands die Stressreaktion im Gehirn messbar dämpft.
@@ -57,7 +57,7 @@ export default function RitualScreen({ showInfo }: Props) {
       )}
 
       <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', marginBottom: 12 }}>Wie fühlst du dich gerade?</p>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
         {STATE_LABELS.map(({ key, label }) => {
           const active = state === key;
           return (
@@ -66,13 +66,13 @@ export default function RitualScreen({ showInfo }: Props) {
               disabled={isDone}
               onClick={() => setSelectedState(key)}
               style={{
-                padding: '4px 7px',
+                padding: '7px 14px',
                 borderRadius: 9999,
-                fontSize: 12,
+                fontSize: 13,
                 cursor: isDone ? 'default' : 'pointer',
                 whiteSpace: 'nowrap',
-                border: active ? `1px solid ${colors.text}` : `1px solid ${colors.border}`,
-                background: active ? colors.text : 'transparent',
+                border: active ? `1px solid ${colors.blue}` : `1px solid ${colors.border}`,
+                background: active ? colors.blue : 'transparent',
                 color: active ? colors.surface : colors.muted,
               }}
             >
@@ -99,7 +99,7 @@ export default function RitualScreen({ showInfo }: Props) {
           padding: '10px 24px',
           borderRadius: 9999,
           fontSize: 14,
-          background: state ? colors.text : colors.border,
+          background: state ? colors.blue : colors.border,
           color: state ? colors.surface : colors.muted,
           cursor: state && !isDone ? 'pointer' : 'default',
         }}
@@ -107,12 +107,12 @@ export default function RitualScreen({ showInfo }: Props) {
         {isDone ? 'Heute erledigt ✓' : 'Ritual abschließen'}
       </button>
 
-      <div style={{ width: '100%', marginTop: 24, padding: '12px 16px', borderRadius: 16, background: colors.card, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ ...cardStyle, width: '100%', marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 14, color: colors.text }}>Serie</span>
-        <span style={{ fontSize: 14, color: colors.green, fontWeight: 500 }}>{streak === 1 ? '1 Tag in Folge' : `${streak} Tage in Folge`}</span>
+        <span style={{ fontFamily: serif, fontSize: 16, color: colors.blue, fontWeight: 500 }}>{streak === 1 ? '1 Tag in Folge' : `${streak} Tage in Folge`}</span>
       </div>
 
-      <div style={{ width: '100%', marginTop: 16, padding: '14px 16px', borderRadius: 16, background: colors.card, border: `1px solid ${colors.border}` }}>
+      <div style={{ ...cardStyle, width: '100%', marginTop: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <button style={iconBtnStyle} onClick={() => setCalMonthOffset((v) => v - 1)} aria-label="Vorheriger Monat">
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -220,7 +220,7 @@ export default function RitualScreen({ showInfo }: Props) {
                   />
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
-                      style={{ padding: '7px 16px', borderRadius: 9999, fontSize: 12, background: colors.text, color: colors.surface, cursor: 'pointer' }}
+                      style={{ padding: '7px 16px', borderRadius: 9999, fontSize: 12, background: colors.blue, color: colors.surface, cursor: 'pointer' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         updateRitualEntry(entry.id, { note: editDraft });

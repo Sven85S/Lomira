@@ -201,17 +201,17 @@ function Silhouette({ type, points, activeIndex }: { type: SilhouetteType; point
           <path
             d="M100,35 C130,35 152,60 155,95 C158,130 148,160 128,178 C122,183 116,186 110,186 C104,186 100,182 99,175 C97,165 100,155 95,150 C75,145 62,125 62,98 C62,65 78,35 100,35 Z"
             fill={illustration.skin}
-            stroke={colors.rust}
+            stroke={colors.blue}
             strokeWidth={0.75}
           />
           <path
             d="M100,58 C118,58 130,74 131,96 C132,116 124,133 111,142"
             fill="none"
-            stroke={colors.rust}
+            stroke={colors.blue}
             strokeWidth={1}
             opacity={0.5}
           />
-          <ellipse cx={106} cy={100} rx={15} ry={24} fill={illustration.hair} stroke={colors.rust} strokeWidth={0.5} opacity={0.6} />
+          <ellipse cx={106} cy={100} rx={15} ry={24} fill={illustration.hair} stroke={colors.blue} strokeWidth={0.5} opacity={0.6} />
         </>
       )}
       {points.map((p, i) => {
@@ -302,7 +302,7 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
         <button
           onClick={toggle}
           style={{
-            display: 'flex', alignItems: 'center', gap: 8, background: colors.text, color: colors.surface,
+            display: 'flex', alignItems: 'center', gap: 8, background: colors.blue, color: colors.surface,
             border: 'none', borderRadius: 999, padding: '14px 32px', fontFamily: sans, fontSize: 15, fontWeight: 500, cursor: 'pointer',
           }}
         >
@@ -360,7 +360,7 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
             style={{
               flex: 1, border: 'none', borderRadius: 999, padding: '9px 0', cursor: 'pointer',
               fontFamily: sans, fontSize: 14, fontWeight: 500,
-              background: category === tab.key ? colors.text : 'transparent',
+              background: category === tab.key ? colors.blue : 'transparent',
               color: category === tab.key ? colors.surface : colors.muted,
               transition: 'background 0.2s, color 0.2s',
             }}

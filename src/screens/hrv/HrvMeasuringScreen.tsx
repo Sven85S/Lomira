@@ -74,7 +74,7 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
             </div>
 
             <svg width={280} height={60} viewBox="0 0 280 60" style={{ background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}` }}>
-              {pathD && <path d={pathD} fill="none" stroke={colors.rust} strokeWidth={1.5} />}
+              {pathD && <path d={pathD} fill="none" stroke={colors.blue} strokeWidth={1.5} />}
             </svg>
 
             <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0 }}>
@@ -84,7 +84,7 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
             </p>
 
             <div style={{ width: 200, height: 4, borderRadius: 9999, background: colors.border, overflow: 'hidden' }}>
-              <div style={{ width: `${Math.round(progress * 100)}%`, height: '100%', background: colors.rust, transition: 'width 0.2s linear' }} />
+              <div style={{ width: `${Math.round(progress * 100)}%`, height: '100%', background: colors.blue, transition: 'width 0.2s linear' }} />
             </div>
           </>
         )}

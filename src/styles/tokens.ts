@@ -60,7 +60,7 @@ export const primaryBtnStyle: CSSProperties = {
   borderRadius: 9999,
   fontSize: 15,
   fontWeight: 500,
-  background: colors.text,
+  background: colors.blue,
   color: colors.surface,
   cursor: 'pointer',
   border: 'none',
