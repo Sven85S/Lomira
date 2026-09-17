@@ -148,69 +148,76 @@ export default function AnkerScreen() {
         boxSizing: 'border-box',
         height: '100%',
         minHeight: '100%',
-        padding: '26px 20px 10px',
+        padding: '20px 20px 10px',
         gap: 8,
       }}
     >
       {/* Breath blob first, directly under the header — the screen's sole
-          focus, no longer sharing space with navigation. */}
-      <div style={{ position: 'relative', width: 450, height: 450, margin: '0 auto', flexShrink: 0, cursor: 'pointer' }} onClick={toggleExercise}>
-        <div
-          ref={glowRef}
-          style={{
-            position: 'absolute',
-            inset: '-14%',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(200,168,75,0.4) 0%, rgba(200,168,75,0) 72%)',
-            filter: 'blur(20px)',
-            transformOrigin: 'center center',
-            willChange: 'transform',
-            transition: 'opacity 0.3s',
-            // Only shown during an active breath cycle — in the idle "Bereit"
-            // state it's fully hidden rather than just scaled down, per the
-            // "no glow at rest" fix.
-            ...(active ? {} : { animation: 'none', transform: 'scale(0.62)', opacity: 0 }),
-          }}
-        />
-        {webglOk && (
-          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }}>
-            <AnimatedBlob resolution={640} getRadius={currentRadius} onGlFailed={() => setGlFailed(true)} />
-          </div>
-        )}
-        {useCssBlob && (
+          focus, no longer sharing space with navigation. Full-bleed: the
+          outer div cancels the screen's 20px side padding via the standard
+          calc(50% - 50vw) break-out trick and centers the ball against the
+          true viewport width instead of the padded content box — a fixed
+          pixel width here would exceed that padded box on every current
+          phone width and collapse to flush-left instead of centering. */}
+      <div style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)', display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ position: 'relative', width: 'min(420px, 96vw)', aspectRatio: '1 / 1', cursor: 'pointer' }} onClick={toggleExercise}>
           <div
-            ref={blobRef}
+            ref={glowRef}
             style={{
               position: 'absolute',
-              inset: 0,
+              inset: '-14%',
               borderRadius: '50%',
-              overflow: 'hidden',
+              background: 'radial-gradient(circle, rgba(200,168,75,0.4) 0%, rgba(200,168,75,0) 72%)',
+              filter: 'blur(20px)',
               transformOrigin: 'center center',
               willChange: 'transform',
-              ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
+              transition: 'opacity 0.3s',
+              // Only shown during an active breath cycle — in the idle "Bereit"
+              // state it's fully hidden rather than just scaled down, per the
+              // "no glow at rest" fix.
+              ...(active ? {} : { animation: 'none', transform: 'scale(0.62)', opacity: 0 }),
             }}
-          >
+          />
+          {webglOk && (
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }}>
+              <AnimatedBlob resolution={640} getRadius={currentRadius} onGlFailed={() => setGlFailed(true)} />
+            </div>
+          )}
+          {useCssBlob && (
             <div
+              ref={blobRef}
               style={{
                 position: 'absolute',
                 inset: 0,
-                background:
-                  'radial-gradient(circle at 30% 52%, #E3A93B 0%, rgba(227,169,59,0) 58%), radial-gradient(circle at 68% 26%, #F6F1E2 0%, rgba(246,241,226,0) 55%), radial-gradient(circle at 64% 78%, #8FA07C 0%, rgba(143,160,124,0) 58%), #EFDDA8',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                transformOrigin: 'center center',
+                willChange: 'transform',
+                ...(active ? {} : { animation: 'none', transform: 'scale(0.62)' }),
               }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url(${blobTexture})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                mixBlendMode: 'normal',
-                opacity: 1,
-              }}
-            />
-          </div>
-        )}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'radial-gradient(circle at 30% 52%, #E3A93B 0%, rgba(227,169,59,0) 58%), radial-gradient(circle at 68% 26%, #F6F1E2 0%, rgba(246,241,226,0) 55%), radial-gradient(circle at 64% 78%, #8FA07C 0%, rgba(143,160,124,0) 58%), #EFDDA8',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${blobTexture})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  mixBlendMode: 'normal',
+                  opacity: 1,
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Timer + intro copy, below the ball now — tightly coupled, only the
@@ -218,14 +225,14 @@ export default function AnkerScreen() {
           idle ("Bereit") and active (the countdown) show real text in the
           big slot, so it keeps one fixed height in both states. */}
       <div style={{ flexShrink: 0 }}>
-        <div style={{ height: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ height: 50, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
           <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
             {phaseLabel}
           </div>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 20, margin: '4px 0 0' }}>
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 16, margin: '4px 0 0' }}>
           {introCopy}
         </p>
       </div>
@@ -233,10 +240,10 @@ export default function AnkerScreen() {
       {/* Bottom group: exercise copy, tap hint and steppers stay together as one
           block; like the timer group, only the space around it flexes. */}
       <div style={{ width: '100%', flexShrink: 0 }}>
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.muted, margin: '16px 0 0' }}>{tapHintLabel}</p>
+        <p style={{ textAlign: 'center', fontSize: 14, color: colors.muted, margin: '10px 0 0' }}>{tapHintLabel}</p>
 
-        <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 8 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
+        <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 6 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
             <span style={{ fontSize: 11, color: colors.muted }}>Einatmen</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label="Einatmen kürzer">
@@ -248,7 +255,7 @@ export default function AnkerScreen() {
               </button>
             </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '7px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
             <span style={{ fontSize: 11, color: colors.muted }}>Ausatmen</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label="Ausatmen kürzer">
