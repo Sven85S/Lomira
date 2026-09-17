@@ -2,11 +2,6 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    // Only src/animations/intro/*.jsx need this — the vendored intro-
-    // animation bundle, kept as delivered (bare-global React.* references,
-    // no type annotations). allowJs alone (without checkJs) just lets TS
-    // resolve importing them, it doesn't type-check their contents.
-    "allowJs": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
