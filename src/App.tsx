@@ -3,6 +3,7 @@ import { bgGradient } from './styles/tokens';
 import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
+import IntroAnimation from './components/IntroAnimation';
 import Header from './components/Header';
 import OrbitNav from './components/OrbitNav';
 import AnkerScreen from './screens/AnkerScreen';
@@ -22,6 +23,7 @@ export default function App() {
     <DataProvider>
       <SubscriptionProvider>
         <Shell />
+        <IntroAnimation />
       </SubscriptionProvider>
     </DataProvider>
   );
