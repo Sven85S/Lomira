@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { colors, serif } from '../styles/tokens';
+import { STORAGE_KEYS, readJSON } from '../lib/storage';
 
 // Pure CSS-transition intro, no external animation engine. Renders on top
 // of the already-mounted app (Shell's default tab is Anker, so the real
@@ -9,16 +10,27 @@ import { colors, serif } from '../styles/tokens';
 // instance ever existing, there's no way for this intro to drift out of
 // sync with the real Anker screen.
 const FADE_IN_MS = 200;
-const HOLD_MS = 1100;
+const HOLD_MS = 1800;
 const TRANSITION_OUT_MS = 400;
 const BUFFER_MS = 200;
 
 export default function IntroAnimation() {
+  // null until the stored name (same STORAGE_KEYS.firstName SettingsScreen.tsx
+  // owns — not exposed through DataContext) has been read; the whole overlay
+  // stays unrendered until then, rather than starting with a generic
+  // "Willkommen" and swapping to the named greeting mid-fade-in.
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [mounted, setMounted] = useState(true);
   const [textIn, setTextIn] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
+    void readJSON(STORAGE_KEYS.firstName, '').then(setFirstName);
+  }, []);
+
+  useEffect(() => {
+    if (firstName === null) return;
+
     // Deferred a frame so the browser commits the initial (hidden) style
     // first — flipping textIn straight to true from the initial render
     // would skip the fade/scale-in transition entirely.
@@ -37,12 +49,14 @@ export default function IntroAnimation() {
       window.clearTimeout(leaveTimer);
       window.clearTimeout(unmountTimer);
     };
-  }, []);
+  }, [firstName]);
 
-  if (!mounted) return null;
+  if (!mounted || firstName === null) return null;
 
   const textVisible = textIn && !leaving;
   const textTransitionMs = textVisible ? FADE_IN_MS : TRANSITION_OUT_MS;
+  const trimmedName = firstName.trim();
+  const greeting = trimmedName ? `Willkommen, ${trimmedName}` : 'Willkommen';
 
   return (
     <div
@@ -70,7 +84,7 @@ export default function IntroAnimation() {
           transition: `opacity ${textTransitionMs}ms ease, transform ${textTransitionMs}ms ease`,
         }}
       >
-        Willkommen
+        {greeting}
       </div>
     </div>
   );
