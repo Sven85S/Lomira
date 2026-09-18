@@ -41,6 +41,46 @@ für jeden fehlenden Fall automatisch an (alle xcframework-Slices, nicht nur
 der Workaround ein No-op (Datei existiert dann bereits) und kann bei
 Gelegenheit entfernt werden.
 
+**Nachgelagerter Fund: `ditto` kann einzelne xcframeworks kommentarlos
+auslassen.** Nach Einbau des Manifest-Workarounds oben zeigte sich: Nach
+einem Build fehlte `App.xcframework` gezielt in `Frameworks/Active/`,
+während die anderen drei vollständig mit den Original-Zeitstempeln aus dem
+Release-Build vorhanden waren — `ditto "$SRC" "$DST"` selbst lief dabei ohne
+sichtbaren Fehler durch. Vermutung: Das bereits durch den oben beschriebenen
+Bug unvollständige `App.xcframework` (fehlende `NativeAssetsManifest.json`
+schon in der Quelle) bringt `dittos` eigene Bundle-Verarbeitung für genau
+dieses eine xcframework zum Scheitern, ohne dass der Gesamtaufruf einen
+Fehler zurückgibt — nicht abschließend von hier aus beweisbar (kein
+Mac/Xcode in dieser Sandbox verfügbar), aber die schlüssigste Erklärung für
+das beobachtete Muster.
+
+Zwei Konsequenzen in der Run-Script-Phase:
+1. Nach dem `ditto`-Aufruf wird jetzt explizit geprüft, dass alle vier
+   `*.xcframework`-Verzeichnisse tatsächlich in `Frameworks/Active/`
+   angekommen sind — fehlt eines, bricht der Build mit einer klaren
+   Fehlermeldung ab, statt stillschweigend mit einer unvollständigen App
+   weiterzumachen.
+2. Die Manifest-Workaround-Schleife prüft jetzt zusätzlich mit `[ -d
+   "$app_framework" ]`, ob das Glob-Pattern `App.xcframework/*/App.framework`
+   tatsächlich getroffen hat. Ohne diese Prüfung hätte ein nicht treffendes
+   Glob (z. B. weil `App.xcframework` fehlt) unter `/bin/sh` als *wörtlicher*
+   String mit `*` weitergereicht werden können — `echo '{}' > $manifest`
+   wäre dann an einem nicht existierenden Pfad mit einem irreführenden,
+   scheinbar vom Manifest-Code verursachten Fehler gescheitert, obwohl die
+   eigentliche Ursache der zuvor fehlgeschlagene `ditto`-Kopiervorgang war.
+   Mit Prüfung 1 oben greift dieser Fall ohnehin schon vorher — die
+   `-d`-Prüfung bleibt trotzdem als zweite Absicherung bestehen.
+
+**Zur Diagnose auf dem Mac**, falls das Problem weiter auftritt: den
+`ditto`-Aufruf einzeln mit `$?`-Prüfung direkt danach ausführen —
+```bash
+ditto "ios/App/LomiraPpgFlutter/Frameworks/Release" "/tmp/ditto-test"; echo "exit: $?"
+ls /tmp/ditto-test
+```
+— zeigt, ob `ditto` selbst einen Fehler meldet (Exit-Code ≠ 0) oder ob es
+`App.xcframework` tatsächlich lautlos auslässt (Exit-Code 0, aber im
+Zielordner fehlend).
+
 ## 1. Beide Modi bauen
 
 ```bash
