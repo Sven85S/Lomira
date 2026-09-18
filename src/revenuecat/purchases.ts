@@ -7,15 +7,32 @@ import {
   type PurchasesError,
   type PurchasesOffering,
 } from '@revenuecat/purchases-capacitor';
-import { ENTITLEMENT_ID, REVENUECAT_API_KEY } from '../config/revenuecat';
+import { ENTITLEMENT_ID, PURCHASES_DISABLED_TEMPORARILY, REVENUECAT_API_KEY } from '../config/revenuecat';
 
 /** RevenueCat's SDK only runs on a native shell (iOS or Android) — guard every call site with this. */
 export const isRevenueCatSupported = ['ios', 'android'].includes(Capacitor.getPlatform());
+
+/**
+ * Why purchasing isn't available right now, if at all — null means it genuinely
+ * is. 'platform' is permanent (web/dev shell); 'temporarily-disabled' is the
+ * PURCHASES_DISABLED_TEMPORARILY stopgap and goes away once that flag does.
+ */
+export type PurchasingUnavailableReason = 'platform' | 'temporarily-disabled' | null;
+
+export const purchasingUnavailableReason: PurchasingUnavailableReason = !isRevenueCatSupported
+  ? 'platform'
+  : PURCHASES_DISABLED_TEMPORARILY
+    ? 'temporarily-disabled'
+    : null;
 
 let configured = false;
 
 export async function configureRevenueCat(): Promise<void> {
   if (!isRevenueCatSupported || configured) return;
+  if (PURCHASES_DISABLED_TEMPORARILY) {
+    console.warn('Lomira: PURCHASES_DISABLED_TEMPORARILY is on — Purchases.configure() skipped, real key still pending.');
+    return;
+  }
   if (!REVENUECAT_API_KEY) {
     console.warn('Lomira: no RevenueCat API key set for this platform — RevenueCat stays unconfigured.');
     return;

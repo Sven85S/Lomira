@@ -9,7 +9,7 @@ interface Props {
 const FEATURES = ['Alle Lektionen freigeschaltet', 'Unbegrenzter Ritual-Verlauf', 'Neue Inhalte automatisch inklusive'];
 
 export default function PaywallScreen({ onClose }: Props) {
-  const { offering, purchasingUnsupported, purchasing, purchaseError, purchase, restore, isSubscribed } = useSubscription();
+  const { offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, isSubscribed } = useSubscription();
   const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
 
   const yearlyPkg = offering?.annual ?? null;
@@ -74,9 +74,11 @@ export default function PaywallScreen({ onClose }: Props) {
           <div style={{ ...primaryBtnStyleCard(), textAlign: 'center' }}>
             <p style={{ fontSize: 14, color: colors.text, margin: 0 }}>Du hast Lomira Plus bereits freigeschaltet.</p>
           </div>
-        ) : purchasingUnsupported ? (
+        ) : purchasingUnavailableReason ? (
           <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260 }}>
-            Käufe sind nur in der iOS- oder Android-App verfügbar. Öffne Lomira auf deinem Smartphone, um Lomira Plus zu abonnieren.
+            {purchasingUnavailableReason === 'platform'
+              ? 'Käufe sind nur in der iOS- oder Android-App verfügbar. Öffne Lomira auf deinem Smartphone, um Lomira Plus zu abonnieren.'
+              : 'Der Abo-Kauf ist gerade vorübergehend nicht verfügbar. Bitte versuch es in Kürze erneut.'}
           </p>
         ) : (
           <>

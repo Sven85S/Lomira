@@ -5,19 +5,21 @@ import {
   fetchCurrentOffering,
   fetchCustomerInfo,
   hasPlusEntitlement,
-  isRevenueCatSupported,
   isUserCancelledError,
   purchaseErrorMessage,
   purchasePlan,
+  purchasingUnavailableReason,
   restorePurchases,
+  type PurchasingUnavailableReason,
 } from '../revenuecat/purchases';
 
 interface SubscriptionContextValue {
   loading: boolean;
   isSubscribed: boolean;
   offering: PurchasesOffering | null;
-  /** True once we know purchasing genuinely can't work here (non-iOS shell, e.g. browser dev). */
-  purchasingUnsupported: boolean;
+  /** Null once purchasing genuinely works; otherwise why it doesn't right now
+   * (unsupported platform, or the PURCHASES_DISABLED_TEMPORARILY stopgap). */
+  purchasingUnavailableReason: PurchasingUnavailableReason;
   purchasing: boolean;
   purchaseError: string | null;
   purchase: (plan: 'yearly' | 'monthly') => Promise<boolean>;
@@ -90,7 +92,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       loading,
       isSubscribed,
       offering,
-      purchasingUnsupported: !isRevenueCatSupported,
+      purchasingUnavailableReason,
       purchasing,
       purchaseError,
       purchase,
