@@ -3,8 +3,21 @@
 Ersetzt die manuelle "Add Files"-Einbindung aus dem Spike durch ein lokales
 Swift-Package (`ios/App/LomiraPpgFlutter/`), das App-Debug-Builds automatisch
 die Debug-Flutter-Frameworks und App-Release-Builds die Release-Frameworks
-linkt — via SwiftPMs `.when(configuration:)`, siehe Kommentar in
-`ios/App/LomiraPpgFlutter/Package.swift`.
+linkt.
+
+**Wichtig:** Die Debug/Release-Auswahl läuft NICHT über SwiftPMs
+`.when(configuration:)` auf den binaryTargets — das war der ursprüngliche
+Ansatz, wurde aber empirisch als unzuverlässig entlarvt (ein Gerätebuild mit
+Xcodes eigenem Build-Log "Configuration Release" hatte trotzdem das
+41,4-MB-Debug-`Flutter.framework` eingebettet statt des 9,4-MB-Release-
+xcframeworks und stürzte entsprechend beim Kaltstart ab — ein bekanntes,
+dokumentiertes Limit von Xcodes nativer SPM-Integration für binaryTarget-
+Auswahl). Stattdessen zeigt `Package.swift` immer auf einen festen Pfad
+(`Frameworks/Active/…xcframework`), und eine Run-Script-Build-Phase namens
+„Select Active Flutter Frameworks" auf Target **App** — die erste Phase im
+Build, noch vor Sources/Frameworks/Resources — kopiert bei jedem Build
+`Frameworks/$CONFIGURATION/` nach `Frameworks/Active/`. Siehe Kommentar in
+`ios/App/LomiraPpgFlutter/Package.swift` für Details.
 
 ## 1. Beide Modi bauen
 
@@ -29,6 +42,10 @@ Beide Ordner sind über `.gitignore` im Package ausgeschlossen (Build-Artefakte,
 nicht Quellcode) — dieser Schritt muss nach jedem `flutter build
 ios-framework`-Lauf wiederholt werden, nicht nur einmalig.
 
+Ein dritter Ordner `Frameworks/Active/` wird NICHT von Hand angelegt — die
+Run-Script-Build-Phase „Select Active Flutter Frameworks" erzeugt/überschreibt
+ihn bei jedem Xcode-Build automatisch aus `Frameworks/$CONFIGURATION/`.
+
 ## 3. Manuelle Spike-Einbindung aus Xcode entfernen
 
 Falls noch vorhanden: Target **App** → *General* → *Frameworks, Libraries and
@@ -52,20 +69,30 @@ nicht die statische FlutterPluginRegistrant. Das ist genau die im Spike
 manuell gesetzte Konfiguration, nur diesmal strukturell erzwungen statt von
 Hand gepflegt.
 
-## 5. Der eine Punkt, der noch nicht verifiziert ist
+## 5. Verifikation der Debug/Release-Weiche
 
-Die Debug/Release-Weiche (`.when(configuration:)`) ist SwiftPMs dafür
-vorgesehener, dokumentierter Mechanismus — aber ungetestet, weil diese
-Sandbox kein Xcode hat.
+Die neue Weiche (Run-Script-Build-Phase kopiert `Frameworks/$CONFIGURATION/`
+nach `Frameworks/Active/`) lässt sich vorab am Build-Log prüfen, bevor
+überhaupt ein Gerätetest nötig ist:
 
-**Verschoben auf Schritt 4 (End-to-End-Test):** Ein Release-Build lässt sich
-aktuell nicht sinnvoll prüfen — der RevenueCat-Test-Key-Schutz schließt jeden
-Release-Build sofort (bekanntes, ohnehin für später vorgesehenes Thema), und
-bis Schritt 3 landet, gibt es im Release-Build noch keinen Code-Pfad, der die
-Flutter-Engine überhaupt anfasst (der `#if DEBUG`-Spike-Button existiert dort
-nicht, `PpgCameraCapture.swift` nutzt noch AVFoundation direkt). Der Test ist
-erst aussagekräftig, sobald der reguläre HRV-Tab tatsächlich über die
-Flutter-Bridge läuft — siehe Schritt 4:
+1. In Xcode einen Release-Build anstoßen (Scheme mit `buildConfiguration =
+   Release`, siehe `App.xcscheme`), dann **Report Navigator** → den Build
+   öffnen → die Phase „Select Active Flutter Frameworks" aufklappen. Der
+   geloggte `CONFIGURATION`-Wert (durch `showEnvVarsInLog` sichtbar) muss
+   `Release` sein, und das Script darf nicht mit dem `error: … fehlt`-Pfad
+   abbrechen.
+2. Direkt danach am Mac-Terminal prüfen, welche Variante tatsächlich in
+   `Frameworks/Active/` liegt:
+   ```bash
+   ls -la ios/App/LomiraPpgFlutter/Frameworks/Active/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter
+   ```
+   Dateigröße sollte der des Release-xcframeworks entsprechen (klein, nicht
+   die ~41 MB der Debug-Variante).
+
+**Der eigentliche End-to-End-Test bleibt wie zuvor auf Schritt 4 verschoben**
+(RevenueCat-Test-Key-Problem, `#if DEBUG`-Spike-Button existiert nur dort;
+erst aussagekräftig, sobald der reguläre HRV-Tab über die Flutter-Bridge
+läuft):
 
 1. **Debug-Build** wie gehabt auf dem Gerät laufen lassen — sollte weiter
    funktionieren wie zuvor.
@@ -77,6 +104,7 @@ Flutter-Bridge läuft — siehe Schritt 4:
    Debug-Frameworks abstürzt.
    - **Kein Absturz** → Release-Frameworks korrekt eingebettet, Weiche
      funktioniert wie geplant.
-   - **Absturz** (z. B. "Library not loaded"/Debug-Engine-bezogen) → die
-     `.when(configuration:)`-Bedingung hat nicht gegriffen; genauen
+   - **Absturz** (z. B. "Library not loaded"/Debug-Engine-bezogen o.ä.) →
+     Build-Log der Run-Script-Phase (Schritt 1 oben) sowie
+     `Frameworks/Active/`-Dateigröße (Schritt 2 oben) prüfen und genauen
      Fehlertext mitteilen.

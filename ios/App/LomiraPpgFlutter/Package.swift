@@ -12,23 +12,41 @@ import PackageDescription
 // or it crashes on launch — shipping that inside a Release build would
 // crash for every real user, not just in dev testing.
 //
-// SwiftPM's dependency `.when(configuration:)` condition only distinguishes
-// .debug/.release, which matches this project exactly: App.xcodeproj has
-// only "Debug" and "Release" build configurations (verified — no "Profile").
-// Flutter's third build mode (used for its own performance-profiling
-// tooling) has no corresponding Xcode configuration here and is
-// intentionally not wired up.
+// IMPORTANT — this used to be done with per-configuration binaryTargets
+// (FlutterEngineDebug/FlutterEngineRelease/…) selected via SwiftPM's
+// `.when(configuration:)` dependency condition. That was empirically proven
+// unreliable: a device build showed "Configuration Release" in Xcode's own
+// build log yet still embedded the 41.4MB Debug Flutter.framework (vs. the
+// 9.4MB Release xcframework), crashing on cold launch with the exact
+// Debug-JIT-without-debugger error. This matches a documented limitation in
+// Xcode's native SPM integration — `.when(configuration:)` is not reliably
+// honored for which binaryTarget actually gets embedded (distinct from
+// ordinary conditional source dependencies).
+//
+// The fix: this package now declares only ONE fixed set of binaryTargets,
+// always pointing at Frameworks/Active/*.xcframework — no configuration
+// branching in Package.swift at all, so there is nothing for SPM to get
+// wrong. Instead, a Run Script Build Phase on the App target (added first
+// in the target's build phase list — see project.pbxproj) copies
+// Frameworks/$CONFIGURATION/ over Frameworks/Active/ before anything else
+// builds, so the correct variant is already on disk by the time SPM/the
+// linker touch it. This mirrors Flutter's own official CocoaPods
+// add-to-app integration, which solves the identical problem with an early
+// Run Script phase rather than relying on SwiftPM conditionals.
 //
 // Expected directory layout (NOT checked into git — see .gitignore in this
-// folder; produced locally by `flutter build ios-framework --output=Frameworks
-// --no-profile`, run from flutter/lomira_ppg_bridge/, then copied here):
+// folder; Debug/Release produced locally by `flutter build ios-framework
+// --output=Frameworks --no-profile`, run from flutter/lomira_ppg_bridge/,
+// then copied here; Active/ is populated automatically by the Run Script
+// Build Phase on every Xcode build, not by hand):
 //   Frameworks/Debug/{Flutter,App,FlutterPluginRegistrant,camera_avfoundation}.xcframework
 //   Frameworks/Release/{Flutter,App,FlutterPluginRegistrant,camera_avfoundation}.xcframework
+//   Frameworks/Active/{Flutter,App,FlutterPluginRegistrant,camera_avfoundation}.xcframework  (generated)
 //
-// Do NOT try to `.when(configuration:)`-gate CameraAvfoundation's own
-// underlying plugin dependencies here — flutter_ppg has no native iOS code
-// (pure Dart), so camera_avfoundation.xcframework is the only plugin
-// xcframework besides the four already listed.
+// Do NOT try to gate CameraAvfoundation's own underlying plugin
+// dependencies here — flutter_ppg has no native iOS code (pure Dart), so
+// camera_avfoundation.xcframework is the only plugin xcframework besides
+// the three already listed.
 let package = Package(
     name: "LomiraPpgFlutter",
     platforms: [.iOS(.v15)],
@@ -36,33 +54,23 @@ let package = Package(
         .library(name: "LomiraPpgFlutter", targets: ["LomiraPpgFlutter"]),
     ],
     targets: [
-        .binaryTarget(name: "FlutterEngineDebug", path: "Frameworks/Debug/Flutter.xcframework"),
-        .binaryTarget(name: "FlutterAppDebug", path: "Frameworks/Debug/App.xcframework"),
-        .binaryTarget(name: "FlutterPluginRegistrantDebug", path: "Frameworks/Debug/FlutterPluginRegistrant.xcframework"),
-        .binaryTarget(name: "CameraAvfoundationDebug", path: "Frameworks/Debug/camera_avfoundation.xcframework"),
-
-        .binaryTarget(name: "FlutterEngineRelease", path: "Frameworks/Release/Flutter.xcframework"),
-        .binaryTarget(name: "FlutterAppRelease", path: "Frameworks/Release/App.xcframework"),
-        .binaryTarget(name: "FlutterPluginRegistrantRelease", path: "Frameworks/Release/FlutterPluginRegistrant.xcframework"),
-        .binaryTarget(name: "CameraAvfoundationRelease", path: "Frameworks/Release/camera_avfoundation.xcframework"),
+        .binaryTarget(name: "FlutterEngine", path: "Frameworks/Active/Flutter.xcframework"),
+        .binaryTarget(name: "FlutterApp", path: "Frameworks/Active/App.xcframework"),
+        .binaryTarget(name: "FlutterPluginRegistrant", path: "Frameworks/Active/FlutterPluginRegistrant.xcframework"),
+        .binaryTarget(name: "CameraAvfoundation", path: "Frameworks/Active/camera_avfoundation.xcframework"),
 
         // Pure marker target — carries no code of its own, only the
-        // configuration-conditional dependency edges onto the binary
-        // targets above. Consuming Swift code keeps importing `Flutter` /
-        // `FlutterPluginRegistrant` directly (those module names come from
-        // the xcframeworks themselves), not `LomiraPpgFlutter`.
+        // dependency edges onto the binary targets above. Consuming Swift
+        // code keeps importing `Flutter` / `FlutterPluginRegistrant`
+        // directly (those module names come from the xcframeworks
+        // themselves), not `LomiraPpgFlutter`.
         .target(
             name: "LomiraPpgFlutter",
             dependencies: [
-                .target(name: "FlutterEngineDebug", condition: .when(configuration: [.debug])),
-                .target(name: "FlutterAppDebug", condition: .when(configuration: [.debug])),
-                .target(name: "FlutterPluginRegistrantDebug", condition: .when(configuration: [.debug])),
-                .target(name: "CameraAvfoundationDebug", condition: .when(configuration: [.debug])),
-
-                .target(name: "FlutterEngineRelease", condition: .when(configuration: [.release])),
-                .target(name: "FlutterAppRelease", condition: .when(configuration: [.release])),
-                .target(name: "FlutterPluginRegistrantRelease", condition: .when(configuration: [.release])),
-                .target(name: "CameraAvfoundationRelease", condition: .when(configuration: [.release])),
+                "FlutterEngine",
+                "FlutterApp",
+                "FlutterPluginRegistrant",
+                "CameraAvfoundation",
             ],
             path: "Sources/LomiraPpgFlutter"
         ),
