@@ -192,7 +192,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/${CONFIGURATION}\"\nDST=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/Active\"\nif [ ! -d \"$SRC\" ]; then\n  echo \"error: $SRC fehlt - zuerst 'flutter build ios-framework' + Kopierschritt aus SPM_INTEGRATION.md ausfuehren\"\n  exit 1\nfi\nrm -rf \"$DST\"\nmkdir -p \"$DST\"\ncp -R \"$SRC\"/. \"$DST\"/\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/${CONFIGURATION}\"\nDST=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/Active\"\nif [ ! -d \"$SRC\" ]; then\n  echo \"error: $SRC fehlt - zuerst 'flutter build ios-framework' + Kopierschritt aus SPM_INTEGRATION.md ausfuehren\"\n  exit 1\nfi\nrm -rf \"$DST\"\nmkdir -p \"$DST\"\nditto \"$SRC\" \"$DST\"\n";
 			showEnvVarsInLog = 1;
 		};
 /* End PBXShellScriptBuildPhase section */

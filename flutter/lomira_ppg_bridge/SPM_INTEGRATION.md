@@ -19,6 +19,12 @@ Build, noch vor Sources/Frameworks/Resources — kopiert bei jedem Build
 `Frameworks/$CONFIGURATION/` nach `Frameworks/Active/`. Siehe Kommentar in
 `ios/App/LomiraPpgFlutter/Package.swift` für Details.
 
+Die Kopierlogik nutzt `ditto`, nicht `cp -R`: `cp -R` verursachte auf dem
+Gerät xattr-Fehler beim Kopieren der `.xcframework`-Bundles (Ressourcen-
+Forks/Metadaten, die xcframeworks/.framework-Bundles enthalten). `ditto` ist
+das von Apple für Bundle-Kopien empfohlene Werkzeug, kopiert dabei
+standardmäßig vollständig rekursiv und erhält alle Metadaten korrekt.
+
 ## 1. Beide Modi bauen
 
 ```bash
