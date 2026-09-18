@@ -81,6 +81,27 @@ ls /tmp/ditto-test
 `App.xcframework` tatsächlich lautlos auslässt (Exit-Code 0, aber im
 Zielordner fehlend).
 
+**Präziserer Befund:** In `Active/App.xcframework/ios-arm64/App.framework/`
+landete nach dem Kopieren nur `Info.plist` — `App` (das eigentliche
+Programm, 3,27 MB in der Quelle), `flutter_assets` und `_CodeSignature`
+fehlten. `ditto` bricht also mitten in genau diesem einen Framework ab,
+nicht das ganze `App.xcframework` wird übersprungen. Ein manueller
+`ditto`-Aufruf derselben Quelle im Terminal funktionierte dabei einwandfrei
+— der Unterschied liegt vermutlich in den Rechten/der Umgebung, mit der
+Xcode die Build-Phase ausführt (z. B. Full-Disk-Access-Sandboxing), nicht
+an den Dateien selbst. Nicht abschließend geklärt.
+
+**Deshalb jetzt volle Sichtbarkeit direkt im Xcode-Build-Log:** Die
+Run-Script-Phase ruft `ditto -v` seit dem letzten Fix für jedes der vier
+xcframeworks einzeln auf (nicht mehr ein Aufruf für den ganzen
+`Release`-Ordner), loggt den Exit-Code jedes einzelnen Aufrufs explizit
+(`echo … $status`, erfasst *vor* einem möglichen `set -e`-Abbruch) und
+listet direkt danach per `find … -type f` den tatsächlich kopierten Inhalt
+auf. Im Report Navigator (Cmd+9) ist beim nächsten Fehlschlag also sofort
+sichtbar: welches der vier xcframeworks betroffen ist, mit welchem
+Exit-Code, und was `ditto` tatsächlich hinterlassen hat — ohne weitere
+Terminal-Nachschau.
+
 **Kritischer Nachtrag: die Henne-Ei-Falle konnte sich selbst zuschlagen.**
 Die Run-Script-Phase schrieb bisher direkt nach `Frameworks/Active/`
 (`rm -rf "$DST"` ganz am Anfang). Schlug irgendein Schritt danach fehl —
