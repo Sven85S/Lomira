@@ -25,6 +25,22 @@ Forks/Metadaten, die xcframeworks/.framework-Bundles enthalten). `ditto` ist
 das von Apple für Bundle-Kopien empfohlene Werkzeug, kopiert dabei
 standardmäßig vollständig rekursiv und erhält alle Metadaten korrekt.
 
+**Bekannter Flutter-Tooling-Bug (NativeAssetsManifest.json):** Mit Flutter
+3.47.4 erzeugt `flutter build ios-framework` `App.framework` ohne die Datei
+`NativeAssetsManifest.json`, obwohl Xcode sie beim Einbetten erwartet
+(„The file … couldn't be opened because there is no such file"). Bestätigt:
+Die Datei fehlt bereits in `Frameworks/Release/App.xcframework/ios-arm64/
+App.framework/` direkt nach dem `flutter build`-Lauf — das Problem liegt in
+Flutters Tooling, nicht in unserer Kopierlogik. Passt zu
+[flutter/flutter#181507](https://github.com/flutter/flutter/pull/181507)
+("[native_assets] Fix `flutter build ios-framework`"), das genau diesen
+Bereich umgebaut hat. Da dieses Projekt keine nativen Dart-/FFI-Pakete nutzt,
+ist ein leeres JSON-Objekt inhaltlich korrekt — die Run-Script-Phase legt es
+für jeden fehlenden Fall automatisch an (alle xcframework-Slices, nicht nur
+`ios-arm64`). Sollte ein künftiges Flutter-Update das Problem beheben, ist
+der Workaround ein No-op (Datei existiert dann bereits) und kann bei
+Gelegenheit entfernt werden.
+
 ## 1. Beide Modi bauen
 
 ```bash

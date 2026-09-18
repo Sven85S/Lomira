@@ -192,7 +192,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/${CONFIGURATION}\"\nDST=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/Active\"\nif [ ! -d \"$SRC\" ]; then\n  echo \"error: $SRC fehlt - zuerst 'flutter build ios-framework' + Kopierschritt aus SPM_INTEGRATION.md ausfuehren\"\n  exit 1\nfi\nrm -rf \"$DST\"\nmkdir -p \"$DST\"\nditto \"$SRC\" \"$DST\"\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/${CONFIGURATION}\"\nDST=\"${SRCROOT}/LomiraPpgFlutter/Frameworks/Active\"\nif [ ! -d \"$SRC\" ]; then\n  echo \"error: $SRC fehlt - zuerst 'flutter build ios-framework' + Kopierschritt aus SPM_INTEGRATION.md ausfuehren\"\n  exit 1\nfi\nrm -rf \"$DST\"\nmkdir -p \"$DST\"\nditto \"$SRC\" \"$DST\"\n\n# Workaround fuer einen bekannten Flutter-Tooling-Bug (siehe\n# flutter/flutter#181507): `flutter build ios-framework` erzeugt\n# App.framework teils ohne NativeAssetsManifest.json, obwohl Xcode die\n# Datei beim Einbetten erwartet. Fuer dieses Projekt (keine nativen\n# Dart-/FFI-Pakete im Einsatz) ist ein leeres JSON-Objekt inhaltlich\n# korrekt. Deckt alle xcframework-Slices ab (Geraet + Simulator), nicht\n# nur ios-arm64, falls derselbe Bug dort ebenfalls auftritt.\nfor app_framework in \"$DST\"/App.xcframework/*/App.framework; do\n  manifest=\"$app_framework/NativeAssetsManifest.json\"\n  [ -f \"$manifest\" ] || echo '{}' > \"$manifest\"\ndone\n";
 			showEnvVarsInLog = 1;
 		};
 /* End PBXShellScriptBuildPhase section */
