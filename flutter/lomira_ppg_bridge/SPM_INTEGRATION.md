@@ -56,10 +56,15 @@ doppelt gelinkt (einmal roh, einmal über das neue Package).
 
 ## 4. Lokales Package hinzufügen
 
-Xcode: **File → Add Package Dependencies… → Add Local…** → Ordner
-`ios/App/LomiraPpgFlutter` auswählen. Danach im Target **App** →
-*Frameworks, Libraries and Embedded Content* das Produkt `LomiraPpgFlutter`
-hinzufügen (falls nicht automatisch geschehen).
+**Bereits erledigt und committet** — `LomiraPpgFlutter` ist als lokale Package-
+Referenz + Produkt-Abhängigkeit direkt in `App.xcodeproj/project.pbxproj`
+verankert (Target **App** → *Frameworks, Libraries and Embedded Content*),
+kein manueller **File → Add Package Dependencies…**-Schritt mehr nötig. Das
+war zuvor die eigentliche Lücke: Diese Verknüpfung wurde ursprünglich nur
+lokal in Xcode gesetzt und nie ins Repo committet — jeder Gerätebuild lief
+also gegen einen Projektzustand, den git nie kannte. Falls du diesen Schritt
+selbst schon einmal manuell in Xcode ausgeführt hattest, prüfe kurz, dass
+`LomiraPpgFlutter` dort nicht doppelt auftaucht.
 
 Anders als bei der manuellen Spike-Einbindung gibt es hier **keine**
 Embed & Sign / Do Not Embed-Entscheidung mehr von Hand zu treffen — SwiftPM
