@@ -81,6 +81,40 @@ ls /tmp/ditto-test
 `App.xcframework` tatsächlich lautlos auslässt (Exit-Code 0, aber im
 Zielordner fehlend).
 
+**Kritischer Nachtrag: die Henne-Ei-Falle konnte sich selbst zuschlagen.**
+Die Run-Script-Phase schrieb bisher direkt nach `Frameworks/Active/`
+(`rm -rf "$DST"` ganz am Anfang). Schlug irgendein Schritt danach fehl —
+z. B. der oben beschriebene `ditto`-Aussetzer —, blieb `Active/` dauerhaft
+in einem kaputten Zwischenzustand zurück. Das Tückische: SwiftPM prüft die
+`binaryTarget`-Pfade in `Package.swift` bei der Paket-Auflösung, die JEDER
+Build-Phase vorausgeht — ist `Active/` einmal ungültig, startet gar keine
+Build-Phase mehr, auch nicht diese Script-Phase selbst, die den Ordner
+eigentlich reparieren würde. Ein einziger fehlgeschlagener Durchlauf hat
+sich damit selbst dauerhaft blockiert.
+
+**Fix:** Die Script-Phase kopiert und validiert jetzt vollständig in ein
+Staging-Verzeichnis `Frameworks/Active.tmp/` — `Active/` selbst wird bis
+zum letzten Schritt nicht angefasst. Erst nach erfolgreicher `ditto`-Kopie
+UND bestandener Vollständigkeits-/Manifest-Prüfung wird `Active/` per zweier
+`mv`-Aufrufe (erst altes `Active/` nach `Active.old/` beiseiteschieben, dann
+`Active.tmp/` an die Stelle von `Active/` verschieben) atomar ersetzt.
+Schlägt irgendetwas vorher fehl, bleibt der zuvor funktionierende
+`Active/`-Stand unangetastet stehen — der nächste Versuch kann die
+Paket-Auflösung weiterhin bestehen.
+
+**Einmalige manuelle Reparatur nötig, falls `Active/` bereits kaputt ist:**
+Diese Fahrlässigkeit selbst kann das neue Skript nicht mehr rückgängig
+machen, weil es aus genau dem oben beschriebenen Grund gar nicht erst zum
+Laufen kommt, solange `Active/` ungültig ist. Einmalig von Hand reparieren,
+bevor Xcode wieder ein normales Build versucht:
+```bash
+cd ios/App/LomiraPpgFlutter/Frameworks
+rm -rf Active Active.tmp Active.old
+ditto Release Active   # oder Debug, je nach zuletzt gebrauchter Konfiguration
+```
+Danach sollte Xcodes Paket-Auflösung wieder greifen, und ab dann übernimmt
+die Script-Phase selbst dauerhaft und sicher.
+
 ## 1. Beide Modi bauen
 
 ```bash
