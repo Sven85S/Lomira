@@ -89,13 +89,22 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
     // exactly the kind of silent-crash-or-hang that could plausibly explain
     // some of the earlier "torch goes off immediately" symptoms as a crash
     // right after stop(), not a torch/hardware problem.
+    //
+    // call.resolve() now waits for capture.stop()'s completion — i.e. for
+    // Dart's setFlashMode(off) to have actually run — instead of firing as
+    // soon as the native preview view was removed. That gap (JS "stopCapture
+    // resolved" without the torch actually being off yet) was the confirmed
+    // root cause of the torch staying on after a measurement ends: nothing
+    // downstream of the resolved promise could tell the difference between
+    // "stop requested" and "stop completed".
     @objc func stopCapture(_ call: CAPPluginCall) {
         print("[PpgCamera] stopCapture() called")
-        capture.stop(reason: "JS PpgCamera.stopCapture()")
-        DispatchQueue.main.async { [weak self] in
-            self?.previewContainerView?.removeFromSuperview()
-            self?.previewContainerView = nil
-            call.resolve()
+        capture.stop(reason: "JS PpgCamera.stopCapture()") { [weak self] in
+            DispatchQueue.main.async {
+                self?.previewContainerView?.removeFromSuperview()
+                self?.previewContainerView = nil
+                call.resolve()
+            }
         }
     }
 
