@@ -4,6 +4,10 @@ import type { CameraPermissionState } from '../../native/ppgCamera';
 
 interface Props {
   isSupported: boolean;
+  /** No active subscription/trial — takes priority over the platform checks
+   * below, since the Plus gate applies regardless of iOS/web/simulator. */
+  locked: boolean;
+  onOpenPaywall: () => void;
   permission: CameraPermissionState | 'unknown';
   available: boolean | null;
   error: string | null;
@@ -13,12 +17,26 @@ interface Props {
   onContinue: () => void;
 }
 
+// Same lock glyph as LektionenScreen's LockIcon, just sized to match this
+// screen's own centered-icon states (the 40x40 "no preview" camera icon
+// below) instead of LektionenScreen's small 15x15 row icon.
+function LockIcon() {
+  return (
+    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x={3} y={11} width={18} height={11} rx={2} ry={2} />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
 // No back/close button — HRV is a regular tab now (like Anker/Übungen/...),
 // so switching to another tab is the exit, same as everywhere else. Only
 // HrvMeasuringScreen keeps an explicit button, since it doubles as
 // "cancel a running measurement", not just "leave".
 export default function HrvStartScreen({
   isSupported,
+  locked,
+  onOpenPaywall,
   permission,
   available,
   error,
@@ -34,19 +52,31 @@ export default function HrvStartScreen({
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text, alignSelf: 'flex-start' }}>Puls messen</div>
 
-        {!isSupported && (
+        {locked && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
+            <LockIcon />
+            <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
+              Die HRV-Messung ist Teil von Lomira Plus — starte deine kostenlose 14-tägige Testphase, um sie freizuschalten.
+            </p>
+            <button style={primaryBtnStyle} onClick={onOpenPaywall}>
+              HRV-Messung freischalten
+            </button>
+          </div>
+        )}
+
+        {!locked && !isSupported && (
           <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: '40px 0 0' }}>
             Die Puls-Messung über die Kamera ist aktuell nur in der iOS-App verfügbar.
           </p>
         )}
 
-        {simulatorLikely && (
+        {!locked && simulatorLikely && (
           <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: '40px 0 0' }}>
             Keine passende Kamera gefunden. Diese Messung funktioniert nur auf einem echten iPhone.
           </p>
         )}
 
-        {isSupported && available !== false && (
+        {!locked && isSupported && available !== false && (
           <>
             <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
               Finger vollständig auf Kamera und Blitz legen — ruhig halten, bis die Messung abgeschlossen ist.

@@ -97,7 +97,11 @@ export default function SettingsScreen({ onClose }: Props) {
   return (
     <div
       style={{
-        position: 'absolute', inset: 0, background: colors.surface, zIndex: 35, display: 'flex', flexDirection: 'column',
+        // bottom leaves room for OrbitNav instead of covering it (inset: 0
+        // used to) — the tab bar stays visible/reachable while this overlay
+        // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
+        background: colors.surface, zIndex: 35, display: 'flex', flexDirection: 'column',
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
