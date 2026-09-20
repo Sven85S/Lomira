@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { colors, iconBtnStyle, primaryBtnStyle, serif } from '../styles/tokens';
+import { cardStyle, colors, iconBtnStyle, primaryBtnStyle, serif } from '../styles/tokens';
 import { useSubscription } from '../context/SubscriptionContext';
 
 interface Props {
@@ -53,16 +53,16 @@ export default function PaywallScreen({ onClose }: Props) {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-        <div style={{ fontFamily: serif, fontSize: 10, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase', marginTop: 4 }}>lomira</div>
+        <div style={{ fontFamily: serif, fontSize: 10, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase', marginTop: 4, alignSelf: 'flex-start', width: '100%' }}>lomira</div>
         <div style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text, textAlign: 'center' }}>Lomira Plus</div>
         <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, maxWidth: 270, margin: 0 }}>
           Alle 18 Lektionen, dein vollständiger Ritual-Verlauf und alle kommenden Module.
         </p>
 
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+        <div style={{ ...cardStyle, width: '100%', marginTop: 4, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {FEATURES.map((f) => (
             <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.sage} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.blue} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               <span style={{ fontSize: 13, color: colors.text }}>{f}</span>
@@ -71,7 +71,7 @@ export default function PaywallScreen({ onClose }: Props) {
         </div>
 
         {isSubscribed ? (
-          <div style={{ ...primaryBtnStyleCard(), textAlign: 'center' }}>
+          <div style={{ ...cardStyle, width: '100%', marginTop: 4, textAlign: 'center' }}>
             <p style={{ fontSize: 14, color: colors.text, margin: 0 }}>Du hast Lomira Plus bereits freigeschaltet.</p>
           </div>
         ) : purchasingUnavailableReason ? (
@@ -135,8 +135,4 @@ export default function PaywallScreen({ onClose }: Props) {
       </div>
     </div>
   );
-}
-
-function primaryBtnStyleCard(): CSSProperties {
-  return { width: '100%', marginTop: 4, padding: '15px', borderRadius: 16, background: colors.card, border: `1px solid ${colors.border}` };
 }
