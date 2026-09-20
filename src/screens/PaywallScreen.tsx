@@ -86,7 +86,7 @@ export default function PaywallScreen({ onClose }: Props) {
         ) : purchasingUnavailableReason ? (
           <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260 }}>
             {purchasingUnavailableReason === 'platform'
-              ? 'Käufe sind nur in der iOS- oder Android-App verfügbar. Öffne Lomira auf deinem Smartphone, um Lomira Plus zu abonnieren.'
+              ? 'Käufe sind nur in der iOS-App verfügbar.'
               : 'Der Abo-Kauf ist gerade vorübergehend nicht verfügbar. Bitte versuch es in Kürze erneut.'}
           </p>
         ) : (

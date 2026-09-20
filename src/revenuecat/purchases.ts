@@ -9,8 +9,22 @@ import {
 } from '@revenuecat/purchases-capacitor';
 import { ENTITLEMENT_ID, PURCHASES_DISABLED_TEMPORARILY, REVENUECAT_API_KEY } from '../config/revenuecat';
 
-/** RevenueCat's SDK only runs on a native shell (iOS or Android) — guard every call site with this. */
-export const isRevenueCatSupported = ['ios', 'android'].includes(Capacitor.getPlatform());
+/**
+ * RevenueCat's SDK only runs on a native shell (iOS or Android) — guard every
+ * call site with this. A function, not a frozen module-load-time constant:
+ * Capacitor.getPlatform() itself re-checks window.webkit.messageHandlers.bridge
+ * fresh on every call and is safe to call anytime, but if this were computed
+ * once at module import time, a real device's documented WKWebView race
+ * (native bridge not yet registered when the first script executes) could
+ * permanently freeze it at the wrong "web" result for the rest of the app's
+ * lifetime — confirmed as exactly what caused the Paywall to show the
+ * 'platform' text on a real iOS device instead of 'temporarily-disabled'.
+ * Every call site below now reads the platform live instead of trusting a
+ * value that may have been snapshotted too early.
+ */
+export function isRevenueCatSupported(): boolean {
+  return ['ios', 'android'].includes(Capacitor.getPlatform());
+}
 
 /**
  * Why purchasing isn't available right now, if at all — null means it genuinely
@@ -19,16 +33,16 @@ export const isRevenueCatSupported = ['ios', 'android'].includes(Capacitor.getPl
  */
 export type PurchasingUnavailableReason = 'platform' | 'temporarily-disabled' | null;
 
-export const purchasingUnavailableReason: PurchasingUnavailableReason = !isRevenueCatSupported
-  ? 'platform'
-  : PURCHASES_DISABLED_TEMPORARILY
-    ? 'temporarily-disabled'
-    : null;
+export function getPurchasingUnavailableReason(): PurchasingUnavailableReason {
+  if (!isRevenueCatSupported()) return 'platform';
+  if (PURCHASES_DISABLED_TEMPORARILY) return 'temporarily-disabled';
+  return null;
+}
 
 let configured = false;
 
 export async function configureRevenueCat(): Promise<void> {
-  if (!isRevenueCatSupported || configured) return;
+  if (!isRevenueCatSupported() || configured) return;
   if (PURCHASES_DISABLED_TEMPORARILY) {
     console.warn('Lomira: PURCHASES_DISABLED_TEMPORARILY is on — Purchases.configure() skipped, real key still pending.');
     return;
@@ -48,13 +62,13 @@ export function hasPlusEntitlement(info: CustomerInfo | null): boolean {
 }
 
 export async function fetchCustomerInfo(): Promise<CustomerInfo | null> {
-  if (!isRevenueCatSupported || !configured) return null;
+  if (!isRevenueCatSupported() || !configured) return null;
   const { customerInfo } = await Purchases.getCustomerInfo();
   return customerInfo;
 }
 
 export async function fetchCurrentOffering(): Promise<PurchasesOffering | null> {
-  if (!isRevenueCatSupported || !configured) return null;
+  if (!isRevenueCatSupported() || !configured) return null;
   const offerings = await Purchases.getOfferings();
   return offerings.current;
 }
