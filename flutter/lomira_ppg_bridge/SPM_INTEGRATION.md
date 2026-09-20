@@ -19,6 +19,123 @@ Build, noch vor Sources/Frameworks/Resources — kopiert bei jedem Build
 `Frameworks/$CONFIGURATION/` nach `Frameworks/Active/`. Siehe Kommentar in
 `ios/App/LomiraPpgFlutter/Package.swift` für Details.
 
+Die Kopierlogik nutzt `ditto`, nicht `cp -R`: `cp -R` verursachte auf dem
+Gerät xattr-Fehler beim Kopieren der `.xcframework`-Bundles (Ressourcen-
+Forks/Metadaten, die xcframeworks/.framework-Bundles enthalten). `ditto` ist
+das von Apple für Bundle-Kopien empfohlene Werkzeug, kopiert dabei
+standardmäßig vollständig rekursiv und erhält alle Metadaten korrekt.
+
+**Bekannter Flutter-Tooling-Bug (NativeAssetsManifest.json):** Mit Flutter
+3.47.4 erzeugt `flutter build ios-framework` `App.framework` ohne die Datei
+`NativeAssetsManifest.json`, obwohl Xcode sie beim Einbetten erwartet
+(„The file … couldn't be opened because there is no such file"). Bestätigt:
+Die Datei fehlt bereits in `Frameworks/Release/App.xcframework/ios-arm64/
+App.framework/` direkt nach dem `flutter build`-Lauf — das Problem liegt in
+Flutters Tooling, nicht in unserer Kopierlogik. Passt zu
+[flutter/flutter#181507](https://github.com/flutter/flutter/pull/181507)
+("[native_assets] Fix `flutter build ios-framework`"), das genau diesen
+Bereich umgebaut hat. Da dieses Projekt keine nativen Dart-/FFI-Pakete nutzt,
+ist ein leeres JSON-Objekt inhaltlich korrekt — die Run-Script-Phase legt es
+für jeden fehlenden Fall automatisch an (alle xcframework-Slices, nicht nur
+`ios-arm64`). Sollte ein künftiges Flutter-Update das Problem beheben, ist
+der Workaround ein No-op (Datei existiert dann bereits) und kann bei
+Gelegenheit entfernt werden.
+
+**Nachgelagerter Fund: `ditto` kann einzelne xcframeworks kommentarlos
+auslassen.** Nach Einbau des Manifest-Workarounds oben zeigte sich: Nach
+einem Build fehlte `App.xcframework` gezielt in `Frameworks/Active/`,
+während die anderen drei vollständig mit den Original-Zeitstempeln aus dem
+Release-Build vorhanden waren — `ditto "$SRC" "$DST"` selbst lief dabei ohne
+sichtbaren Fehler durch. Vermutung: Das bereits durch den oben beschriebenen
+Bug unvollständige `App.xcframework` (fehlende `NativeAssetsManifest.json`
+schon in der Quelle) bringt `dittos` eigene Bundle-Verarbeitung für genau
+dieses eine xcframework zum Scheitern, ohne dass der Gesamtaufruf einen
+Fehler zurückgibt — nicht abschließend von hier aus beweisbar (kein
+Mac/Xcode in dieser Sandbox verfügbar), aber die schlüssigste Erklärung für
+das beobachtete Muster.
+
+Zwei Konsequenzen in der Run-Script-Phase:
+1. Nach dem `ditto`-Aufruf wird jetzt explizit geprüft, dass alle vier
+   `*.xcframework`-Verzeichnisse tatsächlich in `Frameworks/Active/`
+   angekommen sind — fehlt eines, bricht der Build mit einer klaren
+   Fehlermeldung ab, statt stillschweigend mit einer unvollständigen App
+   weiterzumachen.
+2. Die Manifest-Workaround-Schleife prüft jetzt zusätzlich mit `[ -d
+   "$app_framework" ]`, ob das Glob-Pattern `App.xcframework/*/App.framework`
+   tatsächlich getroffen hat. Ohne diese Prüfung hätte ein nicht treffendes
+   Glob (z. B. weil `App.xcframework` fehlt) unter `/bin/sh` als *wörtlicher*
+   String mit `*` weitergereicht werden können — `echo '{}' > $manifest`
+   wäre dann an einem nicht existierenden Pfad mit einem irreführenden,
+   scheinbar vom Manifest-Code verursachten Fehler gescheitert, obwohl die
+   eigentliche Ursache der zuvor fehlgeschlagene `ditto`-Kopiervorgang war.
+   Mit Prüfung 1 oben greift dieser Fall ohnehin schon vorher — die
+   `-d`-Prüfung bleibt trotzdem als zweite Absicherung bestehen.
+
+**Zur Diagnose auf dem Mac**, falls das Problem weiter auftritt: den
+`ditto`-Aufruf einzeln mit `$?`-Prüfung direkt danach ausführen —
+```bash
+ditto "ios/App/LomiraPpgFlutter/Frameworks/Release" "/tmp/ditto-test"; echo "exit: $?"
+ls /tmp/ditto-test
+```
+— zeigt, ob `ditto` selbst einen Fehler meldet (Exit-Code ≠ 0) oder ob es
+`App.xcframework` tatsächlich lautlos auslässt (Exit-Code 0, aber im
+Zielordner fehlend).
+
+**Präziserer Befund:** In `Active/App.xcframework/ios-arm64/App.framework/`
+landete nach dem Kopieren nur `Info.plist` — `App` (das eigentliche
+Programm, 3,27 MB in der Quelle), `flutter_assets` und `_CodeSignature`
+fehlten. `ditto` bricht also mitten in genau diesem einen Framework ab,
+nicht das ganze `App.xcframework` wird übersprungen. Ein manueller
+`ditto`-Aufruf derselben Quelle im Terminal funktionierte dabei einwandfrei
+— der Unterschied liegt vermutlich in den Rechten/der Umgebung, mit der
+Xcode die Build-Phase ausführt (z. B. Full-Disk-Access-Sandboxing), nicht
+an den Dateien selbst. Nicht abschließend geklärt.
+
+**Deshalb jetzt volle Sichtbarkeit direkt im Xcode-Build-Log:** Die
+Run-Script-Phase ruft `ditto -v` seit dem letzten Fix für jedes der vier
+xcframeworks einzeln auf (nicht mehr ein Aufruf für den ganzen
+`Release`-Ordner), loggt den Exit-Code jedes einzelnen Aufrufs explizit
+(`echo … $status`, erfasst *vor* einem möglichen `set -e`-Abbruch) und
+listet direkt danach per `find … -type f` den tatsächlich kopierten Inhalt
+auf. Im Report Navigator (Cmd+9) ist beim nächsten Fehlschlag also sofort
+sichtbar: welches der vier xcframeworks betroffen ist, mit welchem
+Exit-Code, und was `ditto` tatsächlich hinterlassen hat — ohne weitere
+Terminal-Nachschau.
+
+**Kritischer Nachtrag: die Henne-Ei-Falle konnte sich selbst zuschlagen.**
+Die Run-Script-Phase schrieb bisher direkt nach `Frameworks/Active/`
+(`rm -rf "$DST"` ganz am Anfang). Schlug irgendein Schritt danach fehl —
+z. B. der oben beschriebene `ditto`-Aussetzer —, blieb `Active/` dauerhaft
+in einem kaputten Zwischenzustand zurück. Das Tückische: SwiftPM prüft die
+`binaryTarget`-Pfade in `Package.swift` bei der Paket-Auflösung, die JEDER
+Build-Phase vorausgeht — ist `Active/` einmal ungültig, startet gar keine
+Build-Phase mehr, auch nicht diese Script-Phase selbst, die den Ordner
+eigentlich reparieren würde. Ein einziger fehlgeschlagener Durchlauf hat
+sich damit selbst dauerhaft blockiert.
+
+**Fix:** Die Script-Phase kopiert und validiert jetzt vollständig in ein
+Staging-Verzeichnis `Frameworks/Active.tmp/` — `Active/` selbst wird bis
+zum letzten Schritt nicht angefasst. Erst nach erfolgreicher `ditto`-Kopie
+UND bestandener Vollständigkeits-/Manifest-Prüfung wird `Active/` per zweier
+`mv`-Aufrufe (erst altes `Active/` nach `Active.old/` beiseiteschieben, dann
+`Active.tmp/` an die Stelle von `Active/` verschieben) atomar ersetzt.
+Schlägt irgendetwas vorher fehl, bleibt der zuvor funktionierende
+`Active/`-Stand unangetastet stehen — der nächste Versuch kann die
+Paket-Auflösung weiterhin bestehen.
+
+**Einmalige manuelle Reparatur nötig, falls `Active/` bereits kaputt ist:**
+Diese Fahrlässigkeit selbst kann das neue Skript nicht mehr rückgängig
+machen, weil es aus genau dem oben beschriebenen Grund gar nicht erst zum
+Laufen kommt, solange `Active/` ungültig ist. Einmalig von Hand reparieren,
+bevor Xcode wieder ein normales Build versucht:
+```bash
+cd ios/App/LomiraPpgFlutter/Frameworks
+rm -rf Active Active.tmp Active.old
+ditto Release Active   # oder Debug, je nach zuletzt gebrauchter Konfiguration
+```
+Danach sollte Xcodes Paket-Auflösung wieder greifen, und ab dann übernimmt
+die Script-Phase selbst dauerhaft und sicher.
+
 ## 1. Beide Modi bauen
 
 ```bash
