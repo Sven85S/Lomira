@@ -9,8 +9,9 @@ export const colors = {
   muted: '#8A8272',
   // Kept for now, even though it's leaving the design system — still used by
   // several screens outside this redesign round's scope (HRV, Ritual,
-  // Fortschritt, Paywall, LessonDetail, Settings). Removed once those get
-  // their own pass and stop referencing it.
+  // Fortschritt, LessonDetail, Settings). Removed once those get their own
+  // pass and stop referencing it. Paywall already had its pass — its one
+  // remaining reference is a deliberate error-state color, not a leftover.
   rust: '#B0532B',
   green: '#6E7D66',
   gold: '#C8A84B',

@@ -112,10 +112,19 @@ final class PpgFlutterEngineBridge: NSObject {
         }
     }
 
-    func stop() {
+    /// `completion` fires once Dart's `_stop()` (lib/main.dart) has actually
+    /// returned — i.e. after stopImageStream()/setFlashMode(off)/dispose()
+    /// have run (or hit their own timeouts) — not merely once the
+    /// MethodChannel message has been sent. Previously invokeMethod was
+    /// called with no result handler at all, so nothing here ever knew
+    /// whether the Dart-side teardown had actually finished; the ignored
+    /// `_` result is Dart's returned `null` from `_handleMethodCall`.
+    func stop(completion: @escaping () -> Void = {}) {
         print("[PpgFlutterEngineBridge] stopCapture() → Dart")
         pendingSamples.removeAll()
-        channel.invokeMethod("stopCapture", arguments: nil)
+        channel.invokeMethod("stopCapture", arguments: nil) { _ in
+            completion()
+        }
     }
 
     /// Same mechanism proven in step 2's spike preview — a

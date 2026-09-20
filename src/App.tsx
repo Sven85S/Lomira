@@ -73,7 +73,9 @@ function Shell() {
       >
         {tab === 'sos' && <AnkerScreen />}
         {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
-        {tab === 'hrv' && <HrvFlow onClose={() => setTab('sos')} onOpenFortschritt={() => setTab('fortschritt')} />}
+        {tab === 'hrv' && (
+          <HrvFlow onClose={() => setTab('sos')} onOpenFortschritt={() => setTab('fortschritt')} onOpenPaywall={() => setShowPaywall(true)} />
+        )}
         {tab === 'ritual' && <RitualScreen showInfo={!!infoOpen.ritual} />}
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
       </div>

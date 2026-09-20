@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { useData } from '../../context/DataContext';
+import { useSubscription } from '../../context/SubscriptionContext';
 import { PpgCamera, isPpgCameraSupported, type CameraPermissionState } from '../../native/ppgCamera';
 import { filterRROutliers } from '../../ppg/outlierFilter';
 import { createPpgService } from '../../ppg/ppgService';
@@ -14,6 +15,7 @@ import HrvResultScreen from './HrvResultScreen';
 interface Props {
   onClose: () => void;
   onOpenFortschritt: () => void;
+  onOpenPaywall: () => void;
 }
 
 type Phase = 'start' | 'measuring' | 'result';
@@ -25,8 +27,12 @@ const WARMUP_MS = 7000;
 const MEASURE_MS = 60000;
 const MAX_LIVE_POINTS = 150;
 
-export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
+export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: Props) {
   const { recordHrvMeasurement } = useData();
+  // hasPlusEntitlement covers both an active trial and a paid subscription —
+  // RevenueCat marks the entitlement active as soon as a trial starts, not
+  // just after it converts, so no separate trial flag is needed here.
+  const { isSubscribed } = useSubscription();
 
   const [phase, setPhase] = useState<Phase>('start');
   const [permission, setPermission] = useState<CameraPermissionState | 'unknown'>('unknown');
@@ -351,6 +357,8 @@ export default function HrvFlow({ onClose, onOpenFortschritt }: Props) {
   return (
     <HrvStartScreen
       isSupported={isPpgCameraSupported}
+      locked={!isSubscribed}
+      onOpenPaywall={onOpenPaywall}
       permission={permission}
       available={available}
       error={error}

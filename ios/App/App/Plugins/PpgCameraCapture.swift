@@ -93,9 +93,23 @@ final class PpgCameraCapture: NSObject {
     /// Idempotent — safe to call from a screen's unmount/cleanup without
     /// tracking whether capture is actually active. `reason` is purely for
     /// the print log below, to see on-device which call site fired.
-    func stop(reason: String = "stop() called directly") {
+    ///
+    /// `completion` only fires once the Flutter bridge's stopCapture
+    /// MethodChannel call has actually completed — i.e. once lib/main.dart's
+    /// `_stop()` has torn down the image stream and turned the torch off
+    /// (see PpgFlutterEngineBridge.stop()). Previously this whole chain was
+    /// fire-and-forget: PpgCameraPlugin resolved the JS call as soon as the
+    /// native preview view was removed, with no relation to whether the
+    /// torch had actually been switched off yet — confirmed as the root
+    /// cause of the torch staying on after a measurement ends. Defaults to
+    /// a no-op so the two call sites that don't care about completion
+    /// (willResignActive, onCaptureError below) don't need to change.
+    func stop(reason: String = "stop() called directly", completion: @escaping () -> Void = {}) {
         print("[PpgCameraCapture] stop() called, reason=\"\(reason)\", wasRunning=\(isRunning)")
-        guard isRunning else { return }
+        guard isRunning else {
+            completion()
+            return
+        }
         isRunning = false
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         // Defensive — the normal flow detaches the preview explicitly before
@@ -107,7 +121,11 @@ final class PpgCameraCapture: NSObject {
         // callback), none of which is guaranteed to already be the main
         // thread.
         DispatchQueue.main.async { [weak self] in
-            self?.bridge.stop()
+            guard let self else {
+                completion()
+                return
+            }
+            self.bridge.stop(completion: completion)
         }
     }
 

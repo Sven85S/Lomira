@@ -4,11 +4,11 @@ import {
   configureRevenueCat,
   fetchCurrentOffering,
   fetchCustomerInfo,
+  getPurchasingUnavailableReason,
   hasPlusEntitlement,
   isUserCancelledError,
   purchaseErrorMessage,
   purchasePlan,
-  purchasingUnavailableReason,
   restorePurchases,
   type PurchasingUnavailableReason,
 } from '../revenuecat/purchases';
@@ -35,6 +35,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  // Computed post-mount (inside the effect below), not at module-load time —
+  // see isRevenueCatSupported()'s own comment in purchases.ts for why a
+  // load-time snapshot of Capacitor.getPlatform() can freeze at the wrong
+  // "web" result on a real device.
+  const [purchasingUnavailableReason, setPurchasingUnavailableReason] = useState<PurchasingUnavailableReason>(null);
 
   const refresh = useCallback(async () => {
     const [info, current] = await Promise.all([fetchCustomerInfo(), fetchCurrentOffering()]);
@@ -44,6 +49,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
+      setPurchasingUnavailableReason(getPurchasingUnavailableReason());
       await configureRevenueCat();
       await refresh();
       setLoading(false);
@@ -99,7 +105,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       restore,
       refresh,
     }),
-    [loading, isSubscribed, offering, purchasing, purchaseError, purchase, restore, refresh],
+    [loading, isSubscribed, offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, refresh],
   );
 
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
