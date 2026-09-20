@@ -72,12 +72,12 @@ function Shell() {
         }}
       >
         {tab === 'sos' && <AnkerScreen />}
-        {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} />}
+        {tab === 'beruehren' && <BeruehrenScreen showInfo={!!infoOpen.beruehren} onOpenPaywall={() => setShowPaywall(true)} />}
         {tab === 'hrv' && (
           <HrvFlow onClose={() => setTab('sos')} onOpenFortschritt={() => setTab('fortschritt')} onOpenPaywall={() => setShowPaywall(true)} />
         )}
         {tab === 'ritual' && <RitualScreen showInfo={!!infoOpen.ritual} />}
-        {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} />}
+        {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} onOpenPaywall={() => setShowPaywall(true)} />}
       </div>
 
       <OrbitNav active={tab} onChange={setTab} />

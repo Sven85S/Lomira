@@ -8,6 +8,8 @@ interface Props {
 
 const FEATURES = [
   'HRV-Messung freigeschaltet',
+  'Fortschritt freigeschaltet',
+  'Übungen freigeschaltet',
   'Alle Lektionen freigeschaltet',
   'Unbegrenzter Ritual-Verlauf',
   'Neue Inhalte automatisch inklusive',
@@ -117,7 +119,7 @@ export default function PaywallScreen({ onClose }: Props) {
             </div>
 
             <p style={{ fontSize: 11, color: colors.muted, textAlign: 'center', lineHeight: 1.4, margin: '6px 0 0', maxWidth: 260 }}>
-              14 Tage kostenlos, danach automatische Verlängerung. Jederzeit kündbar.
+              7 Tage kostenlos, danach automatische Verlängerung. Jederzeit kündbar.
             </p>
 
             {purchaseError && (
@@ -125,7 +127,7 @@ export default function PaywallScreen({ onClose }: Props) {
             )}
 
             <button style={{ ...primaryBtnStyle, marginTop: 4, opacity: purchasing ? 0.6 : 1 }} onClick={handleCta} disabled={purchasing}>
-              {purchasing ? 'Einen Moment …' : '14 Tage kostenlos testen'}
+              {purchasing ? 'Einen Moment …' : '7 Tage kostenlos testen'}
             </button>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 2 }}>
