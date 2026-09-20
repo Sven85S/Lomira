@@ -56,7 +56,7 @@ export default function HrvStartScreen({
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
             <LockIcon />
             <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
-              Die HRV-Messung ist Teil von Lomira Plus — starte deine kostenlose 14-tägige Testphase, um sie freizuschalten.
+              Die HRV-Messung ist Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um sie freizuschalten.
             </p>
             <button style={primaryBtnStyle} onClick={onOpenPaywall}>
               HRV-Messung freischalten

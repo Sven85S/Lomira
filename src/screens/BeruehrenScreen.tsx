@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Pause, Play } from 'lucide-react';
-import { colors, sans, serif } from '../styles/tokens';
+import { colors, primaryBtnStyle, sans, serif } from '../styles/tokens';
 import { useData } from '../context/DataContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import handImage from '../assets/beruehren/hand.webp';
 import butterflyImage from '../assets/beruehren/butterfly.webp';
 import bilateralImage from '../assets/beruehren/bilateral.webp';
@@ -439,13 +440,41 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
   );
 }
 
-interface Props {
-  showInfo: boolean;
+// Same lock glyph as HrvStartScreen's/LektionenScreen's LockIcon — each
+// screen defines its own copy rather than sharing one, matching this
+// codebase's established per-file icon convention.
+function LockIcon() {
+  return (
+    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x={3} y={11} width={18} height={11} rx={2} ry={2} />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
 }
 
-export default function BeruehrenScreen({ showInfo }: Props) {
+interface Props {
+  showInfo: boolean;
+  onOpenPaywall: () => void;
+}
+
+export default function BeruehrenScreen({ showInfo, onOpenPaywall }: Props) {
+  const { isSubscribed } = useSubscription();
   const [view, setView] = useState<'list' | 'detail'>('list');
   const [selected, setSelected] = useState<Exercise | null>(null);
+
+  if (!isSubscribed) {
+    return (
+      <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
+        <LockIcon />
+        <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
+          Übungen sind Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um sie freizuschalten.
+        </p>
+        <button style={primaryBtnStyle} onClick={onOpenPaywall}>
+          Übungen freischalten
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ fontFamily: sans }}>
