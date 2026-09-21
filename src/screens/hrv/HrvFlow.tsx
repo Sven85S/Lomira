@@ -2,10 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { useData } from '../../context/DataContext';
 import { useSubscription } from '../../context/SubscriptionContext';
+import { writeHrvSample } from '../../health/appleHealth';
+import { STORAGE_KEYS, readJSON } from '../../lib/storage';
 import { PpgCamera, isPpgCameraSupported, type CameraPermissionState } from '../../native/ppgCamera';
 import { filterRROutliers } from '../../ppg/outlierFilter';
 import { createPpgService } from '../../ppg/ppgService';
 import { computeRmssd } from '../../ppg/rmssd';
+import { computeSdnn } from '../../ppg/sdnn';
 import { classifySnr } from '../../ppg/signalQuality';
 import { DEFAULT_PPG_CONFIG, type PpgResult, type SignalQuality } from '../../ppg/types';
 import HrvStartScreen from './HrvStartScreen';
@@ -76,6 +79,18 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
   // whenever hrvMeasurements changes), or a mid-measurement countdown would reset.
   const recordHrvMeasurementRef = useRef(recordHrvMeasurement);
   recordHrvMeasurementRef.current = recordHrvMeasurement;
+
+  // Read once on mount (Apple Health opt-in, changed only via the Settings
+  // toggle) and kept in a ref rather than plain state — the measurement-end
+  // logic below runs inside a setInterval callback created when 'measuring'
+  // starts, so a ref guarantees it always sees the current value instead of
+  // whatever was captured at that closure's creation time.
+  const appleHealthEnabledRef = useRef(false);
+  useEffect(() => {
+    (async () => {
+      appleHealthEnabledRef.current = await readJSON(STORAGE_KEYS.appleHealthEnabled, false);
+    })();
+  }, []);
 
   const sampleHandle = useRef<PluginListenerHandle | null>(null);
   const errorHandle = useRef<PluginListenerHandle | null>(null);
@@ -295,6 +310,22 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
 
             setFinalResult({ bpm: avgBpm, quality, rmssd, rmssdEstimated });
             await recordHrvMeasurementRef.current(avgBpm, quality, rmssd, rmssdEstimated);
+
+            // Independent gates, not a shared all-or-nothing one: BPM is
+            // written whenever this block was reached at all (the same
+            // fingerReliable check that gates local storage already covers
+            // it), while SDNN needs its own stricter quality === 'good' —
+            // SDNN is more sensitive to motion artifacts than RMSSD, so
+            // 'fair' isn't trusted enough to write to Health even though
+            // it's accepted for the local RMSSD estimate above. Never
+            // awaited/surfaced — a failed or skipped Health write must not
+            // affect the on-screen result or the local measurement record.
+            if (appleHealthEnabledRef.current) {
+              const sdnn = computeSdnn(cleanSessionRR);
+              writeHrvSample(avgBpm, quality === 'good' ? (sdnn ?? undefined) : undefined).catch((e) => {
+                console.log('[HrvFlow] Apple Health write failed', e);
+              });
+            }
           } else {
             if (totalCountingSamples > 0 && !fingerReliable) {
               console.log('[HrvFlow] measurement rejected — finger not reliably detected', { fingerPresenceFraction });

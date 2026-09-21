@@ -28,4 +28,5 @@ export const STORAGE_KEYS = {
   firstName: 'lomira.firstName.v1',
   remindersEnabled: 'lomira.remindersEnabled.v1',
   reminderTime: 'lomira.reminderTime.v1',
+  appleHealthEnabled: 'lomira.appleHealthEnabled.v1',
 } as const;

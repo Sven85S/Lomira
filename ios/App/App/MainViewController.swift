@@ -12,6 +12,7 @@ class MainViewController: CAPBridgeViewController {
         // (or PpgCameraPlugin's own load()) succeeds.
         print("[MainViewController] capacitorDidLoad() called")
         bridge?.registerPluginInstance(PpgCameraPlugin())
+        bridge?.registerPluginInstance(AppleHealthPlugin())
 
         // Eagerly touch PpgFlutterEngineBridge.shared here, on the main
         // thread — capacitorDidLoad() is reliably main-thread (confirmed

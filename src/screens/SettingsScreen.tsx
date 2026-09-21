@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react
 import { cardStyle, colors, iconBtnStyle, serif } from '../styles/tokens';
 import { STORAGE_KEYS, readJSON, writeJSON } from '../lib/storage';
 import { cancelDailyReminder, isReminderSupported, requestNotificationPermission, scheduleDailyReminder } from '../notifications/reminders';
+import { isAppleHealthSupported, requestAppleHealthAuthorization } from '../health/appleHealth';
 
 interface Props {
   onClose: () => void;
@@ -47,18 +48,22 @@ export default function SettingsScreen({ onClose }: Props) {
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState('08:00');
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [appleHealthEnabled, setAppleHealthEnabled] = useState(false);
+  const [healthPermissionDenied, setHealthPermissionDenied] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const [name, enabled, time] = await Promise.all([
+      const [name, enabled, time, healthEnabled] = await Promise.all([
         readJSON(STORAGE_KEYS.firstName, ''),
         readJSON(STORAGE_KEYS.remindersEnabled, false),
         readJSON(STORAGE_KEYS.reminderTime, '08:00'),
+        readJSON(STORAGE_KEYS.appleHealthEnabled, false),
       ]);
       setFirstName(name);
       setRemindersEnabled(enabled);
       setReminderTime(time);
+      setAppleHealthEnabled(healthEnabled);
       setLoaded(true);
     })();
   }, []);
@@ -85,6 +90,22 @@ export default function SettingsScreen({ onClose }: Props) {
     setRemindersEnabled(true);
     await writeJSON(STORAGE_KEYS.remindersEnabled, true);
     await scheduleDailyReminder(reminderTime);
+  };
+
+  const handleToggleAppleHealth = async () => {
+    setHealthPermissionDenied(false);
+    if (appleHealthEnabled) {
+      setAppleHealthEnabled(false);
+      await writeJSON(STORAGE_KEYS.appleHealthEnabled, false);
+      return;
+    }
+    const granted = await requestAppleHealthAuthorization();
+    if (!granted) {
+      setHealthPermissionDenied(true);
+      return;
+    }
+    setAppleHealthEnabled(true);
+    await writeJSON(STORAGE_KEYS.appleHealthEnabled, true);
   };
 
   const handleTimeChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,6 +195,39 @@ export default function SettingsScreen({ onClose }: Props) {
                 style={{ fontSize: 16, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '5px 8px' }}
               />
             </div>
+          )}
+
+          <div style={rowStyle}>
+            <span style={rowLabelStyle}>In Health speichern</span>
+            <button
+              onClick={handleToggleAppleHealth}
+              disabled={!isAppleHealthSupported}
+              aria-label="Health-Speicherung umschalten"
+              style={{
+                width: 44, height: 26, borderRadius: 9999, background: appleHealthEnabled ? colors.sage : colors.border,
+                position: 'relative', padding: 0, cursor: isAppleHealthSupported ? 'pointer' : 'default', flexShrink: 0, border: 'none',
+                opacity: isAppleHealthSupported ? 1 : 0.5,
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute', top: 3, left: appleHealthEnabled ? 22 : 3, width: 20, height: 20, borderRadius: 9999,
+                  background: colors.card, boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.15s',
+                }}
+              />
+            </button>
+          </div>
+
+          {!isAppleHealthSupported && (
+            <p style={{ fontSize: 12, color: colors.muted, margin: 0, padding: '0 4px' }}>
+              Die Health-Speicherung ist nur in der iOS-App verfügbar.
+            </p>
+          )}
+          {healthPermissionDenied && (
+            <p style={{ fontSize: 12, color: colors.rust, margin: 0, padding: '0 4px' }}>
+              Ohne Health-Berechtigung kann Lomira keine Werte schreiben. Du kannst sie in den Systemeinstellungen
+              deines Geräts erlauben und es hier erneut versuchen.
+            </p>
           )}
         </div>
       </div>
