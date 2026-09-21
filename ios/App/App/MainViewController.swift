@@ -34,5 +34,23 @@ class MainViewController: CAPBridgeViewController {
         // FlutterEngine.runWithEntrypoint) that this was happening.
         print("[MainViewController] eagerly touching PpgFlutterEngineBridge.shared on main thread")
         _ = PpgFlutterEngineBridge.shared
+
+        // Lets Safari's Web Inspector (Develop menu > device name) attach to
+        // this app's WKWebView — Capacitor itself only sets isInspectable
+        // automatically for Debug builds, and this API needs iOS 16.4+
+        // (below the app's own 15.0 deployment target, hence the guard).
+        // Unconditional here, NOT `#if DEBUG`-gated: this project is
+        // currently only ever tested as a Release build (see the Debug/JIT
+        // Flutter-engine crash earlier commits on this branch root-caused,
+        // which is why Release became the only build actually run on
+        // device) — gating this behind DEBUG would make it useless for
+        // exactly the build that needs inspecting. Remove or gate behind
+        // `#if DEBUG` before an actual App Store/TestFlight submission —
+        // isInspectable on a shipped Release build lets anyone with
+        // physical USB access and Xcode attach the Web Inspector.
+        if #available(iOS 16.4, *) {
+            webView?.isInspectable = true
+            print("[MainViewController] webView.isInspectable = true")
+        }
     }
 }
