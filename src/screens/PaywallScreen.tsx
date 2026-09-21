@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { cardStyle, colors, iconBtnStyle, primaryBtnStyle, serif } from '../styles/tokens';
+import { bgGradient, cardStyle, colors, iconBtnStyle, primaryBtnStyle, serif } from '../styles/tokens';
 import { useSubscription } from '../context/SubscriptionContext';
 
 interface Props {
@@ -15,9 +15,33 @@ const FEATURES = [
   'Neue Inhalte automatisch inklusive',
 ];
 
+// Shown whenever the real RevenueCat offering isn't loaded (currently
+// always, since PURCHASES_DISABLED_TEMPORARILY keeps offering === null) —
+// real priceStrings from `offering` take over automatically once purchasing
+// is actually configured, these are just placeholders so the plan picker
+// isn't empty in the meantime.
+const FALLBACK_YEARLY_PRICE = 24.99;
+const FALLBACK_MONTHLY_PRICE = 2.99;
+const formatEuro = (n: number) => `${n.toFixed(2).replace('.', ',')} €`;
+
+const secondaryBtnStyle: CSSProperties = {
+  padding: '15px',
+  borderRadius: 9999,
+  fontSize: 15,
+  fontWeight: 500,
+  background: 'transparent',
+  color: colors.text,
+  cursor: 'pointer',
+  border: `1px solid ${colors.border}`,
+  width: '100%',
+};
+
 export default function PaywallScreen({ onClose }: Props) {
   const { offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, isSubscribed } = useSubscription();
   const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
+  // Set on a CTA tap while purchasing is unavailable, instead of attempting
+  // a real purchase() call — see handlePurchaseAttempt below.
+  const [showUnavailableHint, setShowUnavailableHint] = useState(false);
 
   const yearlyPkg = offering?.annual ?? null;
   const monthlyPkg = offering?.monthly ?? null;
@@ -35,11 +59,22 @@ export default function PaywallScreen({ onClose }: Props) {
     cursor: 'pointer',
   });
 
-  const handleCta = async () => {
+  // Shared by both CTAs — RevenueCat/StoreKit determine trial eligibility
+  // from the product's own configuration, not from which button was
+  // tapped, so "7 Tage kostenlos testen" and "Jetzt erwerben" have nothing
+  // to branch on differently once real purchasing returns; both call the
+  // same purchase(selectedPlan). While it's unavailable, both show the
+  // existing inline hint instead of attempting a real purchase.
+  const handlePurchaseAttempt = async () => {
     if (isSubscribed) {
       onClose();
       return;
     }
+    if (purchasingUnavailableReason) {
+      setShowUnavailableHint(true);
+      return;
+    }
+    setShowUnavailableHint(false);
     const ok = await purchase(selectedPlan);
     if (ok) onClose();
   };
@@ -51,7 +86,12 @@ export default function PaywallScreen({ onClose }: Props) {
         // used to) — the tab bar stays visible/reachable while the paywall
         // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
-        background: colors.surface, zIndex: 30, display: 'flex', flexDirection: 'column',
+        // bgGradient, not the old flat colors.surface — this overlay used to
+        // end in a hard-edged seam against the Shell's own gradient showing
+        // through behind the tab bar. See bgGradient's own comment in
+        // tokens.ts for why its stops are in dvh, which is what makes this
+        // line up with the Shell exactly instead of just approximately.
+        background: bgGradient, zIndex: 30, display: 'flex', flexDirection: 'column',
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
@@ -85,12 +125,6 @@ export default function PaywallScreen({ onClose }: Props) {
           <div style={{ ...cardStyle, width: '100%', marginTop: 4, textAlign: 'center' }}>
             <p style={{ fontSize: 14, color: colors.text, margin: 0 }}>Du hast Lomira Plus bereits freigeschaltet.</p>
           </div>
-        ) : purchasingUnavailableReason ? (
-          <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260 }}>
-            {purchasingUnavailableReason === 'platform'
-              ? 'Käufe sind nur in der iOS-App verfügbar.'
-              : 'Der Abo-Kauf ist gerade vorübergehend nicht verfügbar. Bitte versuch es in Kürze erneut.'}
-          </p>
         ) : (
           <>
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
@@ -103,17 +137,21 @@ export default function PaywallScreen({ onClose }: Props) {
                     </span>
                   </div>
                   <div style={{ fontSize: 11, color: colors.muted, marginTop: 4 }}>
-                    {yearlyPerMonth != null ? `entspricht ${yearlyPerMonth.toFixed(2)} €/Monat` : yearlyPkg ? '' : 'Angebot wird geladen …'}
+                    entspricht {yearlyPerMonth != null ? formatEuro(yearlyPerMonth) : formatEuro(FALLBACK_YEARLY_PRICE / 12)}/Monat
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>{yearlyPkg?.product.priceString ?? '—'}</div>
+                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>
+                    {yearlyPkg?.product.priceString ?? formatEuro(FALLBACK_YEARLY_PRICE)}
+                  </div>
                 </div>
               </div>
               <div style={planTileStyle(selectedPlan === 'monthly')} onClick={() => setSelectedPlan('monthly')}>
                 <span style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>Monatlich</span>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>{monthlyPkg?.product.priceString ?? '—'}</div>
+                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>
+                    {monthlyPkg?.product.priceString ?? formatEuro(FALLBACK_MONTHLY_PRICE)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -126,8 +164,20 @@ export default function PaywallScreen({ onClose }: Props) {
               <p style={{ fontSize: 12, color: colors.rust, textAlign: 'center', margin: 0 }}>{purchaseError}</p>
             )}
 
-            <button style={{ ...primaryBtnStyle, marginTop: 4, opacity: purchasing ? 0.6 : 1 }} onClick={handleCta} disabled={purchasing}>
+            {showUnavailableHint && purchasingUnavailableReason && (
+              <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
+                {purchasingUnavailableReason === 'platform'
+                  ? 'Käufe sind nur in der iOS-App verfügbar.'
+                  : 'Der Abo-Kauf ist gerade vorübergehend nicht verfügbar. Bitte versuch es in Kürze erneut.'}
+              </p>
+            )}
+
+            <button style={{ ...primaryBtnStyle, marginTop: 4, opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
               {purchasing ? 'Einen Moment …' : '7 Tage kostenlos testen'}
+            </button>
+
+            <button style={{ ...secondaryBtnStyle, opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
+              Jetzt erwerben
             </button>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 2 }}>

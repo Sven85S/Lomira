@@ -33,7 +33,18 @@ export const sans = "'Instrument Sans', sans-serif";
 // cream through the upper half (mockups keep the blue mist confined to
 // roughly the bottom third, not a straight top-to-bottom blend) and only
 // eases into blueMist over the lower half, for a softer, later transition.
-export const bgGradient = `linear-gradient(180deg, ${colors.surface} 0%, ${colors.surface} 52%, ${colors.blueMist} 100%)`;
+//
+// Stops are in dvh, not %, on purpose: a linear-gradient's percentage stops
+// are relative to the element's OWN box height, so the same gradient string
+// paints different colors at a given screen position in two elements of
+// different heights (e.g. the full-height Shell vs. an overlay like
+// PaywallScreen that stops short of the tab bar) — that mismatch was the
+// hard-edged seam bug where the overlay's background visibly didn't line up
+// with the Shell's gradient behind the tab bar. dvh stops are anchored to
+// the viewport instead, so any element starting at the same y (all of this
+// app's full-bleed screens/overlays start at y=0) renders identical colors
+// at every shared screen position regardless of the element's own height.
+export const bgGradient = `linear-gradient(180deg, ${colors.surface} 0dvh, ${colors.surface} 52dvh, ${colors.blueMist} 100dvh)`;
 
 export const iconBtnStyle: CSSProperties = {
   width: 32,
