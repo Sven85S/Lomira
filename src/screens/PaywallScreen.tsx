@@ -106,9 +106,6 @@ export default function PaywallScreen({ onClose }: Props) {
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
         <div style={{ fontFamily: serif, fontSize: 10, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase', marginTop: 4, alignSelf: 'flex-start', width: '100%' }}>lomira</div>
         <div style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text, textAlign: 'center' }}>Lomira Plus</div>
-        <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, maxWidth: 270, margin: 0 }}>
-          Alle 18 Lektionen, dein vollständiger Ritual-Verlauf und alle kommenden Module.
-        </p>
 
         <div style={{ ...cardStyle, width: '100%', marginTop: 4, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {FEATURES.map((f) => (
