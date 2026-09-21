@@ -46,6 +46,22 @@ function Shell() {
     });
   }, [tab]);
 
+  // Every full-screen overlay (Paywall, Lektionen, LessonDetail, Settings) is
+  // its own boolean/nullable state, independent of `tab` — a tab tap changed
+  // `tab` underneath whichever overlay was open without ever closing it, so
+  // the overlay just kept covering the newly-active tab. Root-caused via
+  // real device touch diagnostics: the tap genuinely reached OrbitNav and
+  // fired onChange (confirmed by HrvFlow's own unmount safety-net logging),
+  // it just never closed the overlay sitting on top, looking exactly like
+  // "the tab bar doesn't respond". A tab change now always closes all four.
+  const handleTabChange = useCallback((newTab: TabId) => {
+    setTab(newTab);
+    setShowPaywall(false);
+    setShowLektionen(false);
+    setShowSettings(false);
+    setOpenLessonId(null);
+  }, []);
+
   return (
     <div
       style={{
@@ -80,7 +96,7 @@ function Shell() {
         {tab === 'fortschritt' && <FortschrittScreen showInfo={!!infoOpen.fortschritt} onOpenPaywall={() => setShowPaywall(true)} />}
       </div>
 
-      <OrbitNav active={tab} onChange={setTab} />
+      <OrbitNav active={tab} onChange={handleTabChange} />
 
       {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
       {showLektionen && (
