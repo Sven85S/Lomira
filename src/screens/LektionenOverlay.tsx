@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { colors, iconBtnStyle, serif } from '../styles/tokens';
+import { bgGradient, colors, iconBtnStyle, serif } from '../styles/tokens';
 import LektionenScreen from './LektionenScreen';
 
 interface Props {
@@ -25,7 +25,7 @@ export default function LektionenOverlay({ onClose, onOpenLesson, onOpenPaywall 
         // used to) — the tab bar stays visible/reachable while this overlay
         // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
-        background: colors.surface, zIndex: 20, display: 'flex', flexDirection: 'column',
+        background: bgGradient, zIndex: 20, display: 'flex', flexDirection: 'column',
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
