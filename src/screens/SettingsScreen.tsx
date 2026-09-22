@@ -6,13 +6,9 @@ import { isAppleHealthSupported, requestAppleHealthAuthorization } from '../heal
 
 interface Props {
   onClose: () => void;
+  onOpenPrivacyPolicy: () => void;
+  onOpenTerms: () => void;
 }
-
-// TODO: replace with the real, published URLs before App Store / Play Store submission.
-// Left blank on purpose rather than guessed — an empty href renders the row inert instead
-// of linking to a wrong or placeholder domain.
-const PRIVACY_POLICY_URL = '';
-const TERMS_URL = '';
 
 const rowStyle: CSSProperties = { ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' };
 const rowLabelStyle: CSSProperties = { fontSize: 14, color: colors.text };
@@ -26,24 +22,16 @@ function ChevronIcon() {
   );
 }
 
-function LegalRow({ label, href }: { label: string; href: string }) {
+function LegalRow({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <a
-      href={href || undefined}
-      target="_blank"
-      rel="noreferrer"
-      style={{ ...rowStyle, textDecoration: 'none', cursor: href ? 'pointer' : 'default' }}
-      onClick={(e) => {
-        if (!href) e.preventDefault();
-      }}
-    >
+    <button onClick={onClick} style={{ ...rowStyle, cursor: 'pointer', width: '100%', textAlign: 'left' }}>
       <span style={rowLabelStyle}>{label}</span>
       <ChevronIcon />
-    </a>
+    </button>
   );
 }
 
-export default function SettingsScreen({ onClose }: Props) {
+export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTerms }: Props) {
   const [firstName, setFirstName] = useState('');
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState('08:00');
@@ -138,8 +126,8 @@ export default function SettingsScreen({ onClose }: Props) {
         <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text }}>Einstellungen</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <LegalRow label="Datenschutzerklärung" href={PRIVACY_POLICY_URL} />
-          <LegalRow label="Nutzungsbedingungen" href={TERMS_URL} />
+          <LegalRow label="Datenschutzerklärung" onClick={onOpenPrivacyPolicy} />
+          <LegalRow label="Nutzungsbedingungen" onClick={onOpenTerms} />
 
           <div style={rowStyle}>
             <span style={rowLabelStyle}>Dein Vorname (optional)</span>

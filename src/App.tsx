@@ -14,7 +14,9 @@ import RitualScreen from './screens/RitualScreen';
 import FortschrittScreen from './screens/FortschrittScreen';
 import PaywallScreen from './screens/PaywallScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import LegalDocumentScreen from './screens/LegalDocumentScreen';
 import HrvFlow from './screens/hrv/HrvFlow';
+import { PRIVACY_POLICY, TERMS_OF_USE } from './data/legal';
 // PpgDebugScreen stays in the codebase for later on-device signal-processing
 // tuning, but is no longer wired to a regular entry point — see HrvFlow.
 
@@ -36,6 +38,11 @@ function Shell() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLektionen, setShowLektionen] = useState(false);
+  // Nested over SettingsScreen, not siblings of it — closing one of these
+  // returns to Settings underneath, same relationship as LessonDetail
+  // nesting over LektionenOverlay below.
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleInfo = useCallback(() => {
@@ -60,6 +67,8 @@ function Shell() {
     setShowLektionen(false);
     setShowSettings(false);
     setOpenLessonId(null);
+    setShowPrivacyPolicy(false);
+    setShowTerms(false);
   }, []);
 
   return (
@@ -107,7 +116,15 @@ function Shell() {
         />
       )}
       {openLessonId != null && <LessonDetail lessonId={openLessonId} onClose={() => setOpenLessonId(null)} />}
-      {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <SettingsScreen
+          onClose={() => setShowSettings(false)}
+          onOpenPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+          onOpenTerms={() => setShowTerms(true)}
+        />
+      )}
+      {showPrivacyPolicy && <LegalDocumentScreen doc={PRIVACY_POLICY} onClose={() => setShowPrivacyPolicy(false)} />}
+      {showTerms && <LegalDocumentScreen doc={TERMS_OF_USE} onClose={() => setShowTerms(false)} />}
     </div>
   );
 }
