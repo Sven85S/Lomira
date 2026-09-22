@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { PurchasesOffering } from '@revenuecat/purchases-capacitor';
+import { FORCE_UNLOCKED_FOR_TESTING } from '../config/revenuecat';
 import {
   configureRevenueCat,
   fetchCurrentOffering,
@@ -48,6 +49,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (FORCE_UNLOCKED_FOR_TESTING) {
+      console.warn('Lomira: FORCE_UNLOCKED_FOR_TESTING is on — isSubscribed is forced to true, ignoring the real RevenueCat state.');
+    }
     (async () => {
       setPurchasingUnavailableReason(getPurchasingUnavailableReason());
       await configureRevenueCat();
@@ -93,10 +97,16 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Single override point for every isSubscribed consumer (HrvFlow,
+  // BeruehrenScreen, FortschrittScreen, LektionenScreen, PaywallScreen all
+  // read it from here via useSubscription()) — see FORCE_UNLOCKED_FOR_TESTING's
+  // own comment in config/revenuecat.ts for why and until when.
+  const effectiveIsSubscribed = FORCE_UNLOCKED_FOR_TESTING ? true : isSubscribed;
+
   const value = useMemo<SubscriptionContextValue>(
     () => ({
       loading,
-      isSubscribed,
+      isSubscribed: effectiveIsSubscribed,
       offering,
       purchasingUnavailableReason,
       purchasing,
@@ -105,7 +115,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       restore,
       refresh,
     }),
-    [loading, isSubscribed, offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, refresh],
+    [loading, effectiveIsSubscribed, offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, refresh],
   );
 
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
