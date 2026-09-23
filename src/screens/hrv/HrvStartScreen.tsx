@@ -83,14 +83,17 @@ export default function HrvStartScreen({
             </p>
 
             {/* The native preview layer is positioned behind the WebView, clipped to
-                this element's on-screen rect — deliberately no background here so it
-                shows through once attached; the border comes from a sibling overlay
-                so the corner-radius still reads correctly against a live video feed. */}
+                this element's on-screen rect (round, via layer.cornerRadius on the
+                native container — see attachPreview() in PpgCameraPlugin.swift, CSS
+                border-radius here has no effect on that native layer) — deliberately
+                no background here so it shows through once attached; the decorative
+                border comes from a sibling overlay so it stays visible even when the
+                background is fully transparent. */}
             <div style={{ position: 'relative', width: 220, height: 220 }}>
-              <div ref={previewRef} style={{ position: 'absolute', inset: 0, borderRadius: 20, overflow: 'hidden' }} />
+              <div ref={previewRef} style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }} />
               <div
                 style={{
-                  position: 'absolute', inset: 0, borderRadius: 20, border: `1px solid ${colors.border}`,
+                  position: 'absolute', inset: 0, borderRadius: '50%', border: `1px solid ${colors.border}`,
                   pointerEvents: 'none', background: previewActive ? 'transparent' : colors.card,
                 }}
               />
