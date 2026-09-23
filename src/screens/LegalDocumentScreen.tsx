@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { cardStyle, colors, iconBtnStyle, serif } from '../styles/tokens';
+import { bgGradient, cardStyle, colors, iconBtnStyle, serif } from '../styles/tokens';
 import type { LegalDocument } from '../data/legal';
 
 interface Props {
@@ -20,7 +20,7 @@ export default function LegalDocumentScreen({ doc, onClose }: Props) {
         // used to) — the tab bar stays visible/reachable while this overlay
         // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
-        background: colors.surface, zIndex: 40, display: 'flex', flexDirection: 'column',
+        background: bgGradient, zIndex: 40, display: 'flex', flexDirection: 'column',
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >

@@ -26,7 +26,12 @@ export const STORAGE_KEYS = {
   hrvMeasurements: 'lomira.hrvMeasurements.v1',
   practiceSessions: 'lomira.practiceSessions.v1',
   firstName: 'lomira.firstName.v1',
+  // Superseded by reminderTimes/reminderNextId below — kept only so
+  // SettingsScreen's one-time migration can still read a pre-existing
+  // single reminder into the new list format. Never written to again.
   remindersEnabled: 'lomira.remindersEnabled.v1',
   reminderTime: 'lomira.reminderTime.v1',
+  reminderTimes: 'lomira.reminderTimes.v1',
+  reminderNextId: 'lomira.reminderNextId.v1',
   appleHealthEnabled: 'lomira.appleHealthEnabled.v1',
 } as const;
