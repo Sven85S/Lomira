@@ -7,7 +7,7 @@ import {
   type PurchasesError,
   type PurchasesOffering,
 } from '@revenuecat/purchases-capacitor';
-import { ENTITLEMENT_ID, PURCHASES_DISABLED_TEMPORARILY, REVENUECAT_API_KEY } from '../config/revenuecat';
+import { ENTITLEMENT_ID, REVENUECAT_API_KEY } from '../config/revenuecat';
 
 /**
  * RevenueCat's SDK only runs on a native shell (iOS or Android) — guard every
@@ -18,24 +18,19 @@ import { ENTITLEMENT_ID, PURCHASES_DISABLED_TEMPORARILY, REVENUECAT_API_KEY } fr
  * (native bridge not yet registered when the first script executes) could
  * permanently freeze it at the wrong "web" result for the rest of the app's
  * lifetime — confirmed as exactly what caused the Paywall to show the
- * 'platform' text on a real iOS device instead of 'temporarily-disabled'.
- * Every call site below now reads the platform live instead of trusting a
- * value that may have been snapshotted too early.
+ * 'platform' text on a real iOS device instead of null. Every call site
+ * below now reads the platform live instead of trusting a value that may
+ * have been snapshotted too early.
  */
 export function isRevenueCatSupported(): boolean {
   return ['ios', 'android'].includes(Capacitor.getPlatform());
 }
 
-/**
- * Why purchasing isn't available right now, if at all — null means it genuinely
- * is. 'platform' is permanent (web/dev shell); 'temporarily-disabled' is the
- * PURCHASES_DISABLED_TEMPORARILY stopgap and goes away once that flag does.
- */
-export type PurchasingUnavailableReason = 'platform' | 'temporarily-disabled' | null;
+/** Why purchasing isn't available right now, if at all — null means it genuinely is. */
+export type PurchasingUnavailableReason = 'platform' | null;
 
 export function getPurchasingUnavailableReason(): PurchasingUnavailableReason {
   if (!isRevenueCatSupported()) return 'platform';
-  if (PURCHASES_DISABLED_TEMPORARILY) return 'temporarily-disabled';
   return null;
 }
 
@@ -43,10 +38,6 @@ let configured = false;
 
 export async function configureRevenueCat(): Promise<void> {
   if (!isRevenueCatSupported() || configured) return;
-  if (PURCHASES_DISABLED_TEMPORARILY) {
-    console.warn('Lomira: PURCHASES_DISABLED_TEMPORARILY is on — Purchases.configure() skipped, real key still pending.');
-    return;
-  }
   if (!REVENUECAT_API_KEY) {
     console.warn('Lomira: no RevenueCat API key set for this platform — RevenueCat stays unconfigured.');
     return;

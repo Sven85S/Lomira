@@ -15,11 +15,10 @@ const FEATURES = [
   'Neue Inhalte automatisch inklusive',
 ];
 
-// Shown whenever the real RevenueCat offering isn't loaded (currently
-// always, since PURCHASES_DISABLED_TEMPORARILY keeps offering === null) —
-// real priceStrings from `offering` take over automatically once purchasing
-// is actually configured, these are just placeholders so the plan picker
-// isn't empty in the meantime.
+// Shown only while the real RevenueCat offering hasn't loaded yet (e.g. the
+// fetch is still in flight, or genuinely unavailable) — real priceStrings
+// from `offering` take over automatically once it does, these are just
+// placeholders so the plan picker isn't empty in the meantime.
 const FALLBACK_YEARLY_PRICE = 24.99;
 const FALLBACK_MONTHLY_PRICE = 2.99;
 const formatEuro = (n: number) => `${n.toFixed(2).replace('.', ',')} €`;
@@ -163,9 +162,7 @@ export default function PaywallScreen({ onClose }: Props) {
 
             {showUnavailableHint && purchasingUnavailableReason && (
               <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
-                {purchasingUnavailableReason === 'platform'
-                  ? 'Käufe sind nur in der iOS-App verfügbar.'
-                  : 'Der Abo-Kauf ist gerade vorübergehend nicht verfügbar. Bitte versuch es in Kürze erneut.'}
+                Käufe sind nur in der iOS-App verfügbar.
               </p>
             )}
 
