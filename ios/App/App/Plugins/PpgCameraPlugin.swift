@@ -129,24 +129,27 @@ public class PpgCameraPlugin: CAPPlugin, CAPBridgedPlugin {
             }
 
             let frame = CGRect(x: x, y: y, width: width, height: height)
-            // Round preview window (matches the app's round visual language —
-            // breathing ball, tab-bar button). The JS-side placeholder <div>'s
-            // own border-radius only shapes the CSS overlay/border, not the
-            // live camera feed itself — that's a native UIView with an
-            // embedded FlutterViewController behind the WebView, entirely
-            // outside CSS's reach, so it needs its own corner-radius clip to
-            // actually crop the running video into a circle instead of just
-            // showing a round border in front of a square feed.
-            let cornerRadius = min(width, height) / 2
 
             if let existing = self.previewContainerView {
                 existing.frame = frame
-                existing.layer.cornerRadius = cornerRadius
             } else {
                 let container = UIView(frame: frame)
                 container.backgroundColor = .black
-                container.layer.cornerRadius = cornerRadius
-                container.layer.masksToBounds = true
+                // Deliberately NOT clipped (no cornerRadius/masksToBounds) —
+                // this container hosts the embedded FlutterViewController
+                // (see PpgFlutterEngineBridge.attachPreview: flutterVC.view.frame
+                // = container.bounds), i.e. the live ~30fps camera preview
+                // widget. masksToBounds on a continuously-redrawing view forces
+                // an offscreen rasterization pass every frame — a real, GPU-cost
+                // side effect that on-device testing tied to a round-preview
+                // attempt here produced corrupted PPG readings (RMSSD ~745ms,
+                // live BPM swinging 32–120), even though the actual redMean
+                // analysis reads the raw camera sensor stream directly in Dart
+                // (see main.dart's _CaptureController), entirely separate from
+                // this view's compositing and unaffected by its clipping.
+                // The round visual language stays purely decorative, via the
+                // JS-side sibling <div>'s CSS border-radius in HrvStartScreen.tsx
+                // — confirmed to have zero effect on the native layer.
                 hostView.insertSubview(container, belowSubview: webView)
                 self.previewContainerView = container
 

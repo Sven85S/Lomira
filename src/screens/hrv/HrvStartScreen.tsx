@@ -62,13 +62,17 @@ export default function HrvStartScreen({
               Finger vollständig auf Kamera und Blitz legen — ruhig halten, bis die Messung abgeschlossen ist.
             </p>
 
-            {/* The native preview layer is positioned behind the WebView, clipped to
-                this element's on-screen rect (round, via layer.cornerRadius on the
-                native container — see attachPreview() in PpgCameraPlugin.swift, CSS
-                border-radius here has no effect on that native layer) — deliberately
-                no background here so it shows through once attached; the decorative
-                border comes from a sibling overlay so it stays visible even when the
-                background is fully transparent. */}
+            {/* The native preview layer is positioned behind the WebView, at this
+                element's on-screen rect — deliberately unclipped natively (no
+                cornerRadius/masksToBounds on that container; see the comment in
+                PpgCameraPlugin.swift's attachPreview() — clipping the live ~30fps
+                preview there once corrupted real PPG readings on-device, a GPU
+                compositing cost, not a change to the analyzed pixel stream, which
+                is separate). The round look here is purely this CSS border-radius
+                — cosmetic only, the native square feed can show past its corners.
+                No background here so the (still square) video shows through once
+                attached; the decorative border comes from a sibling overlay so it
+                stays visible even when the background is fully transparent. */}
             <div style={{ position: 'relative', width: 220, height: 220 }}>
               <div ref={previewRef} style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }} />
               <div
