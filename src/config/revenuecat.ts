@@ -50,4 +50,4 @@ export const FORCE_UNLOCKED_FOR_TESTING = true;
  * Identifier of the entitlement (configured in the RevenueCat dashboard) that
  * unlocks Lomira Plus: lessons 2-18 and the full ritual history.
  */
-export const ENTITLEMENT_ID = import.meta.env.VITE_REVENUECAT_ENTITLEMENT_ID || 'plus';
+export const ENTITLEMENT_ID = import.meta.env.VITE_REVENUECAT_ENTITLEMENT_ID || 'lomira_pro';
