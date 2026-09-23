@@ -21,6 +21,7 @@
 		AA11000000000000000A0007 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000A0006 /* MainViewController.swift */; };
 		E82F2351E5DA8F37A7EB7DE8 /* LomiraPpgFlutter in Frameworks */ = {isa = PBXBuildFile; productRef = D94B66250F80374544D75017 /* LomiraPpgFlutter */; };
 		F49983613060308F005D4593 /* PpgFlutterEngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49983603060308F005D4593 /* PpgFlutterEngineBridge.swift */; };
+		F4C00D473061C3020052D8D8 /* AppleHealthPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C00D463061C3020052D8D8 /* AppleHealthPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		AA11000000000000000A0006 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		F49983603060308F005D4593 /* PpgFlutterEngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PpgFlutterEngineBridge.swift; path = Plugins/PpgFlutterEngineBridge.swift; sourceTree = "<group>"; };
 		F4C00D453061BEDB0052D8D8 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		F4C00D463061C3020052D8D8 /* AppleHealthPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 		AA11000000000000000A0001 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				F4C00D463061C3020052D8D8 /* AppleHealthPlugin.swift */,
 				AA11000000000000000A0002 /* PpgCameraPlugin.swift */,
 				AA11000000000000000A0003 /* PpgCameraCapture.swift */,
 			);
@@ -208,6 +211,7 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				F49983613060308F005D4593 /* PpgFlutterEngineBridge.swift in Sources */,
+				F4C00D473061C3020052D8D8 /* AppleHealthPlugin.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				AA11000000000000000A0004 /* PpgCameraPlugin.swift in Sources */,
 				AA11000000000000000A0005 /* PpgCameraCapture.swift in Sources */,
