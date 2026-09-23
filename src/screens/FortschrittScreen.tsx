@@ -175,35 +175,35 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
                 style={{ width: 7, height: 7, borderRadius: 9999, background: QUALITY_COLOR[hrvMeasurements[0].quality], marginLeft: 'auto' }}
               />
             </div>
-            {hrvMeasurements.length > 1 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {/* Starts at index 1 — the newest entry is already the summary
-                    line above, so the list only covers older history and
-                    never repeats it. Every row's primary line is the same
-                    "● XX bpm" shape regardless of RMSSD; RMSSD (when present)
-                    is a fixed-position second line underneath rather than
-                    variable-length text appended to the first, so it reads as
-                    extra info rather than a layout glitch. */}
-                {hrvMeasurements.slice(1, 6).map((m) => (
-                  <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', fontSize: 12, gap: 8 }}>
-                    <span style={{ color: colors.muted }}>
-                      {formatEntryDate(m.date)}, {new Date(m.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {/* Includes the newest entry too, even though it's already
+                  summarized in the big headline above — excluding it here
+                  (as this used to) meant it never showed up as a plain list
+                  row at all, easy to misread as "the last measurement wasn't
+                  saved". Every row's primary line is the same "● XX bpm"
+                  shape regardless of RMSSD; RMSSD (when present) is a
+                  fixed-position second line underneath rather than
+                  variable-length text appended to the first, so it reads as
+                  extra info rather than a layout glitch. */}
+              {hrvMeasurements.slice(0, 6).map((m) => (
+                <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', fontSize: 12, gap: 8 }}>
+                  <span style={{ color: colors.muted }}>
+                    {formatEntryDate(m.date)}, {new Date(m.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: 9999, background: QUALITY_COLOR[m.quality], flexShrink: 0 }} />
+                      <span style={{ color: colors.text }}>{m.bpm} bpm</span>
                     </span>
-                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 6, height: 6, borderRadius: 9999, background: QUALITY_COLOR[m.quality], flexShrink: 0 }} />
-                        <span style={{ color: colors.text }}>{m.bpm} bpm</span>
+                    {m.rmssd != null && (
+                      <span style={{ fontSize: 11, color: colors.muted }}>
+                        RMSSD {Math.round(m.rmssd)}ms{m.rmssdEstimated ? ' (geschätzt)' : ''}
                       </span>
-                      {m.rmssd != null && (
-                        <span style={{ fontSize: 11, color: colors.muted }}>
-                          RMSSD {Math.round(m.rmssd)}ms{m.rmssdEstimated ? ' (geschätzt)' : ''}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
           </>
         ) : (
           <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
