@@ -11,6 +11,7 @@ import { computeRmssd } from '../../ppg/rmssd';
 import { computeSdnn } from '../../ppg/sdnn';
 import { classifySnr } from '../../ppg/signalQuality';
 import { DEFAULT_PPG_CONFIG, type PpgResult, type SignalQuality } from '../../ppg/types';
+import HrvDashboardScreen from './HrvDashboardScreen';
 import HrvStartScreen from './HrvStartScreen';
 import HrvMeasuringScreen from './HrvMeasuringScreen';
 import HrvResultScreen from './HrvResultScreen';
@@ -21,7 +22,11 @@ interface Props {
   onOpenPaywall: () => void;
 }
 
-type Phase = 'start' | 'measuring' | 'result';
+// 'dashboard' is the tab's landing phase now — the camera flow ('start')
+// used to open automatically, it's now reached only via the dashboard's own
+// "Jetzt messen" CTA. The subscription gate (locked) is checked at
+// 'dashboard', not 'start', since that's the first thing rendered now.
+type Phase = 'dashboard' | 'start' | 'measuring' | 'result';
 
 // 5–10s warmup + 30–60s counting, per spec — the warmup's ppgService output is
 // discarded entirely (bandpass/peak-detection needs a moment on fresh camera
@@ -37,7 +42,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
   // just after it converts, so no separate trial flag is needed here.
   const { isSubscribed } = useSubscription();
 
-  const [phase, setPhase] = useState<Phase>('start');
+  const [phase, setPhase] = useState<Phase>('dashboard');
   const [permission, setPermission] = useState<CameraPermissionState | 'unknown'>('unknown');
   const [available, setAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +61,7 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
   // measurement" text, since here the reason is specific and actionable.
   const [noFingerDetected, setNoFingerDetected] = useState(false);
 
-  const phaseRef = useRef<Phase>('start');
+  const phaseRef = useRef<Phase>('dashboard');
   phaseRef.current = phase;
   const isWarmupRef = useRef(true);
   const lastResultRef = useRef<PpgResult | null>(null);
@@ -360,6 +365,14 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
     onClose();
   }, [onClose]);
 
+  const handleStartMeasurement = useCallback(() => {
+    setPhase('start');
+  }, []);
+
+  const handleBackToDashboard = useCallback(() => {
+    setPhase('dashboard');
+  }, []);
+
   if (phase === 'measuring') {
     return (
       <HrvMeasuringScreen
@@ -385,18 +398,21 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
     );
   }
 
-  return (
-    <HrvStartScreen
-      isSupported={isPpgCameraSupported}
-      locked={!isSubscribed}
-      onOpenPaywall={onOpenPaywall}
-      permission={permission}
-      available={available}
-      error={error}
-      previewActive={previewActive}
-      previewRef={previewRef}
-      onActivateCamera={handleActivateCamera}
-      onContinue={handleContinueToMeasuring}
-    />
-  );
+  if (phase === 'start') {
+    return (
+      <HrvStartScreen
+        isSupported={isPpgCameraSupported}
+        onBack={handleBackToDashboard}
+        permission={permission}
+        available={available}
+        error={error}
+        previewActive={previewActive}
+        previewRef={previewRef}
+        onActivateCamera={handleActivateCamera}
+        onContinue={handleContinueToMeasuring}
+      />
+    );
+  }
+
+  return <HrvDashboardScreen locked={!isSubscribed} onOpenPaywall={onOpenPaywall} onStartMeasurement={handleStartMeasurement} />;
 }
