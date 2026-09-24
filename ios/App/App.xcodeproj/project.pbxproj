@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -22,7 +22,34 @@
 		E82F2351E5DA8F37A7EB7DE8 /* LomiraPpgFlutter in Frameworks */ = {isa = PBXBuildFile; productRef = D94B66250F80374544D75017 /* LomiraPpgFlutter */; };
 		F49983613060308F005D4593 /* PpgFlutterEngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49983603060308F005D4593 /* PpgFlutterEngineBridge.swift */; };
 		F4C00D473061C3020052D8D8 /* AppleHealthPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C00D463061C3020052D8D8 /* AppleHealthPlugin.swift */; };
+		F4C00D4F306586450052D8D8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4C00D4E306586450052D8D8 /* WidgetKit.framework */; };
+		F4C00D51306586450052D8D8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4C00D50306586450052D8D8 /* SwiftUI.framework */; };
+		F4C00D60306586470052D8D8 /* LomiraWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F4C00D4C306586450052D8D8 /* LomiraWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F4C00D5E306586470052D8D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F4C00D4B306586450052D8D8;
+			remoteInfo = LomiraWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F4C00D65306586470052D8D8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F4C00D60306586470052D8D8 /* LomiraWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
@@ -42,7 +69,25 @@
 		F49983603060308F005D4593 /* PpgFlutterEngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PpgFlutterEngineBridge.swift; path = Plugins/PpgFlutterEngineBridge.swift; sourceTree = "<group>"; };
 		F4C00D453061BEDB0052D8D8 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		F4C00D463061C3020052D8D8 /* AppleHealthPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthPlugin.swift; sourceTree = "<group>"; };
+		F4C00D4C306586450052D8D8 /* LomiraWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LomiraWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4C00D4E306586450052D8D8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		F4C00D50306586450052D8D8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		F4C00D66306586980052D8D8 /* LomiraWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LomiraWidgetsExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F4C00D61306586470052D8D8 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F4C00D4B306586450052D8D8 /* LomiraWidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F4C00D52306586450052D8D8 /* LomiraWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (F4C00D61306586470052D8D8 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = LomiraWidgets; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		504EC3011FED79650016851F /* Frameworks */ = {
@@ -54,14 +99,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F4C00D49306586450052D8D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4C00D51306586450052D8D8 /* SwiftUI.framework in Frameworks */,
+				F4C00D4F306586450052D8D8 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				F4C00D66306586980052D8D8 /* LomiraWidgetsExtension.entitlements */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
+				F4C00D52306586450052D8D8 /* LomiraWidgets */,
+				F4C00D4D306586450052D8D8 /* Frameworks */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -70,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				F4C00D4C306586450052D8D8 /* LomiraWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,6 +162,15 @@
 			path = Plugins;
 			sourceTree = "<group>";
 		};
+		F4C00D4D306586450052D8D8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F4C00D4E306586450052D8D8 /* WidgetKit.framework */,
+				F4C00D50306586450052D8D8 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -115,10 +182,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				F4C00D65306586470052D8D8 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F4C00D5F306586470052D8D8 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -129,19 +198,44 @@
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F4C00D4B306586450052D8D8 /* LomiraWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4C00D62306586470052D8D8 /* Build configuration list for PBXNativeTarget "LomiraWidgetsExtension" */;
+			buildPhases = (
+				F4C00D48306586450052D8D8 /* Sources */,
+				F4C00D49306586450052D8D8 /* Frameworks */,
+				F4C00D4A306586450052D8D8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F4C00D52306586450052D8D8 /* LomiraWidgets */,
+			);
+			name = LomiraWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = LomiraWidgetsExtension;
+			productReference = F4C00D4C306586450052D8D8 /* LomiraWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		504EC2FC1FED79650016851F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0920;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 0920;
 				TargetAttributes = {
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
+					};
+					F4C00D4B306586450052D8D8 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
@@ -163,6 +257,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				F4C00D4B306586450052D8D8 /* LomiraWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -178,6 +273,13 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4C00D4A306586450052D8D8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,7 +321,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F4C00D48306586450052D8D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F4C00D5F306586470052D8D8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F4C00D4B306586450052D8D8 /* LomiraWidgetsExtension */;
+			targetProxy = F4C00D5E306586470052D8D8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -400,6 +517,92 @@
 			};
 			name = Release;
 		};
+		F4C00D63306586470052D8D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LomiraWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5YCN3T97P;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LomiraWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LomiraWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lomira.app.LomiraWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F4C00D64306586470052D8D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LomiraWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5YCN3T97P;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LomiraWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LomiraWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lomira.app.LomiraWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -417,6 +620,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4C00D62306586470052D8D8 /* Build configuration list for PBXNativeTarget "LomiraWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4C00D63306586470052D8D8 /* Debug */,
+				F4C00D64306586470052D8D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
