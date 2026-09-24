@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { HrvMeasurement, PracticeSession, PulseEntry, RitualEntry, RitualState } from '../types';
 import { STORAGE_KEYS, readJSON, writeJSON } from '../lib/storage';
-import { todayKey } from '../lib/date';
+import { dateKeyMinusDays, todayKey } from '../lib/date';
+import { writeWidgetState } from '../native/sharedState';
 import {
   buildCalendar,
   buildWeekStrip,
@@ -87,6 +88,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ? ritualEntries.map((e) => (e.id === existing.id ? { ...e, state, note } : e))
         : [{ id: uid(), date: key, state, note, createdAt: Date.now() }, ...ritualEntries];
       await persistRitualEntries(next);
+      // Fire-and-forget, same as the Apple Health/RevenueCat sync calls — a
+      // failed widget update must never affect the ritual entry itself.
+      void writeWidgetState({ streak: currentStreak(next), practicedToday: true });
     },
     [ritualEntries, persistRitualEntries],
   );
@@ -140,6 +144,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const next = [{ id: uid(), date: todayKey(), createdAt: Date.now(), bpm, quality, rmssd, rmssdEstimated }, ...hrvMeasurements];
       setHrvMeasurements(next);
       await writeJSON(STORAGE_KEYS.hrvMeasurements, next);
+
+      // Widget's "HRV heute früh · +3 zur Woche" needs a comparison value —
+      // this measurement's rmssd against the mean of the other rmssd-bearing
+      // measurements from the last 7 days (today excluded, since it's the
+      // thing being compared). No rmssd on this measurement, or no other
+      // measurement to compare against, and the widget just shows the value
+      // alone (see the SwiftUI view's own null-handling).
+      if (rmssd != null) {
+        const sevenDaysAgo = dateKeyMinusDays(todayKey(), 6);
+        const priorValues = next.slice(1).filter((m) => m.rmssd != null && m.date >= sevenDaysAgo).map((m) => m.rmssd as number);
+        const hrvWeekDeltaMs = priorValues.length > 0 ? rmssd - priorValues.reduce((a, b) => a + b, 0) / priorValues.length : null;
+        void writeWidgetState({ hrvValue: rmssd, hrvWeekDeltaMs });
+      }
     },
     [hrvMeasurements],
   );

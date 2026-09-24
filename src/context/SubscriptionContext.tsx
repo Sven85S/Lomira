@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { PurchasesOffering } from '@revenuecat/purchases-capacitor';
+import { writeWidgetState } from '../native/sharedState';
 import {
   configureRevenueCat,
   fetchCurrentOffering,
@@ -41,11 +42,22 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   // "web" result on a real device.
   const [purchasingUnavailableReason, setPurchasingUnavailableReason] = useState<PurchasingUnavailableReason>(null);
 
+  // Single spot for every place isSubscribed changes (refresh/purchase/
+  // restore) to also sync the Home Screen widget's App Group state — a
+  // widget the app itself won't touch again until the next of these calls
+  // must never show a stale "locked" state right after a successful
+  // purchase. Fire-and-forget: a failed widget sync must never surface to
+  // the user or block the actual subscription flow.
+  const syncSubscribed = useCallback((subscribed: boolean) => {
+    setIsSubscribed(subscribed);
+    void writeWidgetState({ isSubscribed: subscribed });
+  }, []);
+
   const refresh = useCallback(async () => {
     const [info, current] = await Promise.all([fetchCustomerInfo(), fetchCurrentOffering()]);
-    setIsSubscribed(hasPlusEntitlement(info));
+    syncSubscribed(hasPlusEntitlement(info));
     setOffering(current);
-  }, []);
+  }, [syncSubscribed]);
 
   useEffect(() => {
     (async () => {
@@ -66,7 +78,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setPurchaseError(null);
       try {
         const info = await purchasePlan(offering, plan);
-        setIsSubscribed(hasPlusEntitlement(info));
+        syncSubscribed(hasPlusEntitlement(info));
         return hasPlusEntitlement(info);
       } catch (error) {
         if (!isUserCancelledError(error)) setPurchaseError(purchaseErrorMessage(error));
@@ -75,7 +87,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         setPurchasing(false);
       }
     },
-    [offering],
+    [offering, syncSubscribed],
   );
 
   const restore = useCallback(async () => {
@@ -83,7 +95,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     setPurchaseError(null);
     try {
       const info = await restorePurchases();
-      setIsSubscribed(hasPlusEntitlement(info));
+      syncSubscribed(hasPlusEntitlement(info));
       return hasPlusEntitlement(info);
     } catch (error) {
       setPurchaseError(purchaseErrorMessage(error));
@@ -91,7 +103,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     } finally {
       setPurchasing(false);
     }
-  }, []);
+  }, [syncSubscribed]);
 
   const value = useMemo<SubscriptionContextValue>(
     () => ({

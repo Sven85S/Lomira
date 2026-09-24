@@ -1,4 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PluginListenerHandle } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 import { bgGradient } from './styles/tokens';
 import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
@@ -52,6 +54,38 @@ function Shell() {
       return { ...cur, [tab]: opening };
     });
   }, [tab]);
+
+  // Deep-link entry point for the Home Screen/Lock Screen widgets (and any
+  // future Live Activity) — a locked widget's tap target is lomira://paywall,
+  // opening straight into the Paywall instead of just the app, same intent
+  // as onOpenPaywall elsewhere. Registered once, same cancelled-guard pattern
+  // as HrvFlow's PpgCamera listeners — appUrlOpen fires for both a cold
+  // launch via the URL and a foreground-open while already running.
+  useEffect(() => {
+    let cancelled = false;
+    let handle: PluginListenerHandle | null = null;
+    (async () => {
+      const h = await CapacitorApp.addListener('appUrlOpen', (data) => {
+        let target = '';
+        try {
+          const url = new URL(data.url);
+          target = url.hostname || url.pathname.replace(/^\//, '');
+        } catch {
+          return;
+        }
+        if (target === 'paywall') setShowPaywall(true);
+      });
+      if (cancelled) {
+        void h.remove();
+        return;
+      }
+      handle = h;
+    })();
+    return () => {
+      cancelled = true;
+      void handle?.remove();
+    };
+  }, []);
 
   // Every full-screen overlay (Paywall, Lektionen, LessonDetail, Settings) is
   // its own boolean/nullable state, independent of `tab` — a tab tap changed
