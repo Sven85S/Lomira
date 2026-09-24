@@ -249,11 +249,17 @@ private struct LockScreenView: View {
             }
         } else {
             HStack(spacing: 8) {
-                Image("LomiraBall")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                // Deliberately a vector shape, not Image("LomiraBall") — a
+                // full-color bitmap here (combined with .resizable() +
+                // .clipShape()) was the confirmed cause of the whole
+                // accessoryRectangular view rendering blank on-device.
+                // WidgetKit's accessory families expect SF Symbols or
+                // template-rendered images, not raw raster content; a plain
+                // Shape renders correctly since iOS fills it with its own
+                // vibrant/monochrome tint automatically, same as it already
+                // does for the Text/SF Symbol content in this view.
+                Circle()
                     .frame(width: 32, height: 32)
-                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(state.practicedToday ? "Heute geübt" : "Zeit durchzuatmen")

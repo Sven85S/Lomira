@@ -47,10 +47,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   // widget the app itself won't touch again until the next of these calls
   // must never show a stale "locked" state right after a successful
   // purchase. Fire-and-forget: a failed widget sync must never surface to
-  // the user or block the actual subscription flow.
+  // the user or block the actual subscription flow. .catch() only logs —
+  // this path is confirmed working on-device, kept here for parity with
+  // DataContext's writeWidgetState call sites so a future regression here
+  // wouldn't go silent either.
   const syncSubscribed = useCallback((subscribed: boolean) => {
     setIsSubscribed(subscribed);
-    void writeWidgetState({ isSubscribed: subscribed });
+    writeWidgetState({ isSubscribed: subscribed }).catch((e) => {
+      console.error('[SubscriptionContext] writeWidgetState failed', e);
+    });
   }, []);
 
   const refresh = useCallback(async () => {

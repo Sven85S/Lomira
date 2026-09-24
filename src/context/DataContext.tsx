@@ -90,7 +90,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await persistRitualEntries(next);
       // Fire-and-forget, same as the Apple Health/RevenueCat sync calls — a
       // failed widget update must never affect the ritual entry itself.
-      void writeWidgetState({ streak: currentStreak(next), practicedToday: true });
+      // .catch() logs rather than swallowing: a bare `void` here would make
+      // any native failure completely silent, with nothing to diagnose why
+      // a widget went stale — see the same note on recordHrvMeasurement below.
+      writeWidgetState({ streak: currentStreak(next), practicedToday: true }).catch((e) => {
+        console.error('[DataContext] writeWidgetState (completeRitual) failed', e);
+      });
     },
     [ritualEntries, persistRitualEntries],
   );
@@ -155,7 +160,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const sevenDaysAgo = dateKeyMinusDays(todayKey(), 6);
         const priorValues = next.slice(1).filter((m) => m.rmssd != null && m.date >= sevenDaysAgo).map((m) => m.rmssd as number);
         const hrvWeekDeltaMs = priorValues.length > 0 ? rmssd - priorValues.reduce((a, b) => a + b, 0) / priorValues.length : null;
-        void writeWidgetState({ hrvValue: rmssd, hrvWeekDeltaMs });
+        // Diagnostic only — logs the actual native/bridge failure instead of
+        // silently swallowing it, so a real device test with Safari Web
+        // Inspector attached can show why the widget isn't picking this up
+        // (see the on-device report this responds to: fields/values all
+        // check out in code, so this is the one remaining unknown).
+        writeWidgetState({ hrvValue: rmssd, hrvWeekDeltaMs }).catch((e) => {
+          console.error('[DataContext] writeWidgetState (recordHrvMeasurement) failed', e);
+        });
       }
     },
     [hrvMeasurements],
