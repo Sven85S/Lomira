@@ -165,9 +165,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         // Inspector attached can show why the widget isn't picking this up
         // (see the on-device report this responds to: fields/values all
         // check out in code, so this is the one remaining unknown).
+        console.log('[DataContext] recordHrvMeasurement: calling writeWidgetState', { hrvValue: rmssd, hrvWeekDeltaMs });
         writeWidgetState({ hrvValue: rmssd, hrvWeekDeltaMs }).catch((e) => {
           console.error('[DataContext] writeWidgetState (recordHrvMeasurement) failed', e);
         });
+      } else {
+        // The one guard in this function that can skip the widget write
+        // entirely: HrvFlow's own RMSSD reliability gate (session RR count/
+        // quality) already decided rmssd is undefined before this even runs.
+        // A quality: "good" measurement can still land here if too few clean
+        // RR intervals survived outlier filtering.
+        console.log('[DataContext] recordHrvMeasurement: skipping widget HRV write, rmssd is null/undefined', { bpm, quality, rmssdEstimated });
       }
     },
     [hrvMeasurements],
