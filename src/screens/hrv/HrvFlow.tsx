@@ -299,6 +299,20 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
             // rough starting values, never tuned against real Lomira device
             // data; comparing meanSnrDb/lastSnrDb across several clean (non-
             // interrupted) measurements is what a future retuning would need.
+            // Diagnostic only — the actual RR values that fed computeRmssd(),
+            // to check an implausible result (546ms+ reported on-device)
+            // against the real numbers instead of synthetic test data. The
+            // pure math in rmssd.ts/sdnn.ts/outlierFilter.ts checked out
+            // against known-good input; this is the next step to see what
+            // the whole-session peak-detection pass actually produced.
+            const sortedClean = [...cleanSessionRR].sort((a, b) => a - b);
+            const medianCleanRR =
+              sortedClean.length === 0
+                ? null
+                : sortedClean.length % 2 === 1
+                  ? sortedClean[(sortedClean.length - 1) / 2]
+                  : (sortedClean[sortedClean.length / 2 - 1] + sortedClean[sortedClean.length / 2]) / 2;
+
             console.log('[HrvFlow] Messung beendet', {
               avgBpm,
               quality,
@@ -309,6 +323,10 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
               snrSampleCount: snrSamples.length,
               sessionRRCount: sessionRR.length,
               cleanRRCount: cleanSessionRR.length,
+              cleanRRMin: sortedClean.length > 0 ? sortedClean[0] : null,
+              cleanRRMax: sortedClean.length > 0 ? sortedClean[sortedClean.length - 1] : null,
+              cleanRRMedian: medianCleanRR,
+              cleanSessionRR,
               rmssd,
               rmssdEstimated,
             });
