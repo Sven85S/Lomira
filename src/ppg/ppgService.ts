@@ -2,7 +2,7 @@ import type { PpgSampleBatch } from '../native/ppgCamera';
 import { bandpassFilter } from './bandpassFilter';
 import { detectFrameRate } from './frameRateDetector';
 import { filterRROutliers } from './outlierFilter';
-import { detectPeaks } from './peakDetector';
+import { detectPeaks, type Peak } from './peakDetector';
 import { classifySnr, computeSnrDb, isFingerDetected } from './signalQuality';
 import { DEFAULT_PPG_CONFIG, type PpgConfig, type PpgResult } from './types';
 
@@ -110,19 +110,50 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     if (fingerDetectedCount / sessionRawValues.length < config.minFingerPresenceFraction) return [];
 
     const filtered = bandpassFilter(sessionRawValues, fps);
-    // detectPeaks' default (one global std over the whole array) is right for
-    // the live path's own short ~8s window, but on this ~60s buffer it lets a
-    // single brief artifact (motion, an exposure glitch) inflate the
-    // threshold enough to bury real peaks everywhere else — passing a window
-    // here switches it to a rolling std instead, sized to roughly match the
-    // live path's own calibration granularity. See peakDetector.ts for the
-    // synthetic reproduction (77→1 peaks global vs. 65 rolling).
-    const localStdWindowSamples = Math.round(fps * 8);
-    const peaks = detectPeaks(filtered, sessionTimestampsMs, fps, config.maxBpm, 0.5, localStdWindowSamples);
+
+    // Peak detection in non-overlapping ~8s chunks, each with its own global
+    // std (exactly what the live per-batch path does on its own short
+    // window) — not one rolling-std pass over the whole ~60s buffer. A
+    // single one-shot pass over that much longer, non-stationary signal has
+    // no redundancy against a locally elevated noise floor: confirmed
+    // on-device losing the large majority of real beats (16 of ~79 expected
+    // at 79bpm), unlike the live path, whose many independent short-window
+    // estimates average out the same per-window miss rate into a plausible
+    // avgBpm. Chunks can't simply be detectPeaks()'d on their own hard-cut
+    // slice, though — a real peak sitting right at a chunk boundary would
+    // lose the left/right context detectPeaks needs for its prominence and
+    // merge-distance checks. Each chunk's slice is padded by minDistanceSamples
+    // on both sides purely for that context; a peak is only kept if its
+    // absolute index falls within the chunk's own unpadded [start, end) core,
+    // which partitions the whole session exactly once — no gaps, no
+    // double-counting. RR intervals are then a single diff pass over every
+    // chunk's kept peaks concatenated in order, so the interval spanning two
+    // chunks (last peak of one, first of the next) is just their real
+    // timestamps' difference, the same as any other interval.
+    const minDistanceSamples = Math.max(1, Math.round((fps * 60) / config.maxBpm));
+    const chunkSamples = Math.round(fps * 8);
+
+    const allPeaks: Peak[] = [];
+    for (let chunkStart = 0; chunkStart < filtered.length; chunkStart += chunkSamples) {
+      const chunkEnd = Math.min(filtered.length, chunkStart + chunkSamples);
+      const sliceStart = Math.max(0, chunkStart - minDistanceSamples);
+      const sliceEnd = Math.min(filtered.length, chunkEnd + minDistanceSamples);
+
+      const filteredSlice = filtered.slice(sliceStart, sliceEnd);
+      const timestampsSlice = sessionTimestampsMs.slice(sliceStart, sliceEnd);
+      const chunkPeaks = detectPeaks(filteredSlice, timestampsSlice, fps, config.maxBpm);
+
+      for (const peak of chunkPeaks) {
+        const absoluteIndex = peak.index + sliceStart;
+        if (absoluteIndex >= chunkStart && absoluteIndex < chunkEnd) {
+          allPeaks.push({ ...peak, index: absoluteIndex });
+        }
+      }
+    }
 
     const rrIntervalsMs: number[] = [];
-    for (let i = 1; i < peaks.length; i++) {
-      rrIntervalsMs.push(peaks[i].timestampMs - peaks[i - 1].timestampMs);
+    for (let i = 1; i < allPeaks.length; i++) {
+      rrIntervalsMs.push(allPeaks[i].timestampMs - allPeaks[i - 1].timestampMs);
     }
     return rrIntervalsMs;
   }

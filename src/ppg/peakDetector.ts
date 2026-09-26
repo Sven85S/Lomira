@@ -13,30 +13,21 @@ export interface Peak {
  * maxBpm, i.e. the fastest physiologically plausible heartbeat) then collapses
  * any remaining too-close candidates down to the tallest one.
  *
- * `localStdWindowSamples` controls how that std is computed: omitted (the
- * default, used by the live per-batch path on its own short ~8s window), it's
- * one global number over the whole `filtered` array. Passed a window size
- * (used by the one-shot whole-session pass for RMSSD, on a ~60s array), it
- * becomes a rolling std instead — without it, a single brief artifact
- * anywhere in a long buffer (motion, an exposure glitch) can inflate that one
- * global number enough to bury real peaks throughout the rest of the
- * recording; confirmed via a synthetic one-off outlier spike collapsing peak
- * count from ~77 to 1 with the global variant, vs. 65 with the rolling one.
+ * The std is one global number over the whole `filtered` array passed in —
+ * this is only ever called on a short (~8s) window: the live per-batch path
+ * calls it directly on its own rolling window, and the one-shot whole-session
+ * pass (RMSSD/SDNN) now calls it once per non-overlapping ~8s chunk of the
+ * session buffer rather than once over the entire ~60s array (see
+ * ppgService.ts's getSessionRRIntervalsMs) — a single global std over that
+ * much longer, non-stationary buffer has no redundancy against a locally
+ * elevated noise floor and was confirmed on-device to lose the large
+ * majority of real beats, unlike the live path's many independent,
+ * short-window estimates.
  */
-export function detectPeaks(
-  filtered: number[],
-  timestampsMs: number[],
-  fps: number,
-  maxBpm: number,
-  prominenceFactor = 0.5,
-  localStdWindowSamples?: number,
-): Peak[] {
+export function detectPeaks(filtered: number[], timestampsMs: number[], fps: number, maxBpm: number, prominenceFactor = 0.5): Peak[] {
   if (filtered.length < 3) return [];
 
-  const stdAtIndex =
-    localStdWindowSamples != null
-      ? rollingStandardDeviation(filtered, localStdWindowSamples)
-      : new Array(filtered.length).fill(standardDeviation(filtered));
+  const std = standardDeviation(filtered);
   const minDistanceSamples = Math.max(1, Math.round((fps * 60) / maxBpm));
 
   const candidates: Peak[] = [];
@@ -52,7 +43,7 @@ export function detectPeaks(
     for (let j = i + 1; j <= right; j++) rightMin = Math.min(rightMin, filtered[j]);
     const prominence = value - Math.max(leftMin, rightMin);
 
-    if (prominence >= stdAtIndex[i] * prominenceFactor) {
+    if (prominence >= std * prominenceFactor) {
       candidates.push({ index: i, timestampMs: timestampsMs[i], value });
     }
   }
@@ -74,35 +65,4 @@ function standardDeviation(values: number[]): number {
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
   return Math.sqrt(variance);
-}
-
-/** Standard deviation over a centered sliding window at each index, computed
- * in O(n) via running sum/sum-of-squares rather than a fresh pass per index. */
-function rollingStandardDeviation(values: number[], windowSize: number): number[] {
-  const n = values.length;
-  const result = new Array(n);
-  const half = Math.floor(windowSize / 2);
-  let sum = 0;
-  let sumSq = 0;
-  let start = 0;
-  let end = -1;
-
-  for (let i = 0; i < n; i++) {
-    const desiredStart = Math.max(0, i - half);
-    const desiredEnd = Math.min(n - 1, i + half);
-    while (end < desiredEnd) {
-      end++;
-      sum += values[end];
-      sumSq += values[end] * values[end];
-    }
-    while (start < desiredStart) {
-      sum -= values[start];
-      sumSq -= values[start] * values[start];
-      start++;
-    }
-    const count = end - start + 1;
-    const mean = sum / count;
-    result[i] = Math.sqrt(Math.max(0, sumSq / count - mean * mean));
-  }
-  return result;
 }
