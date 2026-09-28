@@ -1,4 +1,5 @@
-import { colors, primaryBtnStyle, serif } from '../../styles/tokens';
+import { fonts, layout, palette, pillTrack, statusDot, type } from '../../styles/himmel';
+import PrimaryButton from '../../components/PrimaryButton';
 import type { SignalQuality } from '../../ppg/types';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const QUALITY_LABEL: Record<SignalQuality, string> = { good: 'gut', fair: 'brauchbar', poor: 'schwach' };
-const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: colors.gold, poor: colors.rust };
+const QUALITY_COLOR: Record<SignalQuality, string> = { good: palette.reached, fair: palette.close, poor: palette.low };
 
 // No close button — same reasoning as HrvStartScreen: HRV is a tab now, and
 // this screen already has explicit forward actions (Zu Fortschritt/Erneut
@@ -20,67 +21,57 @@ const QUALITY_COLOR: Record<SignalQuality, string> = { good: colors.sage, fair: 
 export default function HrvResultScreen({ result, noFingerDetected, onOpenFortschritt, onRemeasure }: Props) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: '0 20px 28px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: `0 ${layout.screenX}px` }}>
         {result ? (
           <>
-            <div style={{ fontFamily: serif, fontSize: 15, color: colors.muted }}>Dein Puls</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontFamily: serif, fontSize: 64, fontWeight: 500, color: colors.text }}>{result.bpm}</span>
-              <span style={{ fontSize: 16, color: colors.muted }}>bpm</span>
+            <div style={type.overline}>Dein Puls</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ ...type.scoreNumber, color: palette.ink }}>{result.bpm}</span>
+              <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary }}>bpm</span>
             </div>
 
-            <div
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 9999,
-                background: colors.card, border: `1px solid ${colors.border}`,
-              }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: 9999, background: QUALITY_COLOR[result.quality] }} />
-              <span style={{ fontSize: 13, color: colors.text }}>Signalqualität: {QUALITY_LABEL[result.quality]}</span>
+            <div style={{ ...pillTrack, alignItems: 'center', gap: 6, padding: '6px 14px' }}>
+              <span style={statusDot(QUALITY_COLOR[result.quality])} />
+              <span style={{ ...type.pill, color: palette.ink }}>Signalqualität: {QUALITY_LABEL[result.quality]}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ fontFamily: serif, fontSize: 15, color: colors.muted }}>Deine HRV</div>
+              <div style={type.overline}>Deine HRV</div>
               {result.rmssd != null ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    <span style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text }}>{Math.round(result.rmssd)}</span>
-                    <span style={{ fontSize: 13, color: colors.muted }}>ms RMSSD</span>
+                    <span style={{ ...type.sectionTitle, color: palette.ink }}>{Math.round(result.rmssd)}</span>
+                    <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary }}>ms RMSSD</span>
                   </div>
-                  <span style={{ fontSize: 11, color: colors.muted }}>
+                  <span style={{ ...type.small, color: result.rmssdEstimated ? palette.close : palette.tertiary }}>
                     Kurzfristige Herzratenvariabilität{result.rmssdEstimated ? ' — geschätzt, mit Vorbehalt' : ''}
                   </span>
                 </>
               ) : (
-                <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 240 }}>
+                <p style={{ ...type.hintText, color: palette.tertiary, textAlign: 'center', margin: 0, maxWidth: 240 }}>
                   HRV (RMSSD) nicht verlässlich berechenbar — dafür war das Signal nicht sauber und stabil genug.
                 </p>
               )}
             </div>
 
-            <button style={{ ...primaryBtnStyle, marginTop: 8 }} onClick={onOpenFortschritt}>
+            <PrimaryButton style={{ marginTop: 8 }} onClick={onOpenFortschritt}>
               Zu Fortschritt
-            </button>
-            <button
-              style={{ background: 'none', border: 'none', color: colors.muted, fontSize: 13, cursor: 'pointer', padding: 0 }}
-              onClick={onRemeasure}
-            >
+            </PrimaryButton>
+            <button style={{ ...type.pill, background: 'none', border: 'none', color: palette.tertiary, cursor: 'pointer', padding: 0 }} onClick={onRemeasure}>
               Erneut messen
             </button>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: serif, fontSize: 18, color: colors.text, textAlign: 'center' }}>
+            <div style={{ ...type.sectionTitle, color: palette.ink, textAlign: 'center' }}>
               {noFingerDetected ? 'Kein Finger erkannt' : 'Keine zuverlässige Messung'}
             </div>
-            <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 260 }}>
+            <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: 0, maxWidth: 260 }}>
               {noFingerDetected
                 ? 'Der Finger lag während der Messung nicht zuverlässig auf Kamera und Blitz. Bitte beide vollständig bedecken und ruhig halten.'
                 : 'Der Puls konnte nicht sicher erkannt werden. Bitte lege den Finger vollständig auf Kamera und Blitz und halte ihn ruhig.'}
             </p>
-            <button style={primaryBtnStyle} onClick={onRemeasure}>
-              Erneut versuchen
-            </button>
+            <PrimaryButton onClick={onRemeasure}>Erneut versuchen</PrimaryButton>
           </>
         )}
       </div>

@@ -1,3 +1,5 @@
+/* Schrift, Grundfarbe und Body-Hintergrund kommen aus fonts.css. */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,27 +13,31 @@ body,
   height: 100%;
 }
 
-body {
-  background: #EDEAE2;
-  font-family: 'Instrument Sans', sans-serif;
-  color: #2B2620;
-}
-
 a,
 a:hover {
-  color: #2B2620;
+  color: #1f2a36;
 }
 
 textarea {
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: 'Instrument Sans', -apple-system, system-ui, sans-serif;
   outline: none;
   resize: none;
+}
+
+input {
+  font-family: 'Instrument Sans', -apple-system, system-ui, sans-serif;
+}
+
+/* palette.placeholder — Platzhalter lassen sich nicht per Inline-Style färben */
+textarea::placeholder,
+input::placeholder {
+  color: #7a8594;
 }
 
 button {
   border: none;
   cursor: pointer;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: 'Instrument Sans', -apple-system, system-ui, sans-serif;
   background: none;
 }
 

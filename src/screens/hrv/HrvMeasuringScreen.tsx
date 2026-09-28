@@ -1,4 +1,4 @@
-import { colors, iconBtnStyle, serif } from '../../styles/tokens';
+import { fonts, gearButton, layout, palette, progressFill, progressTrack, type, white } from '../../styles/himmel';
 import type { PpgResult } from '../../ppg/types';
 
 interface Props {
@@ -46,45 +46,48 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
           just "leave" here, it's "cancel a running measurement" (camera/torch
           active), which tapping a different tab would do too but far less
           visibly than an on-screen Abbrechen button. */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={iconBtnStyle} onClick={onClose} aria-label="Abbrechen">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <div style={{ display: 'flex', alignItems: 'center', padding: `0 ${layout.screenX}px`, flexShrink: 0 }}>
+        <button style={gearButton} onClick={onClose} aria-label="Abbrechen">
+          <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6 * (24 / 17)} strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: '0 20px 20px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: `0 ${layout.screenX}px` }}>
         {isWarmup ? (
           <>
-            <div style={{ fontFamily: serif, fontSize: 20, color: colors.text, textAlign: 'center' }}>Signal stabilisiert sich …</div>
-            <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: 0, maxWidth: 260 }}>
+            <div style={{ ...type.sectionTitle, color: palette.ink, textAlign: 'center' }}>Signal stabilisiert sich …</div>
+            <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: 0, maxWidth: 260 }}>
               Finger ruhig auf Kamera und Blitz liegen lassen. Gleich beginnt die eigentliche Messung.
             </p>
-            <div style={{ fontFamily: serif, fontSize: 40, color: colors.muted }}>{Math.ceil(warmupRemainingMs / 1000)}</div>
+            <div style={{ ...type.scoreNumber, color: palette.tertiary }}>{Math.ceil(warmupRemainingMs / 1000)}</div>
           </>
         ) : (
           <>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontFamily: serif, fontSize: 56, fontWeight: 500, color: colors.text }}>
-                {liveResult?.bpm != null ? Math.round(liveResult.bpm) : '--'}
-              </span>
-              <span style={{ fontSize: 15, color: colors.muted }}>bpm</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ ...type.scoreNumber, color: palette.ink }}>{liveResult?.bpm != null ? Math.round(liveResult.bpm) : '--'}</span>
+              <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary }}>bpm</span>
             </div>
 
-            <svg width={280} height={60} viewBox="0 0 280 60" style={{ background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}` }}>
-              {pathD && <path d={pathD} fill="none" stroke={colors.blue} strokeWidth={1.5} />}
+            <svg
+              width={280}
+              height={60}
+              viewBox="0 0 280 60"
+              style={{ background: white(0.58), borderRadius: 24, boxShadow: `inset 0 0 0 1px ${white(0.7)}` }}
+            >
+              {pathD && <path d={pathD} fill="none" stroke={palette.accent} strokeWidth={1.5} />}
             </svg>
 
-            <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0 }}>
+            <p style={{ ...type.hintText, color: palette.tertiary, textAlign: 'center', margin: 0 }}>
               {liveResult?.isFingerDetected === false
                 ? 'Finger nicht erkannt — bitte Kamera und Blitz vollständig bedecken.'
                 : `Noch ${Math.ceil(measureRemainingMs / 1000)}s — bitte ruhig halten.`}
             </p>
 
-            <div style={{ width: 200, height: 4, borderRadius: 9999, background: colors.border, overflow: 'hidden' }}>
-              <div style={{ width: `${Math.round(progress * 100)}%`, height: '100%', background: colors.blue, transition: 'width 0.2s linear' }} />
+            <div style={{ ...progressTrack, width: 200 }}>
+              <div style={progressFill(progress, palette.accent)} />
             </div>
           </>
         )}

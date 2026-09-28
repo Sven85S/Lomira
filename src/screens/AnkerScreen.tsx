@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { colors, serif } from '../styles/tokens';
+import { fonts, gearButton, layout, listCard, palette, type } from '../styles/himmel';
 import { useData } from '../context/DataContext';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
 import AnimatedBlob, { isWebglSupported, MIN_RADIUS, MAX_RADIUS } from '../components/AnimatedBlob';
@@ -122,21 +122,28 @@ export default function AnkerScreen() {
   const introCopy = active ? '' : 'Ball antippen zum Starten';
   const tapHintLabel = active ? 'Ball zum Beenden antippen' : '';
 
-  const stepperBtnStyle: CSSProperties = {
-    width: 32,
-    height: 32,
-    borderRadius: 9999,
-    background: colors.surface,
-    border: `1px solid ${colors.border}`,
-    color: colors.text,
-    fontSize: 17,
-    lineHeight: 1,
+  // +/− als gearButton in 32px
+  const stepperBtnStyle: CSSProperties = { ...gearButton, width: 32, height: 32, fontSize: 17, lineHeight: 1 };
+
+  const stepperCardStyle: CSSProperties = {
+    ...listCard(24),
+    flex: 1,
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 0,
-    cursor: 'pointer',
+    gap: 4,
+    // Karten-Innenabstand 4 + Zeilenabstand 12, wie bei listRow()
+    paddingTop: 16,
+    paddingBottom: 16,
   };
+
+  // Große Serif-Zahl + kleine Sans-Einheit daneben
+  const stepperValue = (seconds: number) => (
+    <span style={{ minWidth: 30, textAlign: 'center', whiteSpace: 'nowrap' }}>
+      <span style={{ ...type.tileValue, color: palette.ink }}>{seconds}</span>
+      <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary, marginLeft: 2 }}>s</span>
+    </span>
+  );
 
   return (
     <div
@@ -148,8 +155,8 @@ export default function AnkerScreen() {
         boxSizing: 'border-box',
         height: '100%',
         minHeight: '100%',
-        padding: '20px 20px 10px',
-        gap: 8,
+        padding: `0 ${layout.screenX}px`,
+        gap: layout.blockGap,
       }}
     >
       {/* Breath blob first, directly under the header — the screen's sole
@@ -226,13 +233,11 @@ export default function AnkerScreen() {
           big slot, so it keeps one fixed height in both states. */}
       <div style={{ flexShrink: 0 }}>
         <div style={{ height: 50, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ fontFamily: serif, fontSize: 32, fontWeight: 500, color: colors.text, lineHeight: 1 }}>{bigTimer}</div>
-          <div style={{ fontFamily: serif, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: colors.muted, marginTop: 4, height: 15 }}>
-            {phaseLabel}
-          </div>
+          <div style={{ fontFamily: fonts.serif, fontSize: 32, fontWeight: 400, color: palette.ink, lineHeight: 1 }}>{bigTimer}</div>
+          <div style={{ ...type.overline, marginTop: 4, height: 15 }}>{phaseLabel}</div>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.text, lineHeight: 1.4, maxWidth: 280, minHeight: 16, margin: '4px 0 0' }}>
+        <p style={{ ...type.body, textAlign: 'center', color: palette.ink, lineHeight: 1.4, maxWidth: 280, minHeight: 16, margin: '4px 0 0' }}>
           {introCopy}
         </p>
       </div>
@@ -240,28 +245,28 @@ export default function AnkerScreen() {
       {/* Bottom group: exercise copy, tap hint and steppers stay together as one
           block; like the timer group, only the space around it flexes. */}
       <div style={{ width: '100%', flexShrink: 0 }}>
-        <p style={{ textAlign: 'center', fontSize: 14, color: colors.muted, margin: '10px 0 0' }}>{tapHintLabel}</p>
+        <p style={{ ...type.body, textAlign: 'center', color: palette.tertiary, margin: '10px 0 0' }}>{tapHintLabel}</p>
 
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 6 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
-            <span style={{ fontSize: 11, color: colors.muted }}>Einatmen</span>
+          <div style={stepperCardStyle}>
+            <span style={{ ...type.small, color: palette.secondary }}>Einatmen</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label="Einatmen kürzer">
                 −
               </button>
-              <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{inhaleDuration}s</span>
+              {stepperValue(inhaleDuration)}
               <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v + 1))} aria-label="Einatmen länger">
                 +
               </button>
             </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 18, background: colors.card, border: `1px solid ${colors.border}` }}>
-            <span style={{ fontSize: 11, color: colors.muted }}>Ausatmen</span>
+          <div style={stepperCardStyle}>
+            <span style={{ ...type.small, color: palette.secondary }}>Ausatmen</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label="Ausatmen kürzer">
                 −
               </button>
-              <span style={{ fontFamily: serif, fontSize: 15, color: colors.text, minWidth: 22, textAlign: 'center' }}>{exhaleDuration}s</span>
+              {stepperValue(exhaleDuration)}
               <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v + 1))} aria-label="Ausatmen länger">
                 +
               </button>

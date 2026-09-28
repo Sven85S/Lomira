@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
-import { bgGradient } from './styles/tokens';
+import { skyBackground, navClearance } from './styles/himmel';
 import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
@@ -110,7 +110,9 @@ function Shell() {
       style={{
         width: '100%',
         height: '100dvh',
-        background: bgGradient,
+        // Himmel-Verlauf: fest, scrollt nicht mit, reicht hinter Statusleiste
+        // und Home-Indikator (entspricht .ignoresSafeArea()).
+        background: skyBackground,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -126,8 +128,10 @@ function Shell() {
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
-          maskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
+          // Inhalt scrollt hinter der schwebenden Milchglas-Leiste durch,
+          // endet aber oberhalb von ihr (.safeAreaInset(edge: .bottom)).
+          paddingBottom: navClearance,
+          boxSizing: 'border-box',
         }}
       >
         {tab === 'sos' && <AnkerScreen />}

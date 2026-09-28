@@ -1,5 +1,7 @@
-import type { CSSProperties, RefObject } from 'react';
-import { colors, iconBtnStyle, primaryBtnStyle, serif } from '../../styles/tokens';
+import type { RefObject } from 'react';
+import { layout, palette, type, white } from '../../styles/himmel';
+import BackButton from '../../components/BackButton';
+import PrimaryButton from '../../components/PrimaryButton';
 import type { CameraPermissionState } from '../../native/ppgCamera';
 
 interface Props {
@@ -17,8 +19,6 @@ interface Props {
   onContinue: () => void;
 }
 
-const backBtnStyle: CSSProperties = { ...iconBtnStyle, width: 44, height: 44 };
-
 export default function HrvStartScreen({
   isSupported,
   onBack,
@@ -34,31 +34,32 @@ export default function HrvStartScreen({
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={backBtnStyle} onClick={onBack} aria-label="Zurück">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+      <div style={{ display: 'flex', alignItems: 'center', padding: `0 ${layout.screenX}px`, flexShrink: 0 }}>
+        <BackButton label="Zurück" onClick={onBack} />
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text, alignSelf: 'flex-start' }}>Puls messen</div>
+      <div
+        style={{
+          flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: `${layout.blockGap}px ${layout.screenX}px 0`,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: layout.blockGap,
+        }}
+      >
+        <div style={{ ...type.subpageTitle, color: palette.ink, alignSelf: 'flex-start', padding: `0 ${layout.headingInset}px` }}>Puls messen</div>
 
         {!isSupported && (
-          <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: '40px 0 0' }}>
+          <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: '40px 0 0' }}>
             Die Puls-Messung über die Kamera ist aktuell nur in der iOS-App verfügbar.
           </p>
         )}
 
         {simulatorLikely && (
-          <p style={{ fontSize: 13, color: colors.muted, textAlign: 'center', margin: '40px 0 0' }}>
+          <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: '40px 0 0' }}>
             Keine passende Kamera gefunden. Diese Messung funktioniert nur auf einem echten iPhone.
           </p>
         )}
 
         {isSupported && available !== false && (
           <>
-            <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
+            <p style={{ ...type.body, color: palette.ink, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
               Finger vollständig auf Kamera und Blitz legen — ruhig halten, bis die Messung abgeschlossen ist.
             </p>
 
@@ -77,13 +78,13 @@ export default function HrvStartScreen({
               <div ref={previewRef} style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden' }} />
               <div
                 style={{
-                  position: 'absolute', inset: 0, borderRadius: '50%', border: `1px solid ${colors.border}`,
-                  pointerEvents: 'none', background: previewActive ? 'transparent' : colors.card,
+                  position: 'absolute', inset: 0, borderRadius: '50%', boxShadow: `inset 0 0 0 1px ${white(0.7)}`,
+                  pointerEvents: 'none', background: previewActive ? 'transparent' : white(0.62),
                 }}
               />
               {!previewActive && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={palette.tertiary} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                     <circle cx="12" cy="13" r="4" />
                   </svg>
@@ -91,20 +92,16 @@ export default function HrvStartScreen({
               )}
             </div>
 
-            {error && <p style={{ fontSize: 12, color: colors.rust, textAlign: 'center', margin: 0 }}>{error}</p>}
+            {error && <p style={{ ...type.hintText, color: palette.low, textAlign: 'center', margin: 0 }}>{error}</p>}
 
             {!previewActive ? (
-              <button style={primaryBtnStyle} onClick={onActivateCamera}>
-                Kamera &amp; Blitz aktivieren
-              </button>
+              <PrimaryButton onClick={onActivateCamera}>Kamera &amp; Blitz aktivieren</PrimaryButton>
             ) : (
-              <button style={primaryBtnStyle} onClick={onContinue}>
-                Weiter
-              </button>
+              <PrimaryButton onClick={onContinue}>Weiter</PrimaryButton>
             )}
 
             {permission === 'denied' && (
-              <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', margin: 0 }}>
+              <p style={{ ...type.hintText, color: palette.tertiary, textAlign: 'center', margin: 0 }}>
                 Kamera-Zugriff wurde abgelehnt — erlaube ihn in den Systemeinstellungen deines Geräts und versuche es erneut.
               </p>
             )}

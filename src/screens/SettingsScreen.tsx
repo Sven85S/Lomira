@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react';
-import { bgGradient, cardStyle, colors, iconBtnStyle, serif } from '../styles/tokens';
+import { inkA, layout, listCard, listRow, palette, type, white } from '../styles/himmel';
+import OverlayScreen from '../components/OverlayScreen';
 import { STORAGE_KEYS, readJSON, writeJSON } from '../lib/storage';
 import {
   cancelReminder,
@@ -19,15 +20,23 @@ interface Props {
 
 const DEFAULT_REMINDER_TIME = '08:00';
 
-const rowStyle: CSSProperties = { ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' };
-const rowLabelStyle: CSSProperties = { fontSize: 14, color: colors.text };
-const backBtnStyle: CSSProperties = { ...iconBtnStyle, width: 44, height: 44 };
-const sectionLabelStyle: CSSProperties = { fontSize: 12, color: colors.muted, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '4px 0 0', padding: '0 4px' };
-const timeInputStyle: CSSProperties = { fontSize: 16, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '5px 8px' };
+const rowStyle = (last: boolean): CSSProperties => ({ ...listRow(last), display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 });
+const rowLabelStyle: CSSProperties = { ...type.settingsRow, color: palette.ink };
+const sectionLabelStyle: CSSProperties = { ...type.overline, padding: `0 ${layout.headingInset}px`, marginBottom: layout.overlineToCard };
+const hintStyle: CSSProperties = { ...type.hintText, color: palette.tertiary, margin: 0, padding: `0 ${layout.headingInset}px` };
+const errorStyle: CSSProperties = { ...hintStyle, color: palette.low };
+const inputStyle: CSSProperties = {
+  ...type.input,
+  color: palette.ink,
+  background: white(0.45),
+  border: 'none',
+  boxShadow: `inset 0 0 0 1px ${white(0.7)}`,
+  borderRadius: 8,
+};
 
 function ChevronIcon() {
   return (
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={palette.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
       <polyline points="9 18 15 12 9 6" />
     </svg>
   );
@@ -35,7 +44,7 @@ function ChevronIcon() {
 
 function PlusIcon() {
   return (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.blue} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={palette.accent} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -44,16 +53,16 @@ function PlusIcon() {
 
 function TrashIcon() {
   return (
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={palette.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <polyline points="3 6 5 6 21 6" />
       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
   );
 }
 
-function LegalRow({ label, onClick }: { label: string; onClick: () => void }) {
+function LegalRow({ label, onClick, last }: { label: string; onClick: () => void; last: boolean }) {
   return (
-    <button onClick={onClick} style={{ ...rowStyle, cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+    <button onClick={onClick} style={{ ...rowStyle(last), cursor: 'pointer', width: '100%', textAlign: 'left', background: 'none' }}>
       <span style={rowLabelStyle}>{label}</span>
       <ChevronIcon />
     </button>
@@ -68,7 +77,7 @@ function Switch({ on, onClick, disabled, ariaLabel }: { on: boolean; onClick: ()
       disabled={disabled}
       aria-label={ariaLabel}
       style={{
-        width: 44, height: 26, borderRadius: 9999, background: on ? colors.sage : colors.border,
+        width: 44, height: 26, borderRadius: 9999, background: on ? palette.accent : palette.track,
         position: 'relative', padding: 0, cursor: disabled ? 'default' : 'pointer', flexShrink: 0, border: 'none',
         opacity: disabled ? 0.5 : 1,
       }}
@@ -76,7 +85,7 @@ function Switch({ on, onClick, disabled, ariaLabel }: { on: boolean; onClick: ()
       <span
         style={{
           position: 'absolute', top: 3, left: on ? 22 : 3, width: 20, height: 20, borderRadius: 9999,
-          background: colors.card, boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.15s',
+          background: white(1), boxShadow: `0 1px 3px ${inkA(0.2)}`, transition: 'left 0.15s',
         }}
       />
     </button>
@@ -95,17 +104,21 @@ function ReminderRow({
   onDelete: (id: number) => void;
 }) {
   return (
-    <div style={rowStyle}>
+    <div style={rowStyle(false)}>
       <input
         type="time"
         value={entry.time}
         onChange={(e) => onTimeChange(entry.id, e.target.value)}
         disabled={!isReminderSupported}
-        style={timeInputStyle}
+        style={{ ...inputStyle, padding: '5px 8px' }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <Switch on={entry.enabled} onClick={() => onToggle(entry.id)} disabled={!isReminderSupported} ariaLabel="Erinnerung umschalten" />
-        <button onClick={() => onDelete(entry.id)} aria-label="Erinnerung löschen" style={{ ...iconBtnStyle, width: 28, height: 28, background: 'transparent', border: 'none' }}>
+        <button
+          onClick={() => onDelete(entry.id)}
+          aria-label="Erinnerung löschen"
+          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, background: 'transparent', border: 'none', flexShrink: 0 }}
+        >
           <TrashIcon />
         </button>
       </div>
@@ -222,96 +235,80 @@ export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTer
   };
 
   return (
-    <div
-      style={{
-        // bottom leaves room for OrbitNav instead of covering it (inset: 0
-        // used to) — the tab bar stays visible/reachable while this overlay
-        // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
-        background: bgGradient, zIndex: 35, display: 'flex', flexDirection: 'column',
-        paddingTop: 'env(safe-area-inset-top)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={backBtnStyle} onClick={onClose} aria-label="Zurück">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-      </div>
+    <OverlayScreen zIndex={35} onBack={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: layout.blockGap, opacity: loaded ? 1 : 0 }}>
+        <div style={{ padding: `0 ${layout.headingInset}px` }}>
+          <div style={type.wordmark}>Lomira</div>
+          <div style={{ ...type.pageTitle, color: palette.ink, marginTop: layout.overlineToTitle }}>Einstellungen</div>
+        </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', gap: 14, opacity: loaded ? 1 : 0 }}>
-        <div style={{ fontFamily: serif, fontSize: 22, fontWeight: 500, color: colors.text }}>Einstellungen</div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={rowStyle}>
+        <div style={listCard()}>
+          <div style={rowStyle(true)}>
             <span style={rowLabelStyle}>Dein Vorname (optional)</span>
             <input
               type="text"
               value={firstName}
               onChange={handleNameChange}
               placeholder="z.B. Michael"
-              style={{ fontSize: 16, color: colors.text, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '6px 10px', width: 140, textAlign: 'right' }}
+              style={{ ...inputStyle, padding: '6px 10px', width: 140, textAlign: 'right' }}
             />
           </div>
+        </div>
 
+        <div>
           <div style={sectionLabelStyle}>Erinnerungen</div>
+          <div style={listCard()}>
+            {reminders.map((entry) => (
+              <ReminderRow
+                key={entry.id}
+                entry={entry}
+                onToggle={handleToggleReminder}
+                onTimeChange={handleReminderTimeChange}
+                onDelete={handleDeleteReminder}
+              />
+            ))}
+            <button
+              onClick={handleAddReminder}
+              disabled={!isReminderSupported}
+              style={{
+                ...rowStyle(true), justifyContent: 'center', gap: 8, cursor: isReminderSupported ? 'pointer' : 'default',
+                opacity: isReminderSupported ? 1 : 0.5, width: '100%', background: 'none',
+              }}
+            >
+              <PlusIcon />
+              <span style={{ ...type.cardTitle, color: palette.accent }}>Erinnerung hinzufügen</span>
+            </button>
+          </div>
+        </div>
 
-          {reminders.map((entry) => (
-            <ReminderRow
-              key={entry.id}
-              entry={entry}
-              onToggle={handleToggleReminder}
-              onTimeChange={handleReminderTimeChange}
-              onDelete={handleDeleteReminder}
-            />
-          ))}
+        {!isReminderSupported && <p style={hintStyle}>Erinnerungen sind nur in der iOS- oder Android-App verfügbar.</p>}
+        {permissionDenied && (
+          <p style={errorStyle}>
+            Ohne Benachrichtigungs-Berechtigung kann Lomira keine Erinnerung senden. Du kannst sie in den
+            Systemeinstellungen deines Geräts erlauben und es hier erneut versuchen.
+          </p>
+        )}
 
-          <button
-            onClick={handleAddReminder}
-            disabled={!isReminderSupported}
-            style={{
-              ...rowStyle, justifyContent: 'center', gap: 8, cursor: isReminderSupported ? 'pointer' : 'default',
-              opacity: isReminderSupported ? 1 : 0.5, width: '100%',
-            }}
-          >
-            <PlusIcon />
-            <span style={{ fontSize: 14, color: colors.blue, fontWeight: 500 }}>Erinnerung hinzufügen</span>
-          </button>
-
-          {!isReminderSupported && (
-            <p style={{ fontSize: 12, color: colors.muted, margin: 0, padding: '0 4px' }}>
-              Erinnerungen sind nur in der iOS- oder Android-App verfügbar.
-            </p>
-          )}
-          {permissionDenied && (
-            <p style={{ fontSize: 12, color: colors.rust, margin: 0, padding: '0 4px' }}>
-              Ohne Benachrichtigungs-Berechtigung kann Lomira keine Erinnerung senden. Du kannst sie in den
-              Systemeinstellungen deines Geräts erlauben und es hier erneut versuchen.
-            </p>
-          )}
-
-          <div style={rowStyle}>
+        <div style={listCard()}>
+          <div style={rowStyle(true)}>
             <span style={rowLabelStyle}>In Health speichern</span>
             <Switch on={appleHealthEnabled} onClick={handleToggleAppleHealth} disabled={!isAppleHealthSupported} ariaLabel="Health-Speicherung umschalten" />
           </div>
+        </div>
 
-          {!isAppleHealthSupported && (
-            <p style={{ fontSize: 12, color: colors.muted, margin: 0, padding: '0 4px' }}>
-              Die Health-Speicherung ist nur in der iOS-App verfügbar.
-            </p>
-          )}
-          {healthPermissionDenied && (
-            <p style={{ fontSize: 12, color: colors.rust, margin: 0, padding: '0 4px' }}>
-              Ohne Health-Berechtigung kann Lomira keine Werte schreiben. Du kannst sie in den Systemeinstellungen
-              deines Geräts erlauben und es hier erneut versuchen.
-            </p>
-          )}
+        {!isAppleHealthSupported && <p style={hintStyle}>Die Health-Speicherung ist nur in der iOS-App verfügbar.</p>}
+        {healthPermissionDenied && (
+          <p style={errorStyle}>
+            Ohne Health-Berechtigung kann Lomira keine Werte schreiben. Du kannst sie in den Systemeinstellungen
+            deines Geräts erlauben und es hier erneut versuchen.
+          </p>
+        )}
 
-          <LegalRow label="Datenschutzerklärung" onClick={onOpenPrivacyPolicy} />
-          <LegalRow label="Nutzungsbedingungen" onClick={onOpenTerms} />
+        <div style={listCard()}>
+          <LegalRow label="Datenschutzerklärung" onClick={onOpenPrivacyPolicy} last={false} />
+          <LegalRow label="Nutzungsbedingungen" onClick={onOpenTerms} last />
         </div>
       </div>
-    </div>
+    </OverlayScreen>
   );
 }

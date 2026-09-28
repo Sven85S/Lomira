@@ -1,5 +1,7 @@
 import { useState, type CSSProperties } from 'react';
-import { bgGradient, cardStyle, colors, iconBtnStyle, primaryBtnStyle, serif } from '../styles/tokens';
+import { glassCard, layout, listCard, palette, type, white } from '../styles/himmel';
+import OverlayScreen from '../components/OverlayScreen';
+import PrimaryButton from '../components/PrimaryButton';
 import { useSubscription } from '../context/SubscriptionContext';
 
 interface Props {
@@ -23,16 +25,17 @@ const FALLBACK_YEARLY_PRICE = 24.99;
 const FALLBACK_MONTHLY_PRICE = 2.99;
 const formatEuro = (n: number) => `${n.toFixed(2).replace('.', ',')} €`;
 
+// Kapsel wie der Primärbutton, ohne Füllung: Rand 1px Weiß 70 % innen
 const secondaryBtnStyle: CSSProperties = {
-  padding: '15px',
-  borderRadius: 9999,
-  fontSize: 15,
-  fontWeight: 500,
-  background: 'transparent',
-  color: colors.text,
-  cursor: 'pointer',
-  border: `1px solid ${colors.border}`,
+  ...type.primaryButton,
   width: '100%',
+  padding: '15px 0',
+  borderRadius: 9999,
+  background: 'transparent',
+  color: palette.ink,
+  cursor: 'pointer',
+  border: 'none',
+  boxShadow: `inset 0 0 0 1px ${white(0.7)}`,
 };
 
 export default function PaywallScreen({ onClose }: Props) {
@@ -47,14 +50,14 @@ export default function PaywallScreen({ onClose }: Props) {
   const yearlyPerMonth = yearlyPkg?.product.pricePerMonth;
 
   const planTileStyle = (active: boolean): CSSProperties => ({
+    ...listCard(),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    padding: '14px 16px',
-    borderRadius: 16,
-    background: active ? colors.surface : colors.card,
-    border: active ? `2px solid ${colors.text}` : `1px solid ${colors.border}`,
+    padding: 16,
+    background: active ? white(0.45) : white(0.58),
+    boxShadow: active ? `inset 0 0 0 2px ${palette.ink}` : `inset 0 0 0 1px ${white(0.7)}`,
     cursor: 'pointer',
   });
 
@@ -79,115 +82,89 @@ export default function PaywallScreen({ onClose }: Props) {
   };
 
   return (
-    <div
-      style={{
-        // bottom leaves room for OrbitNav instead of covering it (inset: 0
-        // used to) — the tab bar stays visible/reachable while the paywall
-        // shows. Exact value matches OrbitNav's own root height, OrbitNav.tsx:66.
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 'calc(118px + env(safe-area-inset-bottom))',
-        // bgGradient, not the old flat colors.surface — this overlay used to
-        // end in a hard-edged seam against the Shell's own gradient showing
-        // through behind the tab bar. See bgGradient's own comment in
-        // tokens.ts for why its stops are in dvh, which is what makes this
-        // line up with the Shell exactly instead of just approximately.
-        background: bgGradient, zIndex: 30, display: 'flex', flexDirection: 'column',
-        paddingTop: 'env(safe-area-inset-top)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px 4px', flexShrink: 0 }}>
-        <button style={iconBtnStyle} onClick={onClose} aria-label="Schließen">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+    <OverlayScreen zIndex={30} onBack={onClose} backAriaLabel="Schließen">
+      <div style={{ padding: `0 ${layout.headingInset}px` }}>
+        <div style={type.wordmark}>Lomira</div>
+        <div style={{ ...type.sheetTitle, color: palette.ink, marginTop: layout.overlineToTitle }}>Lomira Plus</div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-        <div style={{ fontFamily: serif, fontSize: 10, letterSpacing: '0.1em', color: colors.muted, textTransform: 'uppercase', marginTop: 4, alignSelf: 'flex-start', width: '100%' }}>lomira</div>
-        <div style={{ fontFamily: serif, fontSize: 28, fontWeight: 500, color: colors.text, textAlign: 'center' }}>Lomira Plus</div>
-
-        <div style={{ ...cardStyle, width: '100%', marginTop: 4, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={glassCard()}>
+        <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {FEATURES.map((f) => (
             <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.blue} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={palette.accent} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span style={{ fontSize: 13, color: colors.text }}>{f}</span>
+              <span style={{ ...type.body, color: palette.ink }}>{f}</span>
             </div>
           ))}
         </div>
-
-        {isSubscribed ? (
-          <div style={{ ...cardStyle, width: '100%', marginTop: 4, textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: colors.text, margin: 0 }}>Du hast Lomira Plus bereits freigeschaltet.</p>
-          </div>
-        ) : (
-          <>
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
-              <div style={planTileStyle(selectedPlan === 'yearly')} onClick={() => setSelectedPlan('yearly')}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>Jährlich</span>
-                    <span style={{ fontSize: 9, letterSpacing: '0.05em', textTransform: 'uppercase', color: colors.text, background: colors.gold, padding: '2px 8px', borderRadius: 9999 }}>
-                      Empfohlen
-                    </span>
-                  </div>
-                  <div style={{ fontSize: 11, color: colors.muted, marginTop: 4 }}>
-                    entspricht {yearlyPerMonth != null ? formatEuro(yearlyPerMonth) : formatEuro(FALLBACK_YEARLY_PRICE / 12)}/Monat
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>
-                    {yearlyPkg?.product.priceString ?? formatEuro(FALLBACK_YEARLY_PRICE)}
-                  </div>
-                </div>
-              </div>
-              <div style={planTileStyle(selectedPlan === 'monthly')} onClick={() => setSelectedPlan('monthly')}>
-                <span style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>Monatlich</span>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, color: colors.text, fontWeight: 500 }}>
-                    {monthlyPkg?.product.priceString ?? formatEuro(FALLBACK_MONTHLY_PRICE)}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <p style={{ fontSize: 11, color: colors.muted, textAlign: 'center', lineHeight: 1.4, margin: '6px 0 0', maxWidth: 260 }}>
-              7 Tage kostenlos, danach automatische Verlängerung. Jederzeit kündbar.
-            </p>
-
-            {purchaseError && (
-              <p style={{ fontSize: 12, color: colors.rust, textAlign: 'center', margin: 0 }}>{purchaseError}</p>
-            )}
-
-            {showUnavailableHint && purchasingUnavailableReason && (
-              <p style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
-                Käufe sind nur in der iOS-App verfügbar.
-              </p>
-            )}
-
-            <button style={{ ...primaryBtnStyle, marginTop: 4, opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
-              {purchasing ? 'Einen Moment …' : '7 Tage kostenlos testen'}
-            </button>
-
-            <button style={{ ...secondaryBtnStyle, opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
-              Jetzt erwerben
-            </button>
-
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 2 }}>
-              <button
-                style={{ fontSize: 12, color: colors.muted, background: 'none', border: 'none', cursor: 'pointer' }}
-                onClick={async () => {
-                  const ok = await restore();
-                  if (ok) onClose();
-                }}
-              >
-                Bereits abonniert? Käufe wiederherstellen
-              </button>
-            </div>
-          </>
-        )}
       </div>
-    </div>
+
+      {isSubscribed ? (
+        <div style={glassCard()}>
+          <p style={{ ...type.body, color: palette.ink, margin: 0, padding: '12px 0', textAlign: 'center' }}>Du hast Lomira Plus bereits freigeschaltet.</p>
+        </div>
+      ) : (
+        <>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={planTileStyle(selectedPlan === 'yearly')} onClick={() => setSelectedPlan('yearly')}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ ...type.cardTitle, color: palette.ink }}>Jährlich</span>
+                  <span style={{ ...type.overline, color: palette.onAccent, background: palette.accent, padding: '2px 8px', borderRadius: 9999 }}>
+                    Empfohlen
+                  </span>
+                </div>
+                <div style={{ ...type.small, color: palette.secondary, marginTop: 4 }}>
+                  entspricht {yearlyPerMonth != null ? formatEuro(yearlyPerMonth) : formatEuro(FALLBACK_YEARLY_PRICE / 12)}/Monat
+                </div>
+              </div>
+              <div style={{ ...type.cardTitle, color: palette.ink, textAlign: 'right' }}>
+                {yearlyPkg?.product.priceString ?? formatEuro(FALLBACK_YEARLY_PRICE)}
+              </div>
+            </div>
+            <div style={planTileStyle(selectedPlan === 'monthly')} onClick={() => setSelectedPlan('monthly')}>
+              <span style={{ ...type.cardTitle, color: palette.ink }}>Monatlich</span>
+              <div style={{ ...type.cardTitle, color: palette.ink, textAlign: 'right' }}>
+                {monthlyPkg?.product.priceString ?? formatEuro(FALLBACK_MONTHLY_PRICE)}
+              </div>
+            </div>
+          </div>
+
+          <p style={{ ...type.small, color: palette.tertiary, textAlign: 'center', lineHeight: 1.4, margin: '0 auto', maxWidth: 260 }}>
+            7 Tage kostenlos, danach automatische Verlängerung. Jederzeit kündbar.
+          </p>
+
+          {purchaseError && <p style={{ ...type.hintText, color: palette.low, textAlign: 'center', margin: 0 }}>{purchaseError}</p>}
+
+          {showUnavailableHint && purchasingUnavailableReason && (
+            <p style={{ ...type.hintText, color: palette.tertiary, textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: '0 auto' }}>
+              Käufe sind nur in der iOS-App verfügbar.
+            </p>
+          )}
+
+          <PrimaryButton style={{ opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
+            {purchasing ? 'Einen Moment …' : '7 Tage kostenlos testen'}
+          </PrimaryButton>
+
+          <button style={{ ...secondaryBtnStyle, opacity: purchasing ? 0.6 : 1 }} onClick={handlePurchaseAttempt} disabled={purchasing}>
+            Jetzt erwerben
+          </button>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <button
+              style={{ ...type.pill, color: palette.tertiary, background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={async () => {
+                const ok = await restore();
+                if (ok) onClose();
+              }}
+            >
+              Bereits abonniert? Käufe wiederherstellen
+            </button>
+          </div>
+        </>
+      )}
+    </OverlayScreen>
   );
 }

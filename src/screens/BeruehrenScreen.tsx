@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, Pause, Play } from 'lucide-react';
-import { colors, primaryBtnStyle, sans, serif } from '../styles/tokens';
+import { Pause, Play } from 'lucide-react';
+import { fonts, glassCard, layout, listCard, listRow, palette, pillSegment, pillTrack, type, white } from '../styles/himmel';
+import BackButton from '../components/BackButton';
+import PrimaryButton from '../components/PrimaryButton';
 import { useData } from '../context/DataContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import handImage from '../assets/beruehren/hand.webp';
@@ -187,8 +189,8 @@ function Silhouette({ type, points, activeIndex }: { type: SilhouetteType; point
             if (activeIndex !== i) return null;
             return (
               <g key={i}>
-                <circle cx={p.x} cy={p.y} r={22} fill="none" stroke={colors.sage} strokeWidth={4} className="pulse-ring-lg" />
-                <circle cx={p.x} cy={p.y} r={17} fill={colors.sage} className="pulse-dot-lg" />
+                <circle cx={p.x} cy={p.y} r={22} fill="none" stroke={palette.accent} strokeWidth={4} className="pulse-ring-lg" />
+                <circle cx={p.x} cy={p.y} r={17} fill={palette.accent} className="pulse-dot-lg" />
               </g>
             );
           })}
@@ -203,25 +205,25 @@ function Silhouette({ type, points, activeIndex }: { type: SilhouetteType; point
           <path
             d="M100,35 C130,35 152,60 155,95 C158,130 148,160 128,178 C122,183 116,186 110,186 C104,186 100,182 99,175 C97,165 100,155 95,150 C75,145 62,125 62,98 C62,65 78,35 100,35 Z"
             fill={illustration.skin}
-            stroke={colors.blue}
+            stroke={palette.accent}
             strokeWidth={0.75}
           />
           <path
             d="M100,58 C118,58 130,74 131,96 C132,116 124,133 111,142"
             fill="none"
-            stroke={colors.blue}
+            stroke={palette.accent}
             strokeWidth={1}
             opacity={0.5}
           />
-          <ellipse cx={106} cy={100} rx={15} ry={24} fill={illustration.hair} stroke={colors.blue} strokeWidth={0.5} opacity={0.6} />
+          <ellipse cx={106} cy={100} rx={15} ry={24} fill={illustration.hair} stroke={palette.accent} strokeWidth={0.5} opacity={0.6} />
         </>
       )}
       {points.map((p, i) => {
         const active = activeIndex === i;
         return (
           <g key={i}>
-            {active && <circle cx={p.x} cy={p.y} r={9} fill="none" stroke={colors.sage} strokeWidth={2} className="pulse-ring" />}
-            <circle cx={p.x} cy={p.y} r={7} fill={active ? colors.sage : colors.gold} className={active ? 'pulse-dot' : ''} />
+            {active && <circle cx={p.x} cy={p.y} r={9} fill="none" stroke={palette.accent} strokeWidth={2} className="pulse-ring" />}
+            <circle cx={p.x} cy={p.y} r={7} fill={palette.accent} className={active ? 'pulse-dot' : ''} />
           </g>
         );
       })}
@@ -289,52 +291,39 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
   const ss = String(seconds % 60).padStart(2, '0');
 
   return (
-    <div style={{ padding: '0 20px 20px' }}>
-      <button
-        onClick={onBack}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-          color: colors.muted, fontFamily: sans, fontSize: 14, padding: '16px 0', cursor: 'pointer',
-        }}
-      >
-        <ChevronLeft size={18} /> Berühren
-      </button>
-
-      <h2 style={{ fontFamily: serif, fontSize: 24, fontWeight: 500, color: colors.text, margin: '4px 0 4px' }}>{exercise.name}</h2>
-      <p style={{ fontFamily: sans, fontSize: 13, color: colors.muted, margin: '0 0 20px' }}>{exercise.duration}</p>
-
-      <div style={{ background: colors.card, borderRadius: 20, padding: '24px 12px', border: `1px solid ${colors.border}` }}>
-        <Silhouette type={exercise.silhouette} points={exercise.points} activeIndex={activeIndex} />
-        <p style={{ textAlign: 'center', fontFamily: sans, fontSize: 13, color: colors.green, marginTop: 12, fontWeight: 500 }}>
-          {exercise.points[activeIndex]?.name || exercise.points[0].name}
-        </p>
+    <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', gap: layout.blockGap }}>
+      <div>
+        <BackButton label="Berühren" onClick={onBack} />
       </div>
 
-      <div
-        style={{
-          background: 'rgba(139,154,124,0.08)', borderRadius: 16, padding: '16px 18px', margin: '20px 0',
-          border: `1px dashed ${colors.sage}`,
-        }}
-      >
-        <p style={{ fontFamily: sans, fontSize: 14, color: colors.text, lineHeight: 1.6, margin: 0 }}>{exercise.instruction}</p>
+      <div style={{ padding: `0 ${layout.headingInset}px` }}>
+        <h2 style={{ ...type.subpageTitle, color: palette.ink, margin: 0 }}>{exercise.name}</h2>
+        <p style={{ ...type.body, color: palette.secondary, margin: `${layout.overlineToTitle}px 0 0` }}>{exercise.duration}</p>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+      <div style={glassCard()}>
+        <div style={{ padding: '12px 0' }}>
+          <Silhouette type={exercise.silhouette} points={exercise.points} activeIndex={activeIndex} />
+          <p style={{ ...type.body, fontWeight: 500, textAlign: 'center', color: palette.accent, marginTop: 12 }}>
+            {exercise.points[activeIndex]?.name || exercise.points[0].name}
+          </p>
+        </div>
+      </div>
+
+      <div style={listCard()}>
+        <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0, padding: '12px 0' }}>{exercise.instruction}</p>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {playing && (
-          <span style={{ fontFamily: sans, fontSize: 15, color: colors.muted, minWidth: 48 }}>
+          <span style={{ ...type.tileValue, color: palette.ink, minWidth: 48, flexShrink: 0 }}>
             {mm}:{ss}
           </span>
         )}
-        <button
-          onClick={toggle}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8, background: colors.blue, color: colors.surface,
-            border: 'none', borderRadius: 999, padding: '14px 32px', fontFamily: sans, fontSize: 15, fontWeight: 500, cursor: 'pointer',
-          }}
-        >
+        <PrimaryButton onClick={toggle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {playing ? <Pause size={16} /> : <Play size={16} />}
           {playing ? 'Pause' : 'Übung starten'}
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );
@@ -344,74 +333,61 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
   const [category, setCategory] = useState<Category>('tapping');
 
   return (
-    <div style={{ padding: '0 20px 20px' }}>
+    <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', gap: layout.blockGap }}>
       {showInfo && (
-        <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: 16, padding: '16px 18px', marginBottom: 16 }}>
-          <p style={{ fontFamily: sans, fontSize: 14, color: colors.text, lineHeight: 1.6, margin: '0 0 12px' }}>
-            Berührung ist eines der ältesten Signale für Sicherheit, die unser Nervensystem kennt – noch bevor wir sprechen
-            konnten, hat der Körper schon auf sie reagiert. Rhythmisches Klopfen oder sanfter Druck kann diesen Effekt
-            gezielt nutzen.
-          </p>
-          <p style={{ fontFamily: sans, fontSize: 14, color: colors.text, lineHeight: 1.6, margin: '0 0 12px' }}>
-            Klopfen-Übungen stammen direkt aus dem Buch und sind in Studien zu Stress und Angst untersucht.
-            Akupressur-Punkte stammen aus der traditionellen chinesischen Medizin – hier ist die Studienlage dünner, sie
-            können beruhigend wirken, ohne dass wir ihnen ein Wirkversprechen geben.
-          </p>
-          <p style={{ fontFamily: sans, fontSize: 13, color: colors.muted, lineHeight: 1.6, margin: 0 }}>
-            Bei schwerer Traumatisierung oder akuten psychischen Erkrankungen ersetzen diese Übungen keine Behandlung.
-            Professionelle Unterstützung gehört in professionelle Hände.
-          </p>
+        <div style={listCard()}>
+          <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0 }}>
+              Berührung ist eines der ältesten Signale für Sicherheit, die unser Nervensystem kennt – noch bevor wir sprechen
+              konnten, hat der Körper schon auf sie reagiert. Rhythmisches Klopfen oder sanfter Druck kann diesen Effekt
+              gezielt nutzen.
+            </p>
+            <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0 }}>
+              Klopfen-Übungen stammen direkt aus dem Buch und sind in Studien zu Stress und Angst untersucht.
+              Akupressur-Punkte stammen aus der traditionellen chinesischen Medizin – hier ist die Studienlage dünner, sie
+              können beruhigend wirken, ohne dass wir ihnen ein Wirkversprechen geben.
+            </p>
+            <p style={{ ...type.hintText, color: palette.hint, lineHeight: 1.6, margin: 0 }}>
+              Bei schwerer Traumatisierung oder akuten psychischen Erkrankungen ersetzen diese Übungen keine Behandlung.
+              Professionelle Unterstützung gehört in professionelle Hände.
+            </p>
+          </div>
         </div>
       )}
 
-      <p style={{ fontFamily: sans, fontSize: 14, color: colors.muted, margin: '0 0 16px', lineHeight: 1.5 }}>
+      <p style={{ ...type.body, color: palette.secondary, margin: `0 ${layout.headingInset}px`, lineHeight: 1.5 }}>
         Sanfte Berührung als Signal für Sicherheit. Kurze Übungen, keine Verarbeitung.
       </p>
 
-      <div
-        style={{
-          display: 'flex', background: colors.surface, borderRadius: 999, padding: 4, marginBottom: 20,
-          border: `1px solid ${colors.border}`,
-        }}
-      >
+      <div style={{ ...pillTrack, alignSelf: 'flex-start' }}>
         {(
           [
             { key: 'tapping', label: 'Klopfen' },
             { key: 'akupressur', label: 'Akupressur' },
           ] as { key: Category; label: string }[]
         ).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setCategory(tab.key)}
-            style={{
-              flex: 1, border: 'none', borderRadius: 999, padding: '9px 0', cursor: 'pointer',
-              fontFamily: sans, fontSize: 14, fontWeight: 500,
-              background: category === tab.key ? colors.blue : 'transparent',
-              color: category === tab.key ? colors.surface : colors.muted,
-              transition: 'background 0.2s, color 0.2s',
-            }}
-          >
+          <button key={tab.key} onClick={() => setCategory(tab.key)} style={pillSegment(category === tab.key)}>
             {tab.label}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={listCard()}>
         {exercises
           .filter((ex) => ex.category === category)
-          .map((ex) => (
+          .map((ex, i, list) => (
             <button
               key={ex.id}
               onClick={() => onSelect(ex)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: colors.card,
-                border: `1px solid ${colors.border}`, borderRadius: 16, padding: '14px 16px', cursor: 'pointer',
+                ...listRow(i === list.length - 1),
+                display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', width: '100%', background: 'none', cursor: 'pointer',
               }}
             >
               <div
                 style={{
                   width: 48, height: 48, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
-                  background: colors.surface, border: `1px solid ${colors.border}`,
+                  background: white(0.45), boxShadow: `inset 0 0 0 1px ${white(0.7)}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
@@ -428,8 +404,8 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: sans, fontSize: 15, fontWeight: 500, color: colors.text, margin: 0 }}>{ex.name}</p>
-                <p style={{ fontFamily: sans, fontSize: 13, color: colors.muted, margin: '2px 0 0' }}>
+                <p style={{ ...type.body, color: palette.ink, margin: 0 }}>{ex.name}</p>
+                <p style={{ ...type.small, color: palette.secondary, margin: '2px 0 0' }}>
                   {ex.subtitle} &middot; {ex.duration}
                 </p>
               </div>
@@ -445,7 +421,7 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
 // codebase's established per-file icon convention.
 function LockIcon() {
   return (
-    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={colors.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke={palette.tertiary} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <rect x={3} y={11} width={18} height={11} rx={2} ry={2} />
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
@@ -464,20 +440,18 @@ export default function BeruehrenScreen({ showInfo, onOpenPaywall }: Props) {
 
   if (!isSubscribed) {
     return (
-      <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
+      <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
         <LockIcon />
-        <p style={{ fontSize: 14, color: colors.text, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
+        <p style={{ ...type.body, color: palette.ink, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
           Übungen sind Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um sie freizuschalten.
         </p>
-        <button style={primaryBtnStyle} onClick={onOpenPaywall}>
-          Übungen freischalten
-        </button>
+        <PrimaryButton onClick={onOpenPaywall}>Übungen freischalten</PrimaryButton>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: sans }}>
+    <div style={{ fontFamily: fonts.sans }}>
       <style>{`
         @keyframes pulseDot { 0%,100% { r: 7; opacity: 1; } 50% { r: 8.5; opacity: 0.85; } }
         @keyframes pulseRing { 0% { r: 9; opacity: 0.9; } 100% { r: 20; opacity: 0; } }
