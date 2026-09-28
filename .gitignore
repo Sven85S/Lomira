@@ -18,3 +18,10 @@ ios/App/App/public
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local-only: private keys and large Flutter SDK/build artifacts — never commit
+Key/
+*.p8
+flutter/flutter/
+flutter/*.zip
+flutter/ios-frameworks/

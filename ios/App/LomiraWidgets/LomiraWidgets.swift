@@ -197,7 +197,7 @@ private struct MediumHrvView: View {
                     Divider().overlay(Color.lomiraAccent.opacity(0.18))
 
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("HRV HEUTE FRÜH")
+                        Text("HRV HEUTE")
                             .font(.system(size: 9, weight: .semibold))
                             .tracking(1.2)
                             .foregroundStyle(Color.lomiraMuted)
