@@ -292,27 +292,14 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
             const sessionRR = ppgServiceRef.current.getSessionRRIntervalsMs();
             const cleanSessionRR = filterRROutliers(sessionRR, DEFAULT_PPG_CONFIG);
             const rmssdReliable = quality !== 'poor' && cleanSessionRR.length >= DEFAULT_PPG_CONFIG.minRmssdCleanRRCount;
-            const rmssd = rmssdReliable ? (computeRmssd(cleanSessionRR) ?? undefined) : undefined;
+            const rawRmssd = rmssdReliable ? computeRmssd(cleanSessionRR) : null;
+            const rmssd = rawRmssd != null && rawRmssd <= DEFAULT_PPG_CONFIG.maxPlausibleRmssdMs ? rawRmssd : undefined;
             const rmssdEstimated = rmssd != null && quality === 'fair';
 
             // Kept for calibration — the 5.0/0.0dB quality thresholds were only
             // rough starting values, never tuned against real Lomira device
             // data; comparing meanSnrDb/lastSnrDb across several clean (non-
             // interrupted) measurements is what a future retuning would need.
-            // Diagnostic only — the actual RR values that fed computeRmssd(),
-            // to check an implausible result (546ms+ reported on-device)
-            // against the real numbers instead of synthetic test data. The
-            // pure math in rmssd.ts/sdnn.ts/outlierFilter.ts checked out
-            // against known-good input; this is the next step to see what
-            // the whole-session peak-detection pass actually produced.
-            const sortedClean = [...cleanSessionRR].sort((a, b) => a - b);
-            const medianCleanRR =
-              sortedClean.length === 0
-                ? null
-                : sortedClean.length % 2 === 1
-                  ? sortedClean[(sortedClean.length - 1) / 2]
-                  : (sortedClean[sortedClean.length / 2 - 1] + sortedClean[sortedClean.length / 2]) / 2;
-
             console.log('[HrvFlow] Messung beendet', {
               avgBpm,
               quality,
@@ -323,10 +310,6 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
               snrSampleCount: snrSamples.length,
               sessionRRCount: sessionRR.length,
               cleanRRCount: cleanSessionRR.length,
-              cleanRRMin: sortedClean.length > 0 ? sortedClean[0] : null,
-              cleanRRMax: sortedClean.length > 0 ? sortedClean[sortedClean.length - 1] : null,
-              cleanRRMedian: medianCleanRR,
-              cleanSessionRR,
               rmssd,
               rmssdEstimated,
             });
@@ -343,9 +326,11 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
             // it's accepted for the local RMSSD estimate above. Never
             // awaited/surfaced — a failed or skipped Health write must not
             // affect the on-screen result or the local measurement record.
+            // An implausible RMSSD means the same RR data is suspect, so no
+            // SDNN from it either.
             if (appleHealthEnabledRef.current) {
-              const sdnn = computeSdnn(cleanSessionRR);
-              writeHrvSample(avgBpm, quality === 'good' ? (sdnn ?? undefined) : undefined).catch((e) => {
+              const sdnn = quality === 'good' && rmssd != null ? computeSdnn(cleanSessionRR) : null;
+              writeHrvSample(avgBpm, sdnn ?? undefined).catch((e) => {
                 console.log('[HrvFlow] Apple Health write failed', e);
               });
             }

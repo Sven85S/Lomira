@@ -3,6 +3,7 @@ import type { HrvMeasurement, PracticeSession, PulseEntry, RitualEntry, RitualSt
 import { STORAGE_KEYS, readJSON, writeJSON } from '../lib/storage';
 import { dateKeyMinusDays, todayKey } from '../lib/date';
 import { writeWidgetState } from '../native/sharedState';
+import { DEFAULT_PPG_CONFIG } from '../ppg/types';
 import {
   buildCalendar,
   buildWeekStrip,
@@ -42,6 +43,16 @@ interface DataContextValue {
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
+
+// Measurements from before the peak-detection fixes can carry physiologically
+// impossible RMSSD values (500ms+). They stay in storage untouched, but their
+// RMSSD is left out of everything shown or compared — the measurement itself
+// (BPM, date, quality) still counts.
+function withoutImplausibleRmssd(measurements: HrvMeasurement[]): HrvMeasurement[] {
+  return measurements.map((m) =>
+    m.rmssd != null && m.rmssd > DEFAULT_PPG_CONFIG.maxPlausibleRmssdMs ? { ...m, rmssd: undefined, rmssdEstimated: undefined } : m,
+  );
+}
 
 function uid(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -90,9 +101,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await persistRitualEntries(next);
       // Fire-and-forget, same as the Apple Health/RevenueCat sync calls — a
       // failed widget update must never affect the ritual entry itself.
-      // .catch() logs rather than swallowing: a bare `void` here would make
-      // any native failure completely silent, with nothing to diagnose why
-      // a widget went stale — see the same note on recordHrvMeasurement below.
       writeWidgetState({ streak: currentStreak(next), practicedToday: true }).catch((e) => {
         console.error('[DataContext] writeWidgetState (completeRitual) failed', e);
       });
@@ -158,24 +166,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // alone (see the SwiftUI view's own null-handling).
       if (rmssd != null) {
         const sevenDaysAgo = dateKeyMinusDays(todayKey(), 6);
-        const priorValues = next.slice(1).filter((m) => m.rmssd != null && m.date >= sevenDaysAgo).map((m) => m.rmssd as number);
+        const priorValues = withoutImplausibleRmssd(next.slice(1))
+          .filter((m) => m.rmssd != null && m.date >= sevenDaysAgo)
+          .map((m) => m.rmssd as number);
         const hrvWeekDeltaMs = priorValues.length > 0 ? rmssd - priorValues.reduce((a, b) => a + b, 0) / priorValues.length : null;
-        // Diagnostic only — logs the actual native/bridge failure instead of
-        // silently swallowing it, so a real device test with Safari Web
-        // Inspector attached can show why the widget isn't picking this up
-        // (see the on-device report this responds to: fields/values all
-        // check out in code, so this is the one remaining unknown).
-        console.log('[DataContext] recordHrvMeasurement: calling writeWidgetState', { hrvValue: rmssd, hrvWeekDeltaMs });
         writeWidgetState({ hrvValue: rmssd, hrvWeekDeltaMs }).catch((e) => {
           console.error('[DataContext] writeWidgetState (recordHrvMeasurement) failed', e);
         });
-      } else {
-        // The one guard in this function that can skip the widget write
-        // entirely: HrvFlow's own RMSSD reliability gate (session RR count/
-        // quality) already decided rmssd is undefined before this even runs.
-        // A quality: "good" measurement can still land here if too few clean
-        // RR intervals survived outlier filtering.
-        console.log('[DataContext] recordHrvMeasurement: skipping widget HRV write, rmssd is null/undefined', { bpm, quality, rmssdEstimated });
       }
     },
     [hrvMeasurements],
@@ -198,7 +195,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recordAnkerSession,
       pulseEntries,
       pulseChart: buildPulseChart(pulseEntries),
-      hrvMeasurements,
+      hrvMeasurements: withoutImplausibleRmssd(hrvMeasurements),
       recordHrvMeasurement,
       practiceSessions,
       weeklyMinutesChart: buildWeeklyMinutesChart(practiceSessions),

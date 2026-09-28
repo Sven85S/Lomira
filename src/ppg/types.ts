@@ -29,6 +29,9 @@ export interface PpgConfig {
    * Requiring the finger to have actually been present for most of the
    * recording — not just "at least once" — is the real gate. */
   minFingerPresenceFraction: number;
+  /** Upper bound for a believable resting RMSSD in ms — anything above is
+   * treated as a detection artifact, not a real HRV value. */
+  maxPlausibleRmssdMs: number;
 }
 
 export const DEFAULT_PPG_CONFIG: PpgConfig = {
@@ -43,6 +46,7 @@ export const DEFAULT_PPG_CONFIG: PpgConfig = {
   maxBpm: 200,
   minRmssdCleanRRCount: 20,
   minFingerPresenceFraction: 0.8,
+  maxPlausibleRmssdMs: 250,
 };
 
 export type SignalQuality = 'good' | 'fair' | 'poor';

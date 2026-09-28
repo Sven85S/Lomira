@@ -35,12 +35,6 @@ const SharedState = registerPlugin<SharedStatePlugin>('SharedState');
  */
 export async function writeWidgetState(patch: WidgetState): Promise<void> {
   if (!isSharedStateSupported) return;
-  try {
-    await SharedState.writeState({ state: patch });
-    await SharedState.reloadWidgets();
-    console.log('[sharedState] writeWidgetState succeeded', patch);
-  } catch (e) {
-    console.error('[sharedState] writeWidgetState failed', patch, e);
-    throw e;
-  }
+  await SharedState.writeState({ state: patch });
+  await SharedState.reloadWidgets();
 }
