@@ -3,6 +3,7 @@ import type { TabId } from '../types';
 import AnimatedBlob, { isWebglSupported } from './AnimatedBlob';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
 import { palette, white, inkA, type, layout } from '../styles/himmel';
+import { useT } from '../i18n';
 
 // Menüleiste nach Lomira-Design "Himmel" (NavBar.swift aus Lomira Nutrition):
 // 70 hoch (8 + Ball 54 + 8), 14 vom linken/rechten Rand, 4 über dem
@@ -115,16 +116,17 @@ function Tab({
 }
 
 export default function OrbitNav({ active, onChange }: Props) {
+  const { t } = useT();
   const [ankerGlFailed, setAnkerGlFailed] = useState(false);
   const showAnkerBlob = isWebglSupported && !ankerGlFailed;
 
   return (
     <nav style={barStyle}>
-      <Tab id="hrv" label="HRV" ariaLabel="HRV-Messung" active={active} onChange={onChange}>
+      <Tab id="hrv" label={t('nav.hrv')} ariaLabel={t('nav.hrv.aria')} active={active} onChange={onChange}>
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
       </Tab>
 
-      <Tab id="beruehren" label="Übungen" ariaLabel="Übungen" active={active} onChange={onChange}>
+      <Tab id="beruehren" label={t('nav.uebungen')} ariaLabel={t('nav.uebungen.aria')} active={active} onChange={onChange}>
         <path d="M8 11V4.5a1.5 1.5 0 0 1 3 0V10" />
         <path d="M11 10V3.5a1.5 1.5 0 0 1 3 0V10" />
         <path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0v8" />
@@ -136,7 +138,7 @@ export default function OrbitNav({ active, onChange }: Props) {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <button
           onClick={() => onChange('sos')}
-          aria-label="Atmung"
+          aria-label={t('nav.atmung.aria')}
           style={{
             width: BALL,
             height: BALL,
@@ -174,7 +176,7 @@ export default function OrbitNav({ active, onChange }: Props) {
         </button>
       </div>
 
-      <Tab id="ritual" label="Ritual" ariaLabel="Ritual" active={active} onChange={onChange}>
+      <Tab id="ritual" label={t('nav.ritual')} ariaLabel={t('nav.ritual.aria')} active={active} onChange={onChange}>
         <circle cx={12} cy={12} r={5} />
         <line x1={12} y1={1} x2={12} y2={3} />
         <line x1={12} y1={21} x2={12} y2={23} />
@@ -186,7 +188,7 @@ export default function OrbitNav({ active, onChange }: Props) {
         <line x1={18.36} y1={5.64} x2={19.78} y2={4.22} />
       </Tab>
 
-      <Tab id="fortschritt" label="Fortschritt" ariaLabel="Fortschritt" active={active} onChange={onChange}>
+      <Tab id="fortschritt" label={t('nav.fortschritt')} ariaLabel={t('nav.fortschritt.aria')} active={active} onChange={onChange}>
         {/* chart.bar */}
         <line x1={6} y1={20} x2={6} y2={14} />
         <line x1={12} y1={20} x2={12} y2={8} />

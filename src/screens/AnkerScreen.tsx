@@ -3,6 +3,7 @@ import { fonts, gearButton, layout, listCard, palette, type } from '../styles/hi
 import { useData } from '../context/DataContext';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
 import AnimatedBlob, { isWebglSupported, MIN_RADIUS, MAX_RADIUS } from '../components/AnimatedBlob';
+import { useT } from '../i18n';
 
 const clampInhale = (v: number) => Math.max(2, Math.min(10, v));
 const clampExhale = (v: number) => Math.max(2, Math.min(12, v));
@@ -12,6 +13,7 @@ const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 type Phase = 'idle' | 'inhale' | 'exhale';
 
 export default function AnkerScreen() {
+  const { t } = useT();
   const { recordAnkerSession } = useData();
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -117,10 +119,10 @@ export default function AnkerScreen() {
   // Idle state lost its icon ring (see below) and, with it, the reason to
   // say "wähle was du brauchst" — replaced by a plain "Bereit"/tap-hint pair
   // in the same slot the active countdown uses, matching the redesign.
-  const bigTimer = active ? String(phaseTimer + 1) : 'Bereit';
-  const phaseLabel = active ? (phase === 'exhale' ? 'Ausatmen' : 'Einatmen') : '';
-  const introCopy = active ? '' : 'Ball antippen zum Starten';
-  const tapHintLabel = active ? 'Ball zum Beenden antippen' : '';
+  const bigTimer = active ? String(phaseTimer + 1) : t('anker.bigTimer.bereit');
+  const phaseLabel = active ? (phase === 'exhale' ? t('anker.phase.ausatmen') : t('anker.phase.einatmen')) : '';
+  const introCopy = active ? '' : t('anker.introCopy');
+  const tapHintLabel = active ? t('anker.tapHint') : '';
 
   // +/− als gearButton in 32px
   const stepperBtnStyle: CSSProperties = { ...gearButton, width: 32, height: 32, fontSize: 17, lineHeight: 1 };
@@ -249,25 +251,25 @@ export default function AnkerScreen() {
 
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 6 }}>
           <div style={stepperCardStyle}>
-            <span style={{ ...type.small, color: palette.secondary }}>Einatmen</span>
+            <span style={{ ...type.small, color: palette.secondary }}>{t('anker.label.einatmen')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label="Einatmen kürzer">
+              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v - 1))} aria-label={t('anker.aria.einatmenShorter')}>
                 −
               </button>
               {stepperValue(inhaleDuration)}
-              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v + 1))} aria-label="Einatmen länger">
+              <button style={stepperBtnStyle} onClick={() => setInhaleDuration((v) => clampInhale(v + 1))} aria-label={t('anker.aria.einatmenLonger')}>
                 +
               </button>
             </div>
           </div>
           <div style={stepperCardStyle}>
-            <span style={{ ...type.small, color: palette.secondary }}>Ausatmen</span>
+            <span style={{ ...type.small, color: palette.secondary }}>{t('anker.label.ausatmen')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label="Ausatmen kürzer">
+              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v - 1))} aria-label={t('anker.aria.ausatmenShorter')}>
                 −
               </button>
               {stepperValue(exhaleDuration)}
-              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v + 1))} aria-label="Ausatmen länger">
+              <button style={stepperBtnStyle} onClick={() => setExhaleDuration((v) => clampExhale(v + 1))} aria-label={t('anker.aria.ausatmenLonger')}>
                 +
               </button>
             </div>

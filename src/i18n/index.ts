@@ -80,10 +80,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: string, vars?: Record<string, string | number>): string => {
+      // Fallback chain: current locale → English → German → the raw key.
+      // German sits second-last (not just at the end for tolerance): the
+      // lessons and any other long-form German content live in de.json
+      // only for now, so a screen using t() for both UI chrome and long
+      // content ends up with translated chrome plus German content in
+      // FR/IT/ES/EN — deliberately, per the "Etappe 1 lässt Lektionen
+      // auf Deutsch" decision.
       const primary = LOCALES[language][key];
       if (primary != null) return interpolate(primary, vars);
-      const fallback = LOCALES.en[key];
-      if (fallback != null) return interpolate(fallback, vars);
+      const en = LOCALES.en[key];
+      if (en != null) return interpolate(en, vars);
+      const de = LOCALES.de[key];
+      if (de != null) return interpolate(de, vars);
       return key;
     },
     [language],

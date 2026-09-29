@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { fonts, gearButton, glassCard, layout, listCard, palette, progressFill, progressTrack, statusDot, type } from '../../styles/himmel';
 import type { PpgResult, SignalQuality } from '../../ppg/types';
+import { useT } from '../../i18n';
 
 interface Props {
   onClose: () => void;
@@ -43,13 +44,14 @@ function smoothPath(pts: [number, number][]): string {
   return d;
 }
 
-const QUALITY_LABEL: Record<SignalQuality, string> = { good: 'gut', fair: 'brauchbar', poor: 'schwach' };
+const QUALITY_KEY: Record<SignalQuality, string> = { good: 'hrv.quality.good', fair: 'hrv.quality.fair', poor: 'hrv.quality.poor' };
 const QUALITY_COLOR: Record<SignalQuality, string> = { good: palette.reached, fair: palette.close, poor: palette.low };
 
 const tileStyle: CSSProperties = { ...listCard(), padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 };
 const unitStyle: CSSProperties = { fontFamily: fonts.sans, fontSize: 13, color: palette.secondary, marginLeft: 6 };
 
 export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingMs, measureRemainingMs, totalMeasureMs, liveResult, livePoints }: Props) {
+  const { t } = useT();
   let pathD = '';
   if (livePoints.length > 1) {
     // Scale to the currently visible buffer's own min/max (with padding) so
@@ -76,15 +78,15 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
       : '--';
 
   let signal: { label: string; color: string | null };
-  if (fingerLost) signal = { label: 'Kein Finger', color: palette.low };
-  else if (!liveResult || liveResult.bpm == null) signal = { label: 'Wird erkannt …', color: null };
-  else signal = { label: QUALITY_LABEL[liveResult.quality], color: QUALITY_COLOR[liveResult.quality] };
+  if (fingerLost) signal = { label: t('hrv.measuring.signal.noFinger'), color: palette.low };
+  else if (!liveResult || liveResult.bpm == null) signal = { label: t('hrv.measuring.signal.detecting'), color: null };
+  else signal = { label: t(QUALITY_KEY[liveResult.quality]), color: QUALITY_COLOR[liveResult.quality] };
 
   const hint = fingerLost
-    ? 'Finger nicht erkannt — bitte Kamera und Blitz vollständig bedecken.'
+    ? t('hrv.measuring.hint.noFinger')
     : isWarmup
-      ? 'Finger ruhig auf Kamera und Blitz liegen lassen. Gleich beginnt die eigentliche Messung.'
-      : 'Bitte ruhig halten, bis die Messung abgeschlossen ist.';
+      ? t('hrv.measuring.hint.warmup')
+      : t('hrv.measuring.hint.measure');
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -93,7 +95,7 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
           active), which tapping a different tab would do too but far less
           visibly than an on-screen Abbrechen button. */}
       <div style={{ display: 'flex', alignItems: 'center', padding: `0 ${layout.screenX}px`, flexShrink: 0 }}>
-        <button style={gearButton} onClick={onClose} aria-label="Abbrechen">
+        <button style={gearButton} onClick={onClose} aria-label={t('hrv.measuring.cancelAria')}>
           <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6 * (24 / 17)} strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -109,10 +111,10 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
       >
         <div style={glassCard()}>
           <div style={{ padding: '20px 0 18px' }}>
-            <div style={type.overline}>{isWarmup ? 'Signal stabilisiert sich' : 'Puls'}</div>
+            <div style={type.overline}>{isWarmup ? t('hrv.measuring.warmup.overline') : t('hrv.measuring.puls.overline')}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', marginTop: layout.overlineToCard }}>
               <span style={{ fontFamily: fonts.serif, fontSize: 64, lineHeight: 1, color: isWarmup ? palette.tertiary : palette.ink }}>{bigValue}</span>
-              <span style={unitStyle}>{isWarmup ? 's' : 'bpm'}</span>
+              <span style={unitStyle}>{isWarmup ? t('hrv.measuring.secUnit') : t('hrv.measuring.bpmUnit')}</span>
             </div>
 
             <svg
@@ -139,16 +141,16 @@ export default function HrvMeasuringScreen({ onClose, isWarmup, warmupRemainingM
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 20 }}>
               <div style={tileStyle}>
-                <span style={type.overline}>{isWarmup ? 'Messdauer' : 'Verbleibend'}</span>
+                <span style={type.overline}>{isWarmup ? t('hrv.measuring.duration') : t('hrv.measuring.remaining')}</span>
                 <span style={{ display: 'flex', alignItems: 'baseline' }}>
                   <span style={{ ...type.sectionTitle, lineHeight: 1, color: palette.ink }}>
                     {Math.ceil((isWarmup ? totalMeasureMs : measureRemainingMs) / 1000)}
                   </span>
-                  <span style={{ ...unitStyle, fontSize: 12, marginLeft: 4 }}>s</span>
+                  <span style={{ ...unitStyle, fontSize: 12, marginLeft: 4 }}>{t('hrv.measuring.secUnit')}</span>
                 </span>
               </div>
               <div style={tileStyle}>
-                <span style={type.overline}>Signal</span>
+                <span style={type.overline}>{t('hrv.measuring.signal')}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 22 }}>
                   {signal.color && <span style={statusDot(signal.color)} />}
                   <span style={{ ...type.settingsRow, color: signal.color ? palette.ink : palette.tertiary }}>{signal.label}</span>

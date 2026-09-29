@@ -104,6 +104,7 @@ function ReminderRow({
   onTimeChange: (id: number, time: string) => void;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useT();
   return (
     <div style={rowStyle(false)}>
       <input
@@ -114,10 +115,10 @@ function ReminderRow({
         style={{ ...inputStyle, padding: '5px 8px' }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Switch on={entry.enabled} onClick={() => onToggle(entry.id)} disabled={!isReminderSupported} ariaLabel="Erinnerung umschalten" />
+        <Switch on={entry.enabled} onClick={() => onToggle(entry.id)} disabled={!isReminderSupported} ariaLabel={t('settings.reminders.toggleAria')} />
         <button
           onClick={() => onDelete(entry.id)}
-          aria-label="Erinnerung löschen"
+          aria-label={t('settings.reminders.deleteAria')}
           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, background: 'transparent', border: 'none', flexShrink: 0 }}
         >
           <TrashIcon />
@@ -241,17 +242,17 @@ export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTer
       <div style={{ display: 'flex', flexDirection: 'column', gap: layout.blockGap, opacity: loaded ? 1 : 0 }}>
         <div style={{ padding: `0 ${layout.headingInset}px` }}>
           <div style={type.wordmark}>Lomira</div>
-          <div style={{ ...type.pageTitle, color: palette.ink, marginTop: layout.overlineToTitle }}>Einstellungen</div>
+          <div style={{ ...type.pageTitle, color: palette.ink, marginTop: layout.overlineToTitle }}>{t('settings.title')}</div>
         </div>
 
         <div style={listCard()}>
           <div style={rowStyle(true)}>
-            <span style={rowLabelStyle}>Dein Vorname (optional)</span>
+            <span style={rowLabelStyle}>{t('settings.firstName.label')}</span>
             <input
               type="text"
               value={firstName}
               onChange={handleNameChange}
-              placeholder="z.B. Michael"
+              placeholder={t('settings.firstName.placeholder')}
               style={{ ...inputStyle, padding: '6px 10px', width: 140, textAlign: 'right' }}
             />
           </div>
@@ -289,7 +290,7 @@ export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTer
         </div>
 
         <div>
-          <div style={sectionLabelStyle}>Erinnerungen</div>
+          <div style={sectionLabelStyle}>{t('settings.reminders.title')}</div>
           <div style={listCard()}>
             {reminders.map((entry) => (
               <ReminderRow
@@ -309,37 +310,31 @@ export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTer
               }}
             >
               <PlusIcon />
-              <span style={{ ...type.cardTitle, color: palette.accent }}>Erinnerung hinzufügen</span>
+              <span style={{ ...type.cardTitle, color: palette.accent }}>{t('settings.reminders.add')}</span>
             </button>
           </div>
         </div>
 
-        {!isReminderSupported && <p style={hintStyle}>Erinnerungen sind nur in der iOS- oder Android-App verfügbar.</p>}
+        {!isReminderSupported && <p style={hintStyle}>{t('settings.reminders.notSupported')}</p>}
         {permissionDenied && (
-          <p style={errorStyle}>
-            Ohne Benachrichtigungs-Berechtigung kann Lomira keine Erinnerung senden. Du kannst sie in den
-            Systemeinstellungen deines Geräts erlauben und es hier erneut versuchen.
-          </p>
+          <p style={errorStyle}>{t('settings.reminders.permissionDenied')}</p>
         )}
 
         <div style={listCard()}>
           <div style={rowStyle(true)}>
-            <span style={rowLabelStyle}>In Health speichern</span>
-            <Switch on={appleHealthEnabled} onClick={handleToggleAppleHealth} disabled={!isAppleHealthSupported} ariaLabel="Health-Speicherung umschalten" />
+            <span style={rowLabelStyle}>{t('settings.appleHealth.label')}</span>
+            <Switch on={appleHealthEnabled} onClick={handleToggleAppleHealth} disabled={!isAppleHealthSupported} ariaLabel={t('settings.appleHealth.toggleAria')} />
           </div>
         </div>
 
-        {!isAppleHealthSupported && <p style={hintStyle}>Die Health-Speicherung ist nur in der iOS-App verfügbar.</p>}
+        {!isAppleHealthSupported && <p style={hintStyle}>{t('settings.appleHealth.notSupported')}</p>}
         {healthPermissionDenied && (
-          <p style={errorStyle}>
-            Ohne Health-Berechtigung kann Lomira keine Werte schreiben. Du kannst sie in den Systemeinstellungen
-            deines Geräts erlauben und es hier erneut versuchen.
-          </p>
+          <p style={errorStyle}>{t('settings.appleHealth.permissionDenied')}</p>
         )}
 
         <div style={listCard()}>
-          <LegalRow label="Datenschutzerklärung" onClick={onOpenPrivacyPolicy} last={false} />
-          <LegalRow label="Nutzungsbedingungen" onClick={onOpenTerms} last />
+          <LegalRow label={t('settings.legal.privacy')} onClick={onOpenPrivacyPolicy} last={false} />
+          <LegalRow label={t('settings.legal.terms')} onClick={onOpenTerms} last />
         </div>
       </div>
     </OverlayScreen>

@@ -3,6 +3,7 @@ import { layout, palette, type, white } from '../../styles/himmel';
 import BackButton from '../../components/BackButton';
 import PrimaryButton from '../../components/PrimaryButton';
 import type { CameraPermissionState } from '../../native/ppgCamera';
+import { useT } from '../../i18n';
 
 interface Props {
   isSupported: boolean;
@@ -30,12 +31,13 @@ export default function HrvStartScreen({
   onActivateCamera,
   onContinue,
 }: Props) {
+  const { t } = useT();
   const simulatorLikely = isSupported && available === false;
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: `0 ${layout.screenX}px`, flexShrink: 0 }}>
-        <BackButton label="Zurück" onClick={onBack} />
+        <BackButton label={t('hrv.start.back')} onClick={onBack} />
       </div>
       <div
         style={{
@@ -43,24 +45,24 @@ export default function HrvStartScreen({
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: layout.blockGap,
         }}
       >
-        <div style={{ ...type.subpageTitle, color: palette.ink, alignSelf: 'flex-start', padding: `0 ${layout.headingInset}px` }}>Puls messen</div>
+        <div style={{ ...type.subpageTitle, color: palette.ink, alignSelf: 'flex-start', padding: `0 ${layout.headingInset}px` }}>{t('hrv.start.title')}</div>
 
         {!isSupported && (
           <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: '40px 0 0' }}>
-            Die Puls-Messung über die Kamera ist aktuell nur in der iOS-App verfügbar.
+            {t('hrv.start.notSupported')}
           </p>
         )}
 
         {simulatorLikely && (
           <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', margin: '40px 0 0' }}>
-            Keine passende Kamera gefunden. Diese Messung funktioniert nur auf einem echten iPhone.
+            {t('hrv.start.noCamera')}
           </p>
         )}
 
         {isSupported && available !== false && (
           <>
             <p style={{ ...type.body, color: palette.ink, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
-              Finger vollständig auf Kamera und Blitz legen — ruhig halten, bis die Messung abgeschlossen ist.
+              {t('hrv.start.instructions')}
             </p>
 
             {/* The native preview layer is positioned behind the WebView, at this
@@ -95,14 +97,14 @@ export default function HrvStartScreen({
             {error && <p style={{ ...type.hintText, color: palette.low, textAlign: 'center', margin: 0 }}>{error}</p>}
 
             {!previewActive ? (
-              <PrimaryButton onClick={onActivateCamera}>Kamera &amp; Blitz aktivieren</PrimaryButton>
+              <PrimaryButton onClick={onActivateCamera}>{t('hrv.start.activateCamera')}</PrimaryButton>
             ) : (
-              <PrimaryButton onClick={onContinue}>Weiter</PrimaryButton>
+              <PrimaryButton onClick={onContinue}>{t('hrv.start.continue')}</PrimaryButton>
             )}
 
             {permission === 'denied' && (
               <p style={{ ...type.hintText, color: palette.tertiary, textAlign: 'center', margin: 0 }}>
-                Kamera-Zugriff wurde abgelehnt — erlaube ihn in den Systemeinstellungen deines Geräts und versuche es erneut.
+                {t('hrv.start.permissionDenied')}
               </p>
             )}
           </>

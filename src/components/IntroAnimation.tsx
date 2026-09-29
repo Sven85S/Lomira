@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { colors, serif } from '../styles/tokens';
 import { STORAGE_KEYS, readJSON } from '../lib/storage';
+import { useT } from '../i18n';
 
 // Pure CSS-transition intro, no external animation engine. Renders on top
 // of the already-mounted app (Shell's default tab is Anker, so the real
@@ -15,6 +16,7 @@ const TRANSITION_OUT_MS = 400;
 const BUFFER_MS = 200;
 
 export default function IntroAnimation() {
+  const { t } = useT();
   // null until the stored name (same STORAGE_KEYS.firstName SettingsScreen.tsx
   // owns — not exposed through DataContext) has been read; the whole overlay
   // stays unrendered until then, rather than starting with a generic
@@ -56,7 +58,7 @@ export default function IntroAnimation() {
   const textVisible = textIn && !leaving;
   const textTransitionMs = textVisible ? FADE_IN_MS : TRANSITION_OUT_MS;
   const trimmedName = firstName.trim();
-  const greeting = trimmedName ? `Willkommen, ${trimmedName}` : 'Willkommen';
+  const greeting = trimmedName ? t('intro.welcomeWithName', { name: trimmedName }) : t('intro.welcome');
 
   return (
     <div
