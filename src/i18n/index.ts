@@ -120,3 +120,14 @@ export function toBcp47(lang: Language): string {
     case 'es': return 'es-ES';
   }
 }
+
+/**
+ * useLocale — the current app language expressed as a BCP-47 tag ready for
+ * Intl.DateTimeFormat / Number.toLocaleString / Date.toLocaleTimeString.
+ * A separate hook, not tucked inside useT(), so a component that only
+ * needs the locale for one format call doesn't have to destructure t/
+ * setLanguage it doesn't use.
+ */
+export function useLocale(): string {
+  return toBcp47(useT().language);
+}

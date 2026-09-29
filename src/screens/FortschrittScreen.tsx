@@ -6,6 +6,7 @@ import { STATE_COLORS } from '../store/ritualSelectors';
 import { formatEntryDate } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { SignalQuality } from '../ppg/types';
+import { useLocale } from '../i18n';
 
 interface Props {
   showInfo: boolean;
@@ -34,6 +35,7 @@ function LockIcon() {
 }
 
 export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
+  const locale = useLocale();
   const { isSubscribed } = useSubscription();
   const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements, weeklyMinutesChart } = useData();
   const maxWeeklyMinutes = Math.max(1, ...weeklyMinutesChart.map((w) => w.minutes));
@@ -181,7 +183,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
                 {hrvMeasurements[0].rmssd != null
                   ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms${hrvMeasurements[0].rmssdEstimated ? ' (geschätzt)' : ''}`
                   : ''}{' '}
-                · zuletzt {formatEntryDate(hrvMeasurements[0].date)}
+                · zuletzt {formatEntryDate(hrvMeasurements[0].date, locale)}
               </span>
               <span style={{ ...statusDot(QUALITY_COLOR[hrvMeasurements[0].quality]), marginLeft: 'auto', alignSelf: 'center' }} />
             </div>
@@ -197,7 +199,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
             {hrvMeasurements.slice(0, 6).map((m, i, list) => (
               <div key={m.id} style={{ ...listRow(i === list.length - 1), display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                 <span style={{ ...type.small, color: palette.secondary }}>
-                  {formatEntryDate(m.date)}, {new Date(m.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  {formatEntryDate(m.date, locale)}, {new Date(m.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

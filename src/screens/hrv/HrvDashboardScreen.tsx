@@ -4,6 +4,7 @@ import { useData } from '../../context/DataContext';
 import { formatEntryDate } from '../../lib/date';
 import { buildHrvDashboard } from '../../store/hrvSelectors';
 import PrimaryButton from '../../components/PrimaryButton';
+import { useLocale } from '../../i18n';
 
 interface Props {
   /** No active subscription/trial — takes priority over everything else,
@@ -37,6 +38,7 @@ function LockIcon() {
 }
 
 export default function HrvDashboardScreen({ locked, onOpenPaywall, onStartMeasurement }: Props) {
+  const locale = useLocale();
   const { hrvMeasurements } = useData();
 
   if (locked) {
@@ -70,7 +72,7 @@ export default function HrvDashboardScreen({ locked, onOpenPaywall, onStartMeasu
                     {dashboard.latestRmssd != null ? Math.round(dashboard.latestRmssd) : '—'}
                   </span>
                   <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary }}>
-                    ms{dashboard.rmssdFallbackDate ? ` · zuletzt ${formatEntryDate(dashboard.rmssdFallbackDate)}` : ''}
+                    ms{dashboard.rmssdFallbackDate ? ` · zuletzt ${formatEntryDate(dashboard.rmssdFallbackDate, locale)}` : ''}
                   </span>
                 </div>
                 {dashboard.sparklinePts ? (

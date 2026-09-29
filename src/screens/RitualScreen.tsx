@@ -5,6 +5,7 @@ import { STATE_COLORS } from '../store/ritualSelectors';
 import { formatEntryDate } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { RitualState } from '../types';
+import { useLocale } from '../i18n';
 
 const QUESTIONS = [
   'Was hat dich heute besonders bewegt?', 'Wodurch hast du dich heute sicher gefühlt?', 'Was hat dir heute gutgetan?',
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function RitualScreen({ showInfo }: Props) {
+  const locale = useLocale();
   const { ritualEntries, todayEntry, streak, completeRitual, updateRitualEntry, deleteRitualEntry, calendarForOffset } = useData();
 
   const [selectedState, setSelectedState] = useState<RitualState | null>(null);
@@ -161,7 +163,7 @@ export default function RitualScreen({ showInfo }: Props) {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                   <div style={statusDot(STATE_COLORS[entry.state])} />
-                  <span style={{ ...type.small, color: palette.secondary, flexShrink: 0 }}>{formatEntryDate(entry.date)}</span>
+                  <span style={{ ...type.small, color: palette.secondary, flexShrink: 0 }}>{formatEntryDate(entry.date, locale)}</span>
                   {!isExpanded && (
                     <p style={{ ...type.body, flex: 1, minWidth: 0, color: palette.tertiary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
                       {entry.note}
