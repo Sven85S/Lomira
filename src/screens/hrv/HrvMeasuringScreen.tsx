@@ -15,7 +15,9 @@ interface Props {
 const MAX_POINTS = 150;
 // Floor under the buffer's real min/max span so a near-silent stretch (e.g.
 // right as the finger settles) doesn't blow tiny noise up into a wild line.
-const MIN_RANGE = 6;
+// 3 leaves calmer real signals looking like a wave rather than a flat line
+// while still keeping pure warmup noise from filling the whole viewBox.
+const MIN_RANGE = 3;
 
 // viewBox of the live line — stretched to the card's full width via
 // preserveAspectRatio="none"; vectorEffect keeps the stroke itself unstretched.

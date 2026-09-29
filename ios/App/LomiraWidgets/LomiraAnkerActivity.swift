@@ -79,7 +79,7 @@ private struct AnkerActivityContent: View {
             .frame(width: 56, height: 56)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("ANKER")
+                Text("ATMUNG")
                     .font(.system(size: 9, weight: .semibold))
                     .tracking(1.2)
                     .foregroundStyle(Color.lomiraMuted)

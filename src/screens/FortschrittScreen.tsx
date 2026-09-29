@@ -122,7 +122,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
             </div>
           ) : (
             <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
-              Noch keine geübten Minuten erfasst — probiere eine Anker- oder Übungen-Session.
+              Noch keine geübten Minuten erfasst — probiere eine Atem- oder Übungen-Session.
             </p>
           )}
         </div>
@@ -164,7 +164,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
             </>
           ) : (
             <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
-              Noch keine Messungen — miss deinen Puls vor/nach der nächsten Anker-Übung.
+              Noch keine Messungen — miss deinen Puls vor/nach der nächsten Atemübung.
             </p>
           )}
         </div>
@@ -215,7 +215,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
           </>
         ) : (
           <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px 16px', margin: 0 }}>
-            Noch keine Kamera-Messung — probiere &quot;Puls messen&quot; über den Anker-Bereich.
+            Noch keine Kamera-Messung — probiere &quot;Puls messen&quot; über den Atmen-Bereich.
           </p>
         )}
       </div>

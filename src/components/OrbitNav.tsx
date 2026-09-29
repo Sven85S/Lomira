@@ -136,7 +136,7 @@ export default function OrbitNav({ active, onChange }: Props) {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <button
           onClick={() => onChange('sos')}
-          aria-label="Anker"
+          aria-label="Atmung"
           style={{
             width: BALL,
             height: BALL,
