@@ -28,6 +28,8 @@
 	<string>Lomira nutzt die Kamera, um deinen Puls über die Rückkamera und den Blitz zu messen.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Lomira schreibt Puls und HRV-Werte abgeschlossener Messungen in deine Health-App, wenn du das in den Einstellungen aktivierst.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

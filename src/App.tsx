@@ -74,6 +74,7 @@ function Shell() {
           return;
         }
         if (target === 'paywall') setShowPaywall(true);
+        else if (target === 'anker') setTab('sos');
       });
       if (cancelled) {
         void h.remove();

@@ -3,6 +3,7 @@ import { fonts, gearButton, layout, listCard, palette, type } from '../styles/hi
 import { useData } from '../context/DataContext';
 import blobTexture from '../assets/anker/blob-texture-shader.png';
 import AnimatedBlob, { isWebglSupported, MIN_RADIUS, MAX_RADIUS } from '../components/AnimatedBlob';
+import { endAnkerActivity, startAnkerActivity, updateAnkerActivity } from '../native/ankerLiveActivity';
 
 const clampInhale = (v: number) => Math.max(2, Math.min(10, v));
 const clampExhale = (v: number) => Math.max(2, Math.min(12, v));
@@ -84,6 +85,11 @@ export default function AnkerScreen() {
   useEffect(() => {
     if (!active) return;
     const target = phase === 'inhale' ? inhaleDuration : exhaleDuration;
+    // Track the last whole-second value already pushed to the Live Activity
+    // so this 250ms interval only fires an update when the visible countdown
+    // actually changes (once per second). Reset on every phase change since
+    // the ref is closed over per-effect-run.
+    let lastPushedRemaining = -1;
     const id = window.setInterval(() => {
       const now = Date.now();
       const phaseElapsed = (now - phaseStart.current) / 1000;
@@ -93,6 +99,11 @@ export default function AnkerScreen() {
         setPhaseTimer(0);
       } else {
         setPhaseTimer(Math.floor(phaseElapsed));
+        const remaining = Math.max(0, Math.ceil(target - phaseElapsed));
+        if (remaining !== lastPushedRemaining && phase !== 'idle') {
+          lastPushedRemaining = remaining;
+          void updateAnkerActivity({ phase, totalPhaseSeconds: target, remainingSeconds: remaining });
+        }
       }
     }, 250);
     return () => window.clearInterval(id);
@@ -103,6 +114,7 @@ export default function AnkerScreen() {
       setActive(false);
       setPhase('idle');
       setPhaseTimer(0);
+      void endAnkerActivity();
       await recordAnkerSession(Date.now() - exerciseStart.current);
     } else {
       exerciseStart.current = Date.now();
@@ -111,8 +123,22 @@ export default function AnkerScreen() {
       setPhase('inhale');
       setPhaseTimer(0);
       requestAnimationFrame(() => restartBreath());
+      void startAnkerActivity({ phase: 'inhale', totalPhaseSeconds: inhaleDuration, remainingSeconds: inhaleDuration });
     }
-  }, [active, recordAnkerSession, restartBreath]);
+  }, [active, recordAnkerSession, restartBreath, inhaleDuration]);
+
+  // Safety net: if AnkerScreen unmounts while an exercise is still running
+  // (tab change, app-level route change), the Live Activity would otherwise
+  // keep counting down against no real exercise. Refs so the effect only
+  // ever runs once, but reads whatever the current active state was at
+  // teardown — mirrors BeruehrenScreen's own recordExerciseSession cleanup.
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  useEffect(() => {
+    return () => {
+      if (activeRef.current) void endAnkerActivity();
+    };
+  }, []);
 
   // Idle state lost its icon ring (see below) and, with it, the reason to
   // say "wähle was du brauchst" — replaced by a plain "Bereit"/tap-hint pair
