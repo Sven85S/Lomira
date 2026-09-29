@@ -17,6 +17,9 @@ export interface AnkerContentState {
 }
 
 interface AnkerLiveActivityPlugin {
+  // `reason: "iosBelow16_2"` when the runtime iOS version predates
+  // ActivityContent — see AnkerLiveActivityPlugin.swift for why the guard
+  // is 16.2 rather than 16.1.
   start(state: AnkerContentState): Promise<{ supported: boolean; id?: string; reason?: string }>;
   update(state: AnkerContentState): Promise<{ supported: boolean; updated?: boolean }>;
   end(): Promise<{ supported: boolean }>;

@@ -7,7 +7,9 @@ import Foundation
 /// perspective: this plugin only ever reacts to explicit JS calls
 /// (start/update/end), matching the "widget/activity does nothing on its
 /// own" rule the Home/Lock Screen widgets already follow. ActivityKit
-/// itself needs iOS 16.1+, and the app's deployment target is 15.0, so
+/// itself needs iOS 16.2+ (ActivityContent, request(_:content:pushType:),
+/// update(_:), end(_:dismissalPolicy:) are all 16.2 APIs — 16.1 shipped
+/// with older signatures), and the app's deployment target is 15.0, so
 /// every touch below is #available-guarded. On older iOS the plugin
 /// silently resolves each call with `supported: false` — the JS caller
 /// treats the whole thing as best-effort and never surfaces the missing
@@ -38,7 +40,7 @@ public class AnkerLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("start: erwartet phase, totalPhaseSeconds, remainingSeconds")
             return
         }
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             // Match: Live Activities require Info.plist NSSupportsLiveActivities
             // = YES *and* the per-device toggle (Einstellungen > Face ID … / iOS
             // Focus). If either is off, `areActivitiesEnabled` reads false and
@@ -71,7 +73,7 @@ public class AnkerLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
                 call.reject("start: konnte Activity nicht anfragen: \(error.localizedDescription)")
             }
         } else {
-            call.resolve(["supported": false, "reason": "iosBelow16_1"])
+            call.resolve(["supported": false, "reason": "iosBelow16_2"])
         }
     }
 
@@ -82,7 +84,7 @@ public class AnkerLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("update: erwartet phase, totalPhaseSeconds, remainingSeconds")
             return
         }
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             guard let id = activityId,
                   let activity = Activity<LomiraAnkerAttributes>.activities.first(where: { $0.id == id }) else {
                 // JS updates before start, or after the activity already
@@ -106,7 +108,7 @@ public class AnkerLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func end(_ call: CAPPluginCall) {
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             endExistingIfAny()
         }
         call.resolve(["supported": true])
@@ -114,7 +116,7 @@ public class AnkerLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
     // MARK: - Helpers
 
-    @available(iOS 16.1, *)
+    @available(iOS 16.2, *)
     private func endExistingIfAny() {
         // End every currently-running Anker activity (usually one, but be
         // defensive: a crash between start and end could have left orphans).
