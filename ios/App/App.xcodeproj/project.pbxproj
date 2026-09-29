@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B1000001B1000001B1000001 /* AnkerLiveActivityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001B1000002B1000001 /* AnkerLiveActivityPlugin.swift */; };
 		B1000002B1000001B1000001 /* LomiraAnkerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002B1000002B1000001 /* LomiraAnkerAttributes.swift */; };
+		B1000003B1000001B1000001 /* LomiraAnkerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002B1000002B1000001 /* LomiraAnkerAttributes.swift */; };
 		A8540192E450E5ECE363D285 /* SharedStatePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B0BE63A2790F78D81D7069 /* SharedStatePlugin.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
@@ -337,6 +338,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1000003B1000001B1000001 /* LomiraAnkerAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
