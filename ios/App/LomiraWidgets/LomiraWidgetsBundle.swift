@@ -18,11 +18,5 @@ struct LomiraWidgetsBundle: WidgetBundle {
     // picks up on-disk deletions automatically, no pbxproj surgery needed).
     var body: some Widget {
         LomiraWidgets()
-        // Live Activity for the Anker breathing exercise. The widget target's
-        // own deployment target is well above 16.1 (ActivityKit's minimum),
-        // so no #available guard needed here — the app-side plugin still
-        // guards its own ActivityKit calls because the app target ships with
-        // 15.0.
-        LomiraAnkerLiveActivity()
     }
 }

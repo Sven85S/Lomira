@@ -55,12 +55,12 @@ function Shell() {
     });
   }, [tab]);
 
-  // Deep-link entry point for the Home Screen/Lock Screen widgets (and any
-  // future Live Activity) — a locked widget's tap target is lomira://paywall,
-  // opening straight into the Paywall instead of just the app, same intent
-  // as onOpenPaywall elsewhere. Registered once, same cancelled-guard pattern
-  // as HrvFlow's PpgCamera listeners — appUrlOpen fires for both a cold
-  // launch via the URL and a foreground-open while already running.
+  // Deep-link entry point for the Home Screen/Lock Screen widgets — a locked
+  // widget's tap target is lomira://paywall, opening straight into the
+  // Paywall instead of just the app, same intent as onOpenPaywall elsewhere.
+  // Registered once, same cancelled-guard pattern as HrvFlow's PpgCamera
+  // listeners — appUrlOpen fires for both a cold launch via the URL and a
+  // foreground-open while already running.
   useEffect(() => {
     let cancelled = false;
     let handle: PluginListenerHandle | null = null;
@@ -74,7 +74,6 @@ function Shell() {
           return;
         }
         if (target === 'paywall') setShowPaywall(true);
-        else if (target === 'anker') setTab('sos');
       });
       if (cancelled) {
         void h.remove();
