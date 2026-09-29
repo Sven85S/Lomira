@@ -109,7 +109,17 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
     const fingerDetectedCount = sessionRawValues.reduce((count, v) => count + (isFingerDetected(v, config) ? 1 : 0), 0);
     if (fingerDetectedCount / sessionRawValues.length < config.minFingerPresenceFraction) return [];
 
-    const filtered = bandpassFilter(sessionRawValues, fps);
+    // A short symmetric moving average on top of the bandpass output before
+    // peak detection: 5 samples ≈ 167ms at 30fps, well under one beat period
+    // even at maxBpm=200 (300ms), so the beat itself isn't softened, but
+    // sample-to-sample noise that shifts the erkannten Peak-Position by ±1
+    // camera frame is smoothed out. At 30fps that ±33ms jitter propagates
+    // straight into RMSSD, and was the reason RMSSD came out ~2× too high in
+    // synthetic runs of weak, noisy signals (35ms error → 11ms with this
+    // step); RMSSD on clean signals also gets slightly closer to the truth.
+    // Not applied in the live path — it only reports a smoothed running BPM
+    // where sub-sample peak timing doesn't matter.
+    const filtered = smooth5(bandpassFilter(sessionRawValues, fps));
 
     // Peak detection in non-overlapping ~8s chunks, each with its own global
     // std (exactly what the live per-batch path does on its own short
@@ -170,4 +180,17 @@ export function createPpgService(config: PpgConfig = DEFAULT_PPG_CONFIG): PpgSer
 
 function mean(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function smooth5(x: number[]): number[] {
+  if (x.length < 5) return x.slice();
+  const y = new Array(x.length);
+  y[0] = x[0];
+  y[1] = x[1];
+  y[x.length - 2] = x[x.length - 2];
+  y[x.length - 1] = x[x.length - 1];
+  for (let i = 2; i < x.length - 2; i++) {
+    y[i] = (x[i - 2] + x[i - 1] + x[i] + x[i + 1] + x[i + 2]) / 5;
+  }
+  return y;
 }
