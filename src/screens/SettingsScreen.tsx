@@ -11,6 +11,7 @@ import {
   type ReminderEntry,
 } from '../notifications/reminders';
 import { isAppleHealthSupported, requestAppleHealthAuthorization } from '../health/appleHealth';
+import { LANGUAGES, useT } from '../i18n';
 
 interface Props {
   onClose: () => void;
@@ -127,6 +128,7 @@ function ReminderRow({
 }
 
 export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTerms }: Props) {
+  const { language, setLanguage, t } = useT();
   const [firstName, setFirstName] = useState('');
   const [reminders, setReminders] = useState<ReminderEntry[]>([]);
   const [permissionDenied, setPermissionDenied] = useState(false);
@@ -253,6 +255,37 @@ export default function SettingsScreen({ onClose, onOpenPrivacyPolicy, onOpenTer
               style={{ ...inputStyle, padding: '6px 10px', width: 140, textAlign: 'right' }}
             />
           </div>
+        </div>
+
+        <div>
+          <div style={sectionLabelStyle}>{t('settings.language.title')}</div>
+          <div style={listCard()}>
+            {LANGUAGES.map((lang, i, list) => {
+              const active = lang.code === language;
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                  style={{
+                    ...rowStyle(i === list.length - 1),
+                    width: '100%',
+                    cursor: 'pointer',
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={rowLabelStyle}>{lang.nativeLabel}</span>
+                  {active && (
+                    <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={palette.accent} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <p style={{ ...hintStyle, marginTop: 8 }}>{t('settings.language.hint')}</p>
         </div>
 
         <div>

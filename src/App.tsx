@@ -5,6 +5,7 @@ import { skyBackground, navClearance } from './styles/himmel';
 import type { TabId } from './types';
 import { DataProvider } from './context/DataContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
+import { LanguageProvider } from './i18n';
 import IntroAnimation from './components/IntroAnimation';
 import Header from './components/Header';
 import OrbitNav from './components/OrbitNav';
@@ -24,12 +25,14 @@ import { PRIVACY_POLICY, TERMS_OF_USE } from './data/legal';
 
 export default function App() {
   return (
-    <DataProvider>
-      <SubscriptionProvider>
-        <Shell />
-        <IntroAnimation />
-      </SubscriptionProvider>
-    </DataProvider>
+    <LanguageProvider>
+      <DataProvider>
+        <SubscriptionProvider>
+          <Shell />
+          <IntroAnimation />
+        </SubscriptionProvider>
+      </DataProvider>
+    </LanguageProvider>
   );
 }
 
