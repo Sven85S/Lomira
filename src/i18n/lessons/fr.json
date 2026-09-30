@@ -1,0 +1,193 @@
+{
+  "blocks": [
+    { "title": "Bloc 1 — Fondamentaux : comment fonctionne votre système nerveux", "lessonIds": [1, 2, 3, 4] },
+    { "title": "Bloc 2 — Reconnaître stress & dysrégulation", "lessonIds": [5, 6, 7, 8, 9] },
+    { "title": "Bloc 3 — Auto-régulation : les outils", "lessonIds": [10, 11, 12, 13] },
+    { "title": "Bloc 4 — Co-régulation", "lessonIds": [14, 15] },
+    { "title": "Bloc 5 — Quotidien & résilience", "lessonIds": [16, 17, 18] }
+  ],
+  "lessons": {
+    "1": {
+      "title": "Sympathique & parasympathique, expliqués simplement",
+      "paragraphs": [
+        "Votre système nerveux a deux modes de fonctionnement : sympathique et parasympathique. Le sympathique vous mobilise — pouls qui monte, muscles tendus, attention tournée vers l'extérieur. Le parasympathique met la sourdine : digestion, récupération, calme intérieur. Les deux sont presque toujours actifs en même temps, seulement avec un poids différent. Pas un interrupteur, plutôt une table de mixage.",
+        "Ce qui compte n'est pas si vous êtes activé·e en ce moment. Ce qui compte, c'est si votre système peut redescendre une fois l'événement passé. On appelle cela la flexibilité autonome — le passage entre activation et récupération, selon ce dont il est besoin. Un système bien régulé mobilise l'énergie quand l'action est nécessaire, et la réduit dès que la demande est passée.",
+        "C'est précisément ce qui devient difficile quand vous êtes souvent tendu·e, même sans raison claire. Le sympathique reste alors allumé en arrière-plan, même si tout est extérieurement calme depuis longtemps. Une réunion terminée depuis des heures continue de résonner dans le corps, alors que la tête a coché la case depuis longtemps. Pas parce que vous ne vous détendez pas assez, mais parce que le système a désappris le passage.",
+        "Le stress se manifeste donc souvent non seulement comme tension, mais comme perte de cette flexibilité — comme un système qui a plus de mal à passer d'un mode à l'autre."
+      ],
+      "question": "Demandez-vous ce soir : ai-je été vraiment détendu·e à un moment de la journée — ou seulement calme en apparence ?"
+    },
+    "2": {
+      "title": "Les trois états de base : en sécurité, mobilisé·e, figé·e",
+      "paragraphs": [
+        "Au cœur de son fonctionnement, votre système nerveux connaît trois états. En sécurité : vous êtes éveillé·e mais détendu·e, capable d'écouter, de parler, de soutenir un regard, la voix porte normalement. Mobilisé·e : le sympathique prend le dessus, pouls et tonus musculaire montent, le regard se durcit, la respiration devient plus superficielle — vous êtes prêt·e à agir, que ce soit en allant vers ou en s'éloignant. Utile face à une demande réelle, épuisant comme état permanent.",
+        "Figé·e : le système se met activement en veilleuse quand la mobilisation ne suffit plus. Pas du repos, plutôt un retrait sous pleine charge — lourdeur corporelle, engourdissement, la sensation d'être derrière une vitre. Parfois même la faim ou la fatigue deviennent inaccessibles ; même prendre une décision paraît soudain impossible. Le monde apparaît alors plus étouffé que menaçant.",
+        "Se figer n'est ni faiblesse ni détente. C'est une réponse protectrice à part entière, avec sa propre fonction. Le corps a tiré le frein d'urgence parce qu'il a jugé la situation trop lourde — pas parce que vous avez échoué.",
+        "Les trois états ne sont pas des traits de caractère. Ils changent selon ce que votre système nerveux évalue en ce moment comme sûr ou non, souvent sans que vous en ayez consciemment décidé. Vous remarquez le passage surtout après coup, à l'état de votre corps.",
+        "Aucun des trois états n'est faux. Chacun a eu, à un moment, une bonne fonction."
+      ],
+      "question": "Où en êtes-vous en ce moment — en sécurité, mobilisé·e, ou plutôt figé·e ?"
+    },
+    "3": {
+      "title": "Le nerf vague — votre frein intérieur",
+      "paragraphs": [
+        "Le nerf vague relie cerveau et corps — cœur, poumons, digestion, presque tous les organes internes. La plus grande partie de ses fibres ne va pas de la tête au corps, mais dans l'autre sens : du corps vers le cerveau. Il rapporte donc plus qu'il n'ordonne.",
+        "Un exemple : l'arythmie sinusale respiratoire. À l'inspiration, le pouls monte légèrement ; à l'expiration, il redescend. C'est pourquoi des respirations lentes avec une expiration longue apaisent — pas par hasard, mais via ce couplage direct entre respiration, cœur et nerf vague.",
+        "Dans la perspective polyvagale, on distingue deux branches : la ventrale, liée à l'orientation sociale et au calme, et la dorsale, qui tend, en cas de dépassement, vers le retrait et la mise en veille. Toutes deux appartiennent au même nerf, avec des fonctions différentes.",
+        "Le nerf vague n'est pas un bouton de détente à presser. C'est une voie d'information, dans les deux sens : il indique au cerveau à quel point le corps se sent en sécurité, et il est en même temps influencé par ce que vous faites — respiration, posture, rythme."
+      ],
+      "question": "Qu'est-ce qui changerait si vous voyiez votre souffle comme un outil plutôt que comme un détail ?"
+    },
+    "4": {
+      "title": "Pourquoi « calmer la tête » ne suffit souvent pas",
+      "paragraphs": [
+        "Il y a deux façons pour votre cerveau de gérer le stress. Top-down : les régions préfrontales mettent en contexte, évaluent, freinent les impulsions — c'est le versant conscient et verbal. Bottom-up : des signaux du corps, de l'amygdale et du tronc cérébral se manifestent, souvent avant même que vous réfléchissiez.",
+        "Sous stress, les signaux bottom-up prennent plus de poids. Le corps est plus rapide que l'analyse. Cela explique pourquoi une remarque neutre peut être perçue comme critique, une brève pause comme un rejet, une incertitude comme un vrai danger — non parce que la perception est fausse, mais parce qu'elle dépend de l'état du moment.",
+        "C'est précisément pour cela que « se ressaisir » ou « rester calme » ne suffit souvent pas. Ce sont des stratégies top-down, elles partent des pensées. Mais si le corps est déjà en alerte, l'apaisement par le haut ne passe plus.",
+        "Le chemin inverse est alors plus efficace : réguler d'abord le corps — respiration, rythme, posture — la tête suit souvent d'elle-même."
+      ],
+      "question": "Quand avez-vous essayé pour la dernière fois de vous calmer « seulement avec la tête » — cela a-t-il marché ?"
+    },
+    "5": {
+      "title": "Signaux corporels précoces de la tension",
+      "paragraphs": [
+        "Avant que vous ne remarquiez consciemment que vous êtes stressé·e, votre corps l'a déjà enregistré. Cette évaluation automatique s'appelle la neuroception : votre système nerveux lit en continu des signaux venant de l'extérieur et de l'intérieur — voix, ton, posture, mais aussi battement cardiaque, rythme respiratoire, tension ou pression — et évalue s'il y a sécurité ou danger. Cela se passe de manière préconsciente, bien avant qu'une pensée ne se forme. Un collègue qui hausse la voix peut déclencher cette chaîne en quelques secondes, avant que vous n'enregistriez consciemment qu'un élément vous a dérangé·e.",
+        "Trois sources y contribuent : les stimuli externes comme le ton ou l'expression du visage, les signaux corporels internes comme le battement du cœur ou la respiration (interoception), et la perception de tension dans les muscles et les articulations. De ces trois éléments réunis naît l'évaluation de la situation : que se passe-t-il ici, et quelle est la meilleure réponse ?",
+        "La tension précoce apparaît souvent d'abord dans le corps, pas dans la tête : mâchoire serrée, épaules remontées, souffle superficiel, boule dans la gorge. La tête ne s'en aperçoit que plus tard, parfois seulement quand la tension est là depuis un moment.",
+        "Celles et ceux qui connaissent ces signaux précoces peuvent réagir plus tôt, au lieu de ne remarquer qu'au plein régime que quelque chose ne va pas."
+      ],
+      "question": "Où, dans votre corps, remarquez-vous la tension habituellement en premier ?"
+    },
+    "6": {
+      "title": "Combat, fuite, figement, apaisement",
+      "paragraphs": [
+        "Quatre schémas de protection décrivent comment votre système nerveux réagit à une menace — pas comme des traits de caractère, mais comme des modèles pour ce qui se passe dans le corps à cet instant.",
+        "Combat : mobilisation vers l'extérieur. Pouls élevé, tension musculaire, regard ferme. Psychologiquement souvent irritabilité, impulsion de contrôle, besoin de se justifier.",
+        "Fuite : mobilisation vers la mise à distance. Envie de bouger, respiration superficielle, agitation intérieure. Se manifeste par la procrastination, un changement de sujet, un décrochage intérieur dans une conversation.",
+        "Figement : inhibition en état d'alerte. Mimique figée, sensation de froid, engourdissement. Psychologiquement blocage de pensée, vide intérieur, parfois mutisme.",
+        "Apaisement : adaptation sociale pour réduire la tension. Calme à l'extérieur, souvent tendu·e à l'intérieur. Accord, effacement de soi, un sourire qui sonne un peu faux.",
+        "Ces schémas peuvent alterner ou se mélanger, même dans une seule situation : d'abord combat, puis, si cela ne marche pas, figement. C'est précisément pour cela que les réactions au stress sont souvent mal lues au quotidien — comme paresse, indifférence ou manque de coopération, alors que c'est en fait la protection qui est à l'œuvre.",
+        "Ces quatre schémas ont, à un moment, été des réponses sensées face à une menace réelle. Ils ne deviennent problématiques que lorsqu'ils restent actifs alors que la situation permettrait depuis longtemps plus de marge."
+      ],
+      "question": "Quel schéma reconnaissez-vous le plus souvent chez vous ?"
+    },
+    "7": {
+      "title": "Pourquoi vous êtes parfois comme figé·e",
+      "paragraphs": [
+        "Le figement ressemble souvent à un échec : vous voulez réagir, dire, agir — et rien ne vient. Aucun mot ne sort, aucune impulsion ne porte. Cela semble être de la faiblesse. Ce n'est pas le cas.",
+        "Au bord inférieur de votre fenêtre de tolérance, votre système nerveux recourt à une autre stratégie que le combat ou la fuite : une mise en veille active. L'énergie diminue, la réactivité baisse, une distance intérieure s'installe. À l'expérience, cela se manifeste par l'engourdissement, le vide intérieur, la lourdeur corporelle, ou la sensation de vivre le monde derrière une vitre.",
+        "Dans la perspective polyvagale, cela est associé à la branche vagale dorsale : une immobilité défensive. Non pas de la détente, mais une réponse protectrice sous surcharge. Vu de l'extérieur, quelqu'un qui se fige paraît souvent juste calme ou absent. Ce qui se passe à l'intérieur reste invisible.",
+        "Une surcharge prolongée, une douleur chronique ou des expériences antérieures de perte de contrôle peuvent rétrécir la fenêtre de tolérance, si bien que le figement s'installe plus vite que chez un système avec plus de marge.",
+        "La différence avec une vraie récupération est perceptible : la récupération est régénératrice. Le figement est vide, parfois même menaçant."
+      ],
+      "question": "La prochaine fois que vous vous figez, essayez une question au lieu d'un jugement : que ressentirait mon corps comme plus sûr en ce moment ?"
+    },
+    "8": {
+      "title": "Stress aigu vs. hyperactivation chronique",
+      "paragraphs": [
+        "Le stress aigu est une réaction limitée dans le temps à une demande concrète. Attention, tension musculaire, fréquence cardiaque montent brièvement — et une fois la situation passée, le système revient généralement vers le calme. Un entretien d'embauche stressant en fait partie. C'est normal et, en soi, pas nocif.",
+        "Le stress chronique apparaît quand des demandes persistent dans le temps ou que le système nerveux est activé de manière répétée sans assez de récupération entre les épisodes. Un emploi qui vous dépasse depuis des mois sans que rien ne change en fait partie. Les déclencheurs n'ont pas besoin d'être dramatiques : incertitude récurrente, manque de sommeil, conflits ou manque de prévisibilité suffisent.",
+        "Biochimiquement, deux systèmes sont impliqués : le rapide, qui réagit immédiatement via l'adrénaline, et l'axe de stress plus lent via le cortisol, qui agit plutôt sur des heures et influence l'énergie, la glycémie et le système immunitaire.",
+        "La différence n'est donc pas dans l'intensité d'un moment isolé, mais dans la récupération qui suit. En stress aigu, elle vient. En stress chronique, elle manque. Avec le temps, cela s'additionne en ce que la recherche appelle la charge allostatique."
+      ],
+      "question": "Combien de fois cette semaine avez-vous vraiment récupéré entre deux moments exigeants ?"
+    },
+    "9": {
+      "title": "Reconnaître les déclencheurs sans en être piloté·e",
+      "paragraphs": [
+        "Un certain ton de voix vous tend immédiatement. Une odeur change votre état corporel avant que vous ne sachiez pourquoi. Ce n'est ni un hasard ni une réaction excessive — votre système nerveux a appris à classer ce stimulus comme important, souvent bien avant qu'un souvenir conscient n'en existe.",
+        "Ce type d'apprentissage s'appelle la mémoire implicite. Contrairement à une date ou un nom, elle ne se montre pas dans le récit mais dans le faire, le ressentir, le réagir. L'amygdale est fortement impliquée dans l'association de stimuli extérieurs à un danger — un processus d'apprentissage qu'on ne peut pas simplement raisonner pour l'écarter.",
+        "Deux personnes peuvent vivre un événement similaire et en garder des traces très différentes, selon l'expérience antérieure, le niveau d'épuisement et selon qu'un soutien était disponible à ce moment-là. Ce n'est pas un signe de force ou de faiblesse, mais le résultat de conditions de départ différentes.",
+        "C'est pourquoi la seule volonté sert peu contre un déclencheur. Vous ne réagissez pas à la situation actuelle, mais à un schéma stocké qui vient d'être activé. Ce qui aide, c'est reconnaître plutôt que combattre."
+      ],
+      "question": "Quel déclencheur vous met le plus sûrement hors de vous-même ?"
+    },
+    "10": {
+      "title": "Le souffle comme levier le plus rapide",
+      "paragraphs": [
+        "De tous les accès au système nerveux, le souffle est le plus rapide — pas un outil à acheter ou à apprendre, juste un système qui tourne déjà. La façon dont vous respirez à cet instant n'est pas un fait neutre : fréquence, profondeur et rythme respiratoires évoluent avec l'état de votre système nerveux, et à l'inverse le souffle modèle en retour ce système.",
+        "Sous stress, la plupart des gens respirent plus vite, plus superficiellement, davantage par le thorax que par le diaphragme. L'expiration se raccourcit, parfois avec une petite retenue entre deux souffles. Une respiration de repos normale se situe entre 10 et 14 cycles par minute — à partir d'environ 15, la recherche la considère comme un signe possible d'activation accrue.",
+        "Ce lien va dans les deux sens. Vous ne pouvez pas ralentir votre pouls par la seule volonté, mais vous pouvez respirer plus lentement en conscience — et le reste suit souvent tout seul."
+      ],
+      "question": "Comment respirez-vous en ce moment, à cet instant — vite et haut, ou calme et profond ?"
+    },
+    "11": {
+      "title": "Pourquoi l'expiration devrait être plus longue que l'inspiration",
+      "paragraphs": [
+        "Beaucoup de techniques de respiration misent sur le contrôle : inspirer profondément, gonfler le ventre au maximum, retenir l'air. Cela semble plausible, mais l'effet est souvent l'inverse. Commencer à respirer le plus profondément possible sous tension peut déclencher une réaction paradoxale — le corps enregistre l'effort respiratoire inhabituel comme un signal d'alarme supplémentaire.",
+        "La voie plus efficace est le plus souvent inverse : ne pas inspirer sous contrôle, mais laisser l'expiration se dérouler librement, un peu plus longue que l'inspiration. La raison est purement physiologique : à l'inspiration, la fréquence cardiaque monte légèrement, le sympathique prend brièvement plus de poids. À l'expiration, elle redescend, le parasympathique prend plus d'espace.",
+        "Une structure de départ simple : 4 secondes d'inspiration, 6 secondes d'expiration ; avec plus d'expérience aussi 4 pour 8. Plus important que les chiffres exacts, il y a le principe — expiration plus longue que l'inspiration, rythme régulier, pas d'effort forcé."
+      ],
+      "question": "Remarquez-vous une différence si, à votre prochaine expiration, vous la prolongez délibérément de deux ou trois secondes ?"
+    },
+    "12": {
+      "title": "Froid, mouvement, toucher — leviers corporels",
+      "paragraphs": [
+        "Toute voie vers la régulation ne passe pas par le souffle. Le froid, le mouvement et le toucher sont des leviers corporels à part entière — d'effets différents, mais tous conçus pour s'adresser directement au corps plutôt que par les pensées.",
+        "Le froid est d'abord activant, pas calmant : les vaisseaux se resserrent, pouls et respiration montent brièvement. L'effet régulateur véritable se produit ensuite, dans la récupération — une exposition au froid répétée et bien dosée entraîne précisément ce passage de l'activation au calme.",
+        "Le mouvement agit plus directement : l'activité musculaire consomme les hormones de stress que le corps a libérées justement à cet effet. Même un mouvement bref peut sensiblement décharger une activation accumulée.",
+        "Le toucher, qu'il s'agisse d'un tapping rythmique ou d'une simple pression, est l'un des plus anciens signaux de sécurité que connaît votre système nerveux."
+      ],
+      "question": "Lequel de ces trois leviers vous paraît le plus accessible, là maintenant ?"
+    },
+    "13": {
+      "title": "S'orienter dans l'espace comme astuce d'ancrage",
+      "paragraphs": [
+        "L'ancrage semble un grand concept, mais au fond c'est simple : percevoir consciemment le contact avec le sol, son propre poids, le lien entre les pieds et la surface. Pas un rituel mystique, juste un principe sensoriel simple.",
+        "Vos pieds fournissent constamment de l'information — dureté, température, irrégularités du sol. Ces signaux orientent votre système nerveux dans le moment présent et peuvent ramener l'attention d'un tourbillon de pensées vers le corps.",
+        "Marcher pieds nus sur des surfaces variées fournit au système nerveux une riche information sensorielle et compte parmi les ancrages corporels les plus directs disponibles au quotidien, sans aucune préparation.",
+        "L'astuce fonctionne parce qu'elle déplace le focus : de ce qui se passe dans la tête vers ce que le corps ressent réellement en ce moment."
+      ],
+      "question": "Quand avez-vous consciemment senti pour la dernière fois ce sur quoi vous êtes debout ?"
+    },
+    "14": {
+      "title": "Pourquoi la proximité avec les autres apaise votre système nerveux",
+      "paragraphs": [
+        "Votre système nerveux n'apprend pas la régulation seul, mais par la relation. Tôt dans le développement, les figures d'attachement y prennent part : par la voix, le toucher, le rythme, la simple présence. Ce mécanisme — appelé co-régulation — reste à l'œuvre toute la vie.",
+        "En présence d'une personne calme et fiable, votre propre système nerveux peut se stabiliser, souvent sans un mot. Les personnes disposant de relations proches et fiables présentent, en moyenne, des niveaux plus bas d'hormones de stress et une fenêtre de tolérance plus large.",
+        "Ce qui compte ici, ce n'est pas le nombre de contacts mais leur qualité : la connexion sans pression d'être jugé·e. Une seule relation fiable peut déjà suffire. L'isolement chronique, en revanche, est mesurablement pesant."
+      ],
+      "question": "Qui, dans votre entourage, aide le plus sûrement votre système nerveux à se poser ?"
+    },
+    "15": {
+      "title": "Reconnaître la co-régulation, même sans mots",
+      "paragraphs": [
+        "La co-régulation n'a pas besoin de langage. Elle passe par des canaux que votre système nerveux connaissait bien avant que vous ne sachiez parler : le ton, le rythme, la mimique, la posture, la présence toute simple d'une autre personne.",
+        "Un ton calme, des mouvements lents, une expression du visage détendue signalent à votre système, à un niveau très fondamental : il n'y a pas de danger ici en ce moment. C'est un traitement automatique des signaux — la même neuroception qui détecte aussi la menace.",
+        "C'est exactement pour cela que le simple fait de s'asseoir à côté de quelqu'un de familier peut avoir un effet régulateur. Et c'est exactement pour cela que la tension dans une pièce peut être contagieuse avant que quiconque ne dise un mot.",
+        "Reconnaître la co-régulation, c'est percevoir consciemment cet échange non verbal, au lieu de le subir uniquement de manière inconsciente."
+      ],
+      "question": "Dont la présence vous apaise-t-elle, uniquement par la manière dont cette personne est là ?"
+    },
+    "16": {
+      "title": "Entraîner le système nerveux au quotidien plutôt que réagir seulement en cas d'urgence",
+      "paragraphs": [
+        "La résilience n'est pas un programme qu'on suit une fois et qu'on possède ensuite. C'est plutôt une direction dans laquelle le quotidien peut évoluer avec le temps — portée par des facteurs récurrents plutôt petits, plus que par un grand changement unique.",
+        "Un défi dosé en fait partie : supporter et intégrer de petites charges régulières, avec assez de récupération après. C'est exactement ce principe qui entraîne votre système nerveux à passer plus souplement entre activation et calme.",
+        "Le mouvement, le sommeil et le lien social comptent parmi les briques les mieux étayées. Aucun de ces facteurs n'est particulièrement fort à lui seul — ensemble, ils font une différence nette.",
+        "Réguler son système nerveux uniquement en cas d'urgence n'entraîne rien. Une régulation devenue habitude modifie l'état de base lui-même."
+      ],
+      "question": "Quelle petite brique récurrente vous manque-t-il le plus en ce moment ?"
+    },
+    "17": {
+      "title": "Sommeil et système nerveux",
+      "paragraphs": [
+        "Votre corps a une horloge intérieure — un programme biologique d'environ 24 heures, piloté par un tout petit noyau dans l'hypothalamus. Cette horloge règle la température corporelle, les niveaux hormonaux, la digestion et la facilité avec laquelle votre système nerveux régule.",
+        "La lumière en est le signal le plus fort. Elle pilote la libération de la mélatonine, qui est moins une hormone du sommeil qu'un signal d'obscurité. La lumière des écrans le soir peut retarder ce signal et repousser le moment de l'endormissement.",
+        "Le cortisol suit son propre profil journalier : une forte montée après le réveil, puis une baisse progressive. Le stress chronique et un sommeil irrégulier peuvent aplatir ce profil — avec des conséquences sur la capacité à récupérer le lendemain.",
+        "Le sommeil n'est donc pas un à-côté de la régulation, mais l'un de ses fondements biologiques."
+      ],
+      "question": "À quel point votre rythme veille-sommeil est-il vraiment régulier dans une semaine typique ?"
+    },
+    "18": {
+      "title": "Les rechutes sont normales — retrouver son chemin après une phase de dysrégulation",
+      "paragraphs": [
+        "Les anciens schémas ne sont jamais vraiment effacés, seulement recouverts. Sous stress, ils peuvent se réactiver — un recul apparent, alors que vous pensiez venir d'avancer d'un pas. C'est prévisible, ce n'est pas le signe que rien n'a changé.",
+        "Ce qui est décisif, c'est la façon dont vous interprétez ce moment. Lire une rechute comme un échec personnel amplifie précisément l'activation qui devrait être régulée. Ce dont votre système nerveux a besoin à la place, c'est d'un cadre : c'était une rechute dans l'ancien schéma, mon système était surchargé.",
+        "Les études sur l'auto-compassion le montrent : se traiter soi-même avec la même bienveillance qu'on offrirait à un bon ami est lié à une meilleure régulation émotionnelle — l'autocritique n'agit, au mieux, qu'à court terme.",
+        "Une rechute montre que sous charge, votre système se raccroche au familier. C'est ce qui est prévisible, pas l'échec."
+      ],
+      "question": "Comment vous parlez-vous habituellement quand vous remarquez que vous êtes retombé·e dans un vieux schéma ?"
+    }
+  }
+}

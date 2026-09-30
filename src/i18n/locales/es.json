@@ -232,5 +232,10 @@
   "exercise.neiguan.subtitle": "1 punto, presión suave",
   "exercise.neiguan.duration": "1 min",
   "exercise.neiguan.instruction": "Mantén una presión suave dos o tres dedos por encima del pliegue de la muñeca, centrado entre los tendones.",
-  "exercise.neiguan.point.1": "Neiguan"
+  "exercise.neiguan.point.1": "Neiguan",
+
+  "lektionen.title": "Lecciones",
+  "lektionen.info.body": "Estas lecciones se apoyan directamente en el libro «Warum dein Nervensystem dich zurückhält» — presentadas como unidades cortas y autosuficientes para el día a día.",
+  "lektionen.info.disclaimer": "Transmiten conocimiento sobre tu sistema nervioso, pero no reemplazan un diagnóstico ni un tratamiento. Ante malestar persistente, el apoyo profesional forma parte del cuadro.",
+  "lektionen.unlockAll": "Desbloquear todas las lecciones"
 }

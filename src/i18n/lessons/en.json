@@ -1,0 +1,193 @@
+{
+  "blocks": [
+    { "title": "Block 1 — Foundations: how your nervous system works", "lessonIds": [1, 2, 3, 4] },
+    { "title": "Block 2 — Recognising stress & dysregulation", "lessonIds": [5, 6, 7, 8, 9] },
+    { "title": "Block 3 — Self-regulation: the tools", "lessonIds": [10, 11, 12, 13] },
+    { "title": "Block 4 — Co-regulation", "lessonIds": [14, 15] },
+    { "title": "Block 5 — Everyday life & resilience", "lessonIds": [16, 17, 18] }
+  ],
+  "lessons": {
+    "1": {
+      "title": "Sympathetic & parasympathetic, plainly explained",
+      "paragraphs": [
+        "Your nervous system has two operating modes: sympathetic and parasympathetic. The sympathetic branch mobilises you — heart rate up, muscles tense, attention outward. The parasympathetic winds things back down: digestion, recovery, inner quiet. Both are almost always active at the same time, just with different weight. Not a switch, more like a mixing board.",
+        "What matters isn't whether you're currently activated. What matters is whether your system can come back down once the trigger is over. That capacity is called autonomic flexibility — the ability to shift between activation and recovery, depending on what's needed. A well-regulated system provides energy when action is called for, and eases it back down as soon as the demand is over.",
+        "That's exactly what becomes hard when you're often tense, even without a clear reason. The sympathetic branch stays on in the background, even when things have long since gone quiet on the outside. A meeting that ended hours ago still echoes in the body, even though your mind ticked it off long ago. Not because you're not relaxing enough, but because the system has unlearned the shift.",
+        "That's why stress often shows up not just as tension, but as a loss of this flexibility — as a system that has a harder time moving between the two modes."
+      ],
+      "question": "Ask yourself tonight: was I truly relaxed at some point today — or just outwardly calm?"
+    },
+    "2": {
+      "title": "The three basic states: safe, mobilised, frozen",
+      "paragraphs": [
+        "At its core, your nervous system knows three states. Safe: you're alert but relaxed, able to listen, speak, hold eye contact, your voice carries normally. Mobilised: the sympathetic branch takes over, heart rate and muscle tone rise, your gaze hardens, breathing shallows — you're ready to act, whether by moving toward or moving away. Useful under real demand, exhausting as a permanent state.",
+        "Frozen: the system actively dampens itself when mobilisation is no longer enough. Not resting — more like retreat under full load. Heaviness in the body, numbness, the sense of standing behind glass. Sometimes even hunger or tiredness fade out of reach; even decisions suddenly feel impossible. The world seems muted rather than threatening.",
+        "Freezing is neither weakness nor relaxation. It's its own protective response with its own function. The body pulled the emergency brake because it judged the situation as too much — not because you failed.",
+        "The three states aren't personality traits. They shift depending on what your nervous system currently reads as safe or unsafe, often without any conscious decision on your part. You usually notice the shift in hindsight, by the state your body is in.",
+        "None of the three states is wrong. Each one, at some point, had a good function."
+      ],
+      "question": "Where are you right now — safe, mobilised, or more frozen?"
+    },
+    "3": {
+      "title": "The vagus nerve — your inner brake",
+      "paragraphs": [
+        "The vagus nerve connects brain and body — heart, lungs, digestion, nearly all inner organs. Most of its fibres don't run from head to body, but the other way around: from body to brain. So it reports more than it commands.",
+        "One example: respiratory sinus arrhythmia. Your heart rate rises slightly on the in-breath and drops again on the out-breath. That's why slow breaths with a long exhale have a calming effect — not by chance, but through this direct coupling of breath, heart and vagus nerve.",
+        "In the polyvagal view, two branches are distinguished: the ventral, linked to social orientation and calm, and the dorsal, which under overwhelm tends toward withdrawal and shutdown. Both belong to the same nerve, just with different functions.",
+        "The vagus nerve isn't a relaxation button you press. It's an information pathway, in both directions: it tells the brain how safe the body feels, and is at the same time shaped by what you do — breath, posture, pace."
+      ],
+      "question": "What would change if you saw your breath as a tool rather than a side matter?"
+    },
+    "4": {
+      "title": "Why calming yourself down \"just with your head\" often isn't enough",
+      "paragraphs": [
+        "Your brain has two ways of dealing with stress. Top-down: prefrontal areas make sense of things, evaluate, hold impulses back — that's the conscious, verbal side. Bottom-up: signals from body, amygdala and brainstem announce themselves, often before you even think.",
+        "Under stress, bottom-up signals gain weight. The body is faster than analysis. That explains why a neutral remark can land as criticism, a short pause as rejection, an uncertainty as real danger — not because the perception is wrong, but because it's currently state-dependent.",
+        "That's exactly why \"pull yourself together\" or \"just stay calm\" often doesn't cut it. Those are top-down strategies, they start with thoughts. But when the body is already on alert, calming from above no longer gets through.",
+        "The more effective route then is the reverse: regulate the body first — breath, pace, posture — and the mind often follows on its own."
+      ],
+      "question": "When did you last try to calm yourself down \"just with your head\" — did it work?"
+    },
+    "5": {
+      "title": "Early body signals of tension",
+      "paragraphs": [
+        "Before you consciously notice you're stressed, your body has long since registered it. This automatic appraisal is called neuroception: your nervous system constantly reads signals from outside and within — voice, tone, posture, but also heartbeat, breathing rhythm, tightness or pressure — and evaluates whether safety or danger is present. It happens pre-consciously, long before a thought forms around it. A colleague raising their voice can set off this chain in seconds, before you consciously register that anything bothered you.",
+        "Three sources feed into it: outer cues like tone of voice or facial expression, inner body signals like heartbeat or breathing (interoception), and the perception of tension in muscles and joints. From all three combined comes the situational read: what's going on here, and how do I best respond?",
+        "Early tension often shows up in the body first, not the head: a tight jaw, raised shoulders, shallow breath, a lump in the throat. The mind usually notices later, sometimes only once the tension has been building for a while.",
+        "Those who know these early signals can react earlier, instead of only noticing at full swing that something is off."
+      ],
+      "question": "Where in your body do you usually notice tension first?"
+    },
+    "6": {
+      "title": "Fight, Flight, Freeze, Fawn",
+      "paragraphs": [
+        "Four protective patterns describe how your nervous system responds to threat — not as personality traits, but as models for what is currently happening in the body.",
+        "Fight: mobilisation outward. Elevated heart rate, muscle tension, a hard gaze. Psychologically often irritation, an urge to control, the need to justify yourself.",
+        "Flight: mobilisation toward distance. Restlessness, shallow breathing, inner unease. Shows up as procrastination, changing the subject, mentally checking out of a conversation.",
+        "Freeze: inhibition while still on alert. Frozen expression, feeling cold, numbness. Psychologically a thinking block, inner emptiness, sometimes speechlessness.",
+        "Fawn: social accommodation to reduce tension. Calm on the outside, often tense within. Agreeing, holding yourself back, a smile that isn't quite right.",
+        "These patterns can alternate or mix, even within a single situation: fight first, then, when that doesn't help, freeze. That's exactly why stress responses are often misread in everyday life — as laziness, indifference or lack of cooperation, when protection is actually at work.",
+        "All four patterns were once seen as sensible answers to a real threat. They only become a problem when they stay active even after the situation would have long since allowed more room."
+      ],
+      "question": "Which pattern do you most often recognise in yourself?"
+    },
+    "7": {
+      "title": "Why you sometimes feel frozen",
+      "paragraphs": [
+        "Freezing often feels like failure: you want to react, speak, act — and nothing happens. No word comes, no impulse carries. It seems like weakness. It isn't.",
+        "At the lower edge of your window of tolerance your nervous system reaches for a different strategy than fight or flight: active dampening. Energy drops, reactivity falls, an inner distance sets in. Experientially it shows up as numbness, inner emptiness, heaviness in the body, or the sense of experiencing the world through glass.",
+        "In the polyvagal view this is linked to the dorsal vagal branch: a defensive immobility. Not relaxation, but a protective response under overload. From the outside, someone who is freezing often just looks calm or absent. What's happening inside stays invisible.",
+        "Ongoing overload, chronic pain, or earlier experiences of losing control can narrow the window of tolerance, so that freezing sets in faster than in a system with more room.",
+        "The difference from real recovery is tangible: recovery feels regenerative. Freezing feels empty, sometimes even threatening."
+      ],
+      "question": "Next time you freeze, try a question instead of a judgement: what would my body currently experience as safer?"
+    },
+    "8": {
+      "title": "Acute stress vs. chronic overarousal",
+      "paragraphs": [
+        "Acute stress is a time-limited response to a concrete demand. Attention, muscle tension, heart rate rise briefly — and once the situation is over, the system mostly returns toward calm. A stressful job interview belongs here. That's normal, and not, in itself, harmful.",
+        "Chronic stress arises when demands persist over time or the nervous system is repeatedly activated without enough recovery in between. A job that has been overwhelming you for months without anything changing belongs here. The triggers don't have to be dramatic: recurring uncertainty, lack of sleep, conflict, or missing predictability are enough.",
+        "Biochemically, two systems are involved: the fast one, which responds immediately via adrenaline, and the slower stress axis via cortisol, which acts more over hours and affects energy, blood sugar and immune system.",
+        "The difference, then, isn't in the intensity of a single moment, but in the recovery afterward. With acute stress it comes. With chronic stress it doesn't. Over time this adds up to what researchers call allostatic load."
+      ],
+      "question": "How often this week did you truly recover between two demanding moments?"
+    },
+    "9": {
+      "title": "Recognising triggers without being run by them",
+      "paragraphs": [
+        "A particular tone of voice makes you tense on the spot. A smell shifts your body state before you know why. That's neither coincidence nor an overreaction — your nervous system has learned to rank this cue as significant, often long before any conscious memory of it exists.",
+        "This kind of learning is called implicit memory. Unlike a date or a name, it doesn't show up in telling but in doing, feeling and responding. The amygdala is strongly involved in linking external cues to danger — a learning process you can't simply think away.",
+        "Two people can experience a similar event and carry very different traces from it, depending on prior experience, level of exhaustion and whether support was available at the time. That's not a sign of strength or weakness, but the result of different starting conditions.",
+        "That's why pure willpower doesn't do much against a trigger. You're not reacting to the current situation but to a stored pattern that just got activated. What helps is recognising, not fighting."
+      ],
+      "question": "Which trigger most reliably throws you off?"
+    },
+    "10": {
+      "title": "Breath as the fastest lever",
+      "paragraphs": [
+        "Of all the ways into the nervous system, the breath is the fastest — not a tool that has to be bought or learned first, just a system that's already running. How you're breathing right now isn't a neutral fact: breath rate, depth and pattern shift with your nervous-system state, and in turn the breath shapes the system back.",
+        "Under stress, most people breathe faster, shallower, more through the chest than the diaphragm. The exhale gets shorter, sometimes with a slight pause between breaths. Normal resting breath is about 10 to 14 breaths per minute — from about 15 upward, research treats it as a possible sign of raised activation.",
+        "This connection runs both ways. You can't slow your pulse at will, but you can consciously breathe more slowly — and the rest often follows on its own."
+      ],
+      "question": "How are you breathing right now, in this moment — fast and high, or calm and deep?"
+    },
+    "11": {
+      "title": "Why the exhale should be longer than the inhale",
+      "paragraphs": [
+        "Many breath techniques rely on control: breathe in deeply, expand the belly to the max, hold the breath. Sounds plausible, often works the opposite way. Someone who, under tension, starts breathing as deeply as possible can trigger a paradoxical response — the body reads the unfamiliar breathing effort as an added alarm signal.",
+        "The more effective route is usually the reverse: don't control the inhale, let the exhale simply happen, a bit longer than the inhale. The reason is purely physiological: on the inhale, heart rate rises slightly, the sympathetic branch briefly gains weight. On the exhale, it drops again, the parasympathetic branch takes more room.",
+        "A simple starting structure: inhale 4 seconds, exhale 6 seconds; with more practice also 4 to 8. More important than the exact numbers is the principle — exhale longer than inhale, an even rhythm, no forced effort."
+      ],
+      "question": "Do you notice a difference if, on your next exhale, you deliberately let it run two or three seconds longer?"
+    },
+    "12": {
+      "title": "Cold, movement, touch — body-based levers",
+      "paragraphs": [
+        "Not every route to regulation runs through the breath. Cold, movement and touch are their own body-based levers — different in effect, but all designed to reach the body directly rather than via thought.",
+        "Cold is initially activating, not calming: vessels constrict, heart and breath spike briefly. The actual regulation effect appears afterward, in recovery — repeated, well-dosed cold exposure trains exactly that transition from activation back to calm.",
+        "Movement acts more directly: muscle activity uses up the stress hormones the body released for exactly this purpose. Even brief movement can noticeably discharge built-up activation.",
+        "Touch, whether through rhythmic tapping or simple pressure, is one of the oldest signals of safety your nervous system knows."
+      ],
+      "question": "Which of these three levers feels most accessible for you, right now?"
+    },
+    "13": {
+      "title": "Orienting in the room as a grounding trick",
+      "paragraphs": [
+        "Grounding sounds like a big concept, but at its core it's simple: consciously noticing the contact with the floor, your own weight, the connection between feet and surface. Not a mystical ritual, just a simple sensory principle.",
+        "Your feet constantly provide information — hardness, temperature, unevenness of the ground. These signals give your nervous system orientation in the present moment and can pull attention out of a thought loop back into the body.",
+        "Walking barefoot on varied ground feeds the nervous system rich sensory information and counts as one of the most direct body anchors available in everyday life, without any preparation.",
+        "The trick works because it shifts focus: from what's going on in the head to what the body is actually sensing right now."
+      ],
+      "question": "When did you last consciously feel what you're standing on?"
+    },
+    "14": {
+      "title": "Why closeness to others calms your nervous system",
+      "paragraphs": [
+        "Your nervous system doesn't learn regulation alone, but through relationship. Early in development, caregivers take part in it: through voice, touch, rhythm, sheer presence. This mechanism — called co-regulation — stays at work throughout life.",
+        "In the presence of a calm, reliable person your own nervous system can stabilise, often without a single word. People with close, reliable relationships show, on average, lower stress hormone levels and a wider window of tolerance.",
+        "What counts here isn't the number of contacts but their quality: connectedness without the pressure of being judged. A single reliable relationship can already be enough for this. Chronic isolation, in contrast, is measurably distressing."
+      ],
+      "question": "Who in your life most reliably helps your nervous system settle?"
+    },
+    "15": {
+      "title": "Recognising co-regulation, even without words",
+      "paragraphs": [
+        "Co-regulation needs no language. It runs through channels your nervous system knew long before you could speak: tone of voice, pace, facial expression, posture, the plain presence of another person.",
+        "A calm tone, slow movements, a relaxed facial expression signal to your system at a very basic level: no danger here right now. That's automatic signal processing — the same neuroception that also detects threat.",
+        "That's exactly why simply sitting next to someone familiar can be regulating. And that's exactly why tension in a room can be contagious before anyone says a word.",
+        "Recognising co-regulation means consciously perceiving this non-verbal exchange, rather than only being carried along by it unconsciously."
+      ],
+      "question": "Whose presence makes you calmer just by the way they are there?"
+    },
+    "16": {
+      "title": "Training the nervous system daily instead of only responding in crisis",
+      "paragraphs": [
+        "Resilience isn't a programme you complete once and then own. It's more a direction in which everyday life can develop over time — carried by recurring, rather small factors rather than a single big change.",
+        "Dosed challenge is part of it: taking on and processing small, regular loads with enough recovery afterward. This is exactly the principle that trains your nervous system to move more flexibly between activation and calm.",
+        "Movement, sleep and social connection count among the best-supported building blocks. None of these factors is particularly strong on its own — together they make a clear difference.",
+        "Regulating your nervous system only in acute crisis trains nothing. Regulation that becomes a habit shifts the baseline itself."
+      ],
+      "question": "Which small, recurring building block are you missing most right now?"
+    },
+    "17": {
+      "title": "Sleep and the nervous system",
+      "paragraphs": [
+        "Your body has an inner clock — a biological schedule of about 24 hours, driven by a tiny nucleus in the hypothalamus. This clock sets body temperature, hormone levels, digestion, and how easily your nervous system regulates.",
+        "Light is its strongest signal. It steers the release of melatonin, which is less a sleep hormone than a darkness signal. Evening screen light can delay this signal and push the moment of falling asleep back.",
+        "Cortisol follows its own daily profile: a strong rise after waking, then a gradual decline. Chronic stress and irregular sleep can flatten this profile — with consequences for how well you can recover the next day.",
+        "Sleep, then, isn't a side matter of regulation but one of its biological foundations."
+      ],
+      "question": "How regular is your sleep-wake rhythm in a typical week, really?"
+    },
+    "18": {
+      "title": "Relapses are normal — finding your way back after a dysregulated phase",
+      "paragraphs": [
+        "Old patterns are never truly erased, only layered over. Under stress they can re-emerge — an apparent setback just when you thought you'd moved a step forward. That's expected, not a sign that nothing has changed.",
+        "What matters is how you read this moment. Reading a relapse as personal failure amplifies exactly the activation that ought to be regulated. What your nervous system needs instead is context: that was a relapse into the old pattern, my system was overloaded.",
+        "Research on self-compassion shows: meeting yourself with the same kindness you would offer a good friend is linked to better emotional regulation — self-criticism works, at best, only in the short run.",
+        "A relapse shows that under load your system reaches for what's familiar. That's what's expected, not the failure."
+      ],
+      "question": "How do you normally speak to yourself when you notice you've slipped back into an old pattern?"
+    }
+  }
+}

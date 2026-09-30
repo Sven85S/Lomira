@@ -232,5 +232,10 @@
   "exercise.neiguan.subtitle": "1 point, pression douce",
   "exercise.neiguan.duration": "1 min",
   "exercise.neiguan.instruction": "Maintenez une pression douce à deux ou trois largeurs de doigt au-dessus du pli du poignet, au centre entre les tendons.",
-  "exercise.neiguan.point.1": "Neiguan"
+  "exercise.neiguan.point.1": "Neiguan",
+
+  "lektionen.title": "Leçons",
+  "lektionen.info.body": "Ces leçons s'appuient directement sur le livre « Warum dein Nervensystem dich zurückhält » — proposées en unités courtes et autonomes pour le quotidien.",
+  "lektionen.info.disclaimer": "Elles transmettent des connaissances sur votre système nerveux, mais ne remplacent ni un diagnostic ni un traitement. En cas de détresse persistante, un soutien professionnel a toute sa place.",
+  "lektionen.unlockAll": "Débloquer toutes les leçons"
 }

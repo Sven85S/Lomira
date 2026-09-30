@@ -232,5 +232,10 @@
   "exercise.neiguan.subtitle": "1 point, gentle pressure",
   "exercise.neiguan.duration": "1 min",
   "exercise.neiguan.instruction": "Hold gentle pressure two to three finger-widths above the wrist crease, centred between the tendons.",
-  "exercise.neiguan.point.1": "Neiguan"
+  "exercise.neiguan.point.1": "Neiguan",
+
+  "lektionen.title": "Lessons",
+  "lektionen.info.body": "These lessons build directly on the book 'Warum dein Nervensystem dich zurückhält' — presented as short, self-contained units for everyday life.",
+  "lektionen.info.disclaimer": "They convey knowledge about your nervous system but do not replace a diagnosis or treatment. For persistent distress, professional support is part of the picture.",
+  "lektionen.unlockAll": "Unlock all lessons"
 }

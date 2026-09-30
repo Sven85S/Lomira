@@ -232,5 +232,10 @@
   "exercise.neiguan.subtitle": "1 Punkt, sanfter Druck",
   "exercise.neiguan.duration": "1 Min",
   "exercise.neiguan.instruction": "Sanften Druck zwei bis drei Fingerbreit oberhalb der Handgelenksfalte halten, mittig zwischen den Sehnen.",
-  "exercise.neiguan.point.1": "Neiguan"
+  "exercise.neiguan.point.1": "Neiguan",
+
+  "lektionen.title": "Lektionen",
+  "lektionen.info.body": "Diese Lektionen bauen direkt auf dem Buch 'Warum dein Nervensystem dich zurückhält' auf — aufbereitet in kurzen, in sich abgeschlossenen Einheiten für den Alltag.",
+  "lektionen.info.disclaimer": "Sie vermitteln Wissen über dein Nervensystem, ersetzen aber keine Diagnose oder Behandlung. Bei anhaltender Belastung gehört professionelle Unterstützung dazu.",
+  "lektionen.unlockAll": "Alle Lektionen freischalten"
 }

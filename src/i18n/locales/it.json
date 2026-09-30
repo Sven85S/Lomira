@@ -232,5 +232,10 @@
   "exercise.neiguan.subtitle": "1 punto, pressione delicata",
   "exercise.neiguan.duration": "1 min",
   "exercise.neiguan.instruction": "Mantieni una pressione delicata due o tre dita sopra la piega del polso, al centro tra i tendini.",
-  "exercise.neiguan.point.1": "Neiguan"
+  "exercise.neiguan.point.1": "Neiguan",
+
+  "lektionen.title": "Lezioni",
+  "lektionen.info.body": "Queste lezioni si basano direttamente sul libro «Warum dein Nervensystem dich zurückhält» — presentate come brevi unità autonome per la vita quotidiana.",
+  "lektionen.info.disclaimer": "Trasmettono conoscenze sul tuo sistema nervoso, ma non sostituiscono una diagnosi né un trattamento. In caso di sofferenza persistente, il supporto professionale ha il suo posto.",
+  "lektionen.unlockAll": "Sblocca tutte le lezioni"
 }

@@ -1,6 +1,6 @@
 import { fonts, layout, palette, type } from '../styles/himmel';
 import OverlayScreen from '../components/OverlayScreen';
-import { LESSON_CONTENT } from '../data/lessons';
+import { useLessons } from '../i18n/lessons';
 
 interface Props {
   lessonId: number;
@@ -11,7 +11,8 @@ interface Props {
 const inset = `0 ${layout.headingInset}px`;
 
 export default function LessonDetail({ lessonId, onClose }: Props) {
-  const lesson = LESSON_CONTENT[lessonId];
+  const { lessons } = useLessons();
+  const lesson = lessons[String(lessonId)];
 
   return (
     <OverlayScreen zIndex={25} onBack={onClose}>

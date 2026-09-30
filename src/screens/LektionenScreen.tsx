@@ -1,7 +1,8 @@
 import { iconBubble, layout, listCard, listRow, palette, type } from '../styles/himmel';
-import { LESSON_BLOCKS, LESSON_CONTENT } from '../data/lessons';
 import { useSubscription } from '../context/SubscriptionContext';
 import PrimaryButton from '../components/PrimaryButton';
+import { useT } from '../i18n';
+import { useLessons } from '../i18n/lessons';
 
 interface Props {
   showInfo: boolean;
@@ -38,6 +39,8 @@ function ChevronIcon() {
 // Rendered inside LektionenOverlay's scroll area, which already supplies the
 // screen margins and the block gap.
 export default function LektionenScreen({ showInfo, onOpenLesson, onOpenPaywall }: Props) {
+  const { t } = useT();
+  const { blocks, lessons } = useLessons();
   const { isSubscribed } = useSubscription();
 
   return (
@@ -46,18 +49,16 @@ export default function LektionenScreen({ showInfo, onOpenLesson, onOpenPaywall 
         <div style={listCard()}>
           <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.5, margin: 0 }}>
-              Diese Lektionen bauen direkt auf dem Buch 'Warum dein Nervensystem dich zurückhält' auf — aufbereitet in kurzen, in sich
-              abgeschlossenen Einheiten für den Alltag.
+              {t('lektionen.info.body')}
             </p>
             <p style={{ ...type.hintText, color: palette.hint, lineHeight: 1.5, margin: 0 }}>
-              Sie vermitteln Wissen über dein Nervensystem, ersetzen aber keine Diagnose oder Behandlung. Bei anhaltender Belastung gehört
-              professionelle Unterstützung dazu.
+              {t('lektionen.info.disclaimer')}
             </p>
           </div>
         </div>
       )}
 
-      {LESSON_BLOCKS.map((block) => (
+      {blocks.map((block) => (
         <div key={block.title}>
           <div style={{ ...type.overline, padding: `0 ${layout.headingInset}px`, marginBottom: layout.overlineToCard }}>{block.title}</div>
           <div style={listCard()}>
@@ -71,7 +72,7 @@ export default function LektionenScreen({ showInfo, onOpenLesson, onOpenPaywall 
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ ...iconBubble(), ...type.pill }}>{unlocked ? <CheckIcon /> : id}</div>
-                    <span style={{ ...type.body, color: palette.ink, lineHeight: 1.4 }}>{LESSON_CONTENT[id].title}</span>
+                    <span style={{ ...type.body, color: palette.ink, lineHeight: 1.4 }}>{lessons[String(id)]?.title}</span>
                   </div>
                   {unlocked ? <ChevronIcon /> : <LockIcon />}
                 </div>
@@ -81,7 +82,7 @@ export default function LektionenScreen({ showInfo, onOpenLesson, onOpenPaywall 
         </div>
       ))}
 
-      {!isSubscribed && <PrimaryButton onClick={onOpenPaywall}>Alle Lektionen freischalten</PrimaryButton>}
+      {!isSubscribed && <PrimaryButton onClick={onOpenPaywall}>{t('lektionen.unlockAll')}</PrimaryButton>}
     </>
   );
 }

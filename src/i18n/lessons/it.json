@@ -1,0 +1,193 @@
+{
+  "blocks": [
+    { "title": "Blocco 1 — Fondamenti: come funziona il tuo sistema nervoso", "lessonIds": [1, 2, 3, 4] },
+    { "title": "Blocco 2 — Riconoscere stress & disregolazione", "lessonIds": [5, 6, 7, 8, 9] },
+    { "title": "Blocco 3 — Autoregolazione: gli strumenti", "lessonIds": [10, 11, 12, 13] },
+    { "title": "Blocco 4 — Co-regolazione", "lessonIds": [14, 15] },
+    { "title": "Blocco 5 — Vita quotidiana & resilienza", "lessonIds": [16, 17, 18] }
+  ],
+  "lessons": {
+    "1": {
+      "title": "Simpatico & parasimpatico, spiegati in modo semplice",
+      "paragraphs": [
+        "Il tuo sistema nervoso ha due modalità operative: simpatico e parasimpatico. Il simpatico ti mobilita — polso in alto, muscoli tesi, attenzione verso l'esterno. Il parasimpatico rallenta: digestione, recupero, calma interiore. Entrambi sono quasi sempre attivi contemporaneamente, solo con pesi diversi. Non un interruttore, piuttosto un mixer.",
+        "Ciò che conta non è se sei attivato/a in questo momento. Ciò che conta è se il tuo sistema riesce a rientrare una volta finito lo stimolo. Questa capacità si chiama flessibilità autonoma — il passaggio tra attivazione e recupero, a seconda di ciò che serve. Un sistema ben regolato rende disponibile l'energia quando l'azione è necessaria e la riduce non appena la richiesta è passata.",
+        "È proprio questo che diventa difficile quando sei spesso teso/a, anche senza motivo chiaro. Il simpatico rimane allora acceso sullo sfondo, anche se all'esterno è tornata la calma da tempo. Una riunione finita da ore continua a risuonare nel corpo, anche se la testa l'ha archiviata da tempo. Non perché ti rilassi poco, ma perché il sistema ha disimparato il passaggio.",
+        "Lo stress si manifesta perciò spesso non solo come tensione, ma come perdita di questa flessibilità — come un sistema che fatica di più a passare da una modalità all'altra."
+      ],
+      "question": "Chiediti stasera: sono stato/a davvero rilassato/a in qualche momento — o solo apparentemente calmo/a?"
+    },
+    "2": {
+      "title": "I tre stati di base: al sicuro, mobilitato/a, congelato/a",
+      "paragraphs": [
+        "Il tuo sistema nervoso conosce essenzialmente tre stati. Al sicuro: sei sveglio/a ma rilassato/a, capace di ascoltare, parlare, sostenere lo sguardo, la voce sostiene normalmente. Mobilitato/a: il simpatico prende il sopravvento, polso e tono muscolare salgono, lo sguardo si irrigidisce, il respiro si fa più superficiale — sei pronto/a ad agire, sia avvicinandoti sia allontanandoti. Utile davanti a una richiesta reale, faticoso come stato duraturo.",
+        "Congelato/a: il sistema si smorza attivamente quando la mobilitazione non basta più. Non riposo, ma piuttosto un ritiro sotto pieno carico — pesantezza corporea, intorpidimento, la sensazione di stare dietro un vetro. A volte anche fame o stanchezza diventano irraggiungibili; persino le decisioni sembrano d'un tratto impossibili. Il mondo appare più attutito che minaccioso.",
+        "Congelarsi non è né debolezza né rilassamento. È una risposta protettiva a sé, con una propria funzione. Il corpo ha tirato il freno d'emergenza perché ha valutato la situazione come troppo — non perché tu abbia fallito.",
+        "I tre stati non sono tratti di carattere. Cambiano a seconda di ciò che il tuo sistema nervoso valuta in quel momento come sicuro o non sicuro, spesso senza che tu ne decida consapevolmente. Il passaggio lo noti soprattutto a posteriori, dallo stato del tuo corpo.",
+        "Nessuno dei tre stati è sbagliato. Ognuno ha avuto, a un certo punto, una buona funzione."
+      ],
+      "question": "Dove ti trovi in questo momento — al sicuro, mobilitato/a o piuttosto congelato/a?"
+    },
+    "3": {
+      "title": "Il nervo vago — il tuo freno interno",
+      "paragraphs": [
+        "Il nervo vago collega cervello e corpo — cuore, polmoni, digestione, quasi tutti gli organi interni. La maggior parte delle sue fibre non va dalla testa al corpo, ma nel senso opposto: dal corpo al cervello. Riferisce quindi più di quanto comandi.",
+        "Un esempio: l'aritmia sinusale respiratoria. In inspirazione il polso sale leggermente, in espirazione scende di nuovo. Ecco perché respiri lenti con una lunga espirazione hanno un effetto calmante — non per caso, ma attraverso questo accoppiamento diretto tra respiro, cuore e nervo vago.",
+        "Nella prospettiva polivagale si distinguono due branche: quella ventrale, legata all'orientamento sociale e alla calma, e quella dorsale, che sotto sovraccarico tende al ritiro e allo smorzamento. Entrambe appartengono allo stesso nervo, con funzioni diverse.",
+        "Il nervo vago non è un pulsante di rilassamento da premere. È una via informativa, in entrambe le direzioni: comunica al cervello quanto il corpo si sente sicuro, ed è al tempo stesso influenzato da ciò che fai — respiro, postura, ritmo."
+      ],
+      "question": "Cosa cambierebbe se vedessi il respiro come uno strumento, invece che come un dettaglio?"
+    },
+    "4": {
+      "title": "Perché «calmare la testa» spesso non basta",
+      "paragraphs": [
+        "Ci sono due modi in cui il tuo cervello gestisce lo stress. Top-down: le aree prefrontali inquadrano, valutano, frenano gli impulsi — è il lato consapevole e verbale. Bottom-up: segnali dal corpo, dall'amigdala e dal tronco encefalico si fanno sentire, spesso prima ancora che tu pensi.",
+        "Sotto stress, i segnali bottom-up prendono più peso. Il corpo è più veloce dell'analisi. Questo spiega perché un'osservazione neutra può essere percepita come critica, una breve pausa come rifiuto, un'incertezza come pericolo reale — non perché la percezione sia sbagliata, ma perché in quel momento dipende dallo stato.",
+        "Proprio per questo «riprenderti» o «rimanere calmo/a» spesso non basta. Sono strategie top-down, partono dai pensieri. Ma se il corpo è già in allerta, la calma dall'alto non passa più.",
+        "Più efficace è allora la via inversa: regolare prima il corpo — respiro, ritmo, postura — e la testa segue spesso da sola."
+      ],
+      "question": "Quando hai provato l'ultima volta a calmarti «solo con la testa» — ha funzionato?"
+    },
+    "5": {
+      "title": "Segnali corporei precoci della tensione",
+      "paragraphs": [
+        "Prima che tu ti accorga consapevolmente di essere sotto stress, il tuo corpo l'ha già registrato. Questa valutazione automatica si chiama neurocezione: il tuo sistema nervoso legge di continuo segnali dall'esterno e dall'interno — voce, tono, postura, ma anche battito cardiaco, ritmo respiratorio, tensione o pressione — e valuta se ci sia sicurezza o pericolo. Avviene in modo preconscio, molto prima che si formi un pensiero. Un collega che alza la voce può innescare questa catena in pochi secondi, prima che tu registri consapevolmente che qualcosa ti ha disturbato.",
+        "Confluiscono tre fonti: stimoli esterni come tono di voce o espressione del viso, segnali corporei interni come battito o respiro (interocezione), e la percezione della tensione in muscoli e articolazioni. Da tutte e tre insieme nasce la valutazione della situazione: cosa succede qui, e come rispondo meglio?",
+        "La tensione precoce si mostra spesso prima nel corpo, non nella testa: mascella serrata, spalle sollevate, respiro superficiale, un nodo in gola. La testa se ne accorge di solito più tardi, a volte solo quando la tensione è lì da un po'.",
+        "Chi conosce questi segnali precoci può reagire prima, invece di accorgersi solo al pieno allarme che qualcosa non va."
+      ],
+      "question": "Dove nel corpo noti di solito per prima la tensione?"
+    },
+    "6": {
+      "title": "Attacco, fuga, congelamento, adattamento",
+      "paragraphs": [
+        "Quattro schemi protettivi descrivono come il tuo sistema nervoso risponde a una minaccia — non come tratti di carattere, ma come modelli di ciò che sta accadendo nel corpo in quel momento.",
+        "Attacco: mobilitazione verso l'esterno. Polso elevato, tensione muscolare, sguardo fermo. Psicologicamente spesso irritabilità, impulso di controllo, bisogno di giustificarsi.",
+        "Fuga: mobilitazione verso la distanza. Bisogno di muoversi, respiro superficiale, agitazione interna. Si manifesta come procrastinazione, cambio di argomento, uscita interna da una conversazione.",
+        "Congelamento: inibizione con contemporanea allerta. Mimica rigida, sensazione di freddo, intorpidimento. Psicologicamente blocco del pensiero, vuoto interiore, a volte mutismo.",
+        "Adattamento: adeguamento sociale per ridurre la tensione. Calmo/a all'esterno, spesso teso/a dentro. Assenso, ritrarsi, un sorriso che non convince del tutto.",
+        "Questi schemi possono alternarsi o mescolarsi, anche all'interno di una singola situazione: prima attacco, poi, se non aiuta, congelamento. Proprio per questo le reazioni allo stress vengono spesso lette male nel quotidiano — come pigrizia, indifferenza o scarsa collaborazione, mentre in realtà è al lavoro la protezione.",
+        "Tutti e quattro gli schemi hanno avuto, a un certo punto, una risposta sensata a una minaccia reale. Diventano problematici solo quando restano attivi anche quando la situazione permetterebbe da tempo più margine."
+      ],
+      "question": "Quale schema riconosci più spesso in te?"
+    },
+    "7": {
+      "title": "Perché a volte ti senti come congelato/a",
+      "paragraphs": [
+        "Congelarsi sembra spesso un fallimento: vuoi reagire, dire, agire — e non succede nulla. Nessuna parola esce, nessun impulso porta. Sembra debolezza. Non lo è.",
+        "Al bordo inferiore della tua finestra di tolleranza, il sistema nervoso ricorre a una strategia diversa da attacco o fuga: uno smorzamento attivo. L'energia diminuisce, la reattività cala, si crea una distanza interna. Nell'esperienza si manifesta come intorpidimento, vuoto interiore, pesantezza corporea, o la sensazione di vivere il mondo dietro un vetro.",
+        "Nella prospettiva polivagale, ciò viene ricondotto alla branca vagale dorsale: un'immobilità difensiva. Non rilassamento, ma risposta protettiva sotto sovraccarico. Dall'esterno chi si congela appare spesso solo calmo/a o assente. Ciò che accade dentro resta invisibile.",
+        "Un sovraccarico prolungato, un dolore cronico o esperienze precedenti di perdita di controllo possono restringere la finestra di tolleranza, così che il congelamento subentra più velocemente rispetto a un sistema con più margine.",
+        "La differenza con un vero recupero è tangibile: il recupero è rigenerativo. Il congelamento è vuoto, a volte persino minaccioso."
+      ],
+      "question": "La prossima volta che ti congeli, prova una domanda invece di un giudizio: cosa sentirebbe il mio corpo come più sicuro in questo momento?"
+    },
+    "8": {
+      "title": "Stress acuto vs. iperattivazione cronica",
+      "paragraphs": [
+        "Lo stress acuto è una reazione limitata nel tempo a una richiesta concreta. Attenzione, tensione muscolare, frequenza cardiaca salgono brevemente — e una volta passata la situazione, il sistema torna di solito verso la calma. Un colloquio di lavoro stressante rientra qui. È normale e, in sé, non dannoso.",
+        "Lo stress cronico nasce quando le richieste persistono nel tempo o il sistema nervoso viene attivato ripetutamente senza sufficiente recupero fra un episodio e l'altro. Un lavoro che ti sovraccarica da mesi senza che nulla cambi rientra qui. I fattori scatenanti non devono essere drammatici: incertezza ricorrente, mancanza di sonno, conflitti o mancanza di prevedibilità bastano.",
+        "Biochimicamente sono coinvolti due sistemi: quello veloce, che reagisce subito tramite l'adrenalina, e l'asse dello stress più lento tramite il cortisolo, che agisce piuttosto nell'arco di ore e influenza energia, glicemia e sistema immunitario.",
+        "La differenza non sta quindi nell'intensità di un singolo momento, ma nel recupero successivo. Con lo stress acuto arriva. Con lo stress cronico manca. Nel tempo si somma in ciò che i ricercatori chiamano carico allostatico."
+      ],
+      "question": "Quante volte questa settimana hai davvero recuperato tra due momenti impegnativi?"
+    },
+    "9": {
+      "title": "Riconoscere i trigger senza esserne guidato/a",
+      "paragraphs": [
+        "Un certo tono di voce ti mette subito in tensione. Un odore cambia il tuo stato corporeo prima che tu sappia perché. Non è un caso e non è una reazione eccessiva — il tuo sistema nervoso ha imparato a classificare quello stimolo come significativo, spesso molto prima che esista un ricordo consapevole.",
+        "Questo tipo di apprendimento si chiama memoria implicita. A differenza di una data o di un nome, non si mostra nel racconto ma nel fare, nel sentire e nel reagire. L'amigdala è fortemente coinvolta nell'associare stimoli esterni al pericolo — un processo di apprendimento che non si può semplicemente pensare via.",
+        "Due persone possono vivere un evento simile e portarsi via tracce molto diverse, a seconda dell'esperienza precedente, del grado di esaurimento e del fatto che al momento fosse disponibile o meno un sostegno. Non è un segno di forza o debolezza, ma il risultato di condizioni di partenza diverse.",
+        "Per questo la sola forza di volontà serve poco contro un trigger. Non stai reagendo alla situazione attuale, ma a uno schema memorizzato che si è appena attivato. Ciò che aiuta è riconoscere, non combattere."
+      ],
+      "question": "Quale trigger ti fa perdere la calma con più sicurezza?"
+    },
+    "10": {
+      "title": "Il respiro come leva più veloce",
+      "paragraphs": [
+        "Fra tutti gli accessi al sistema nervoso, il respiro è il più veloce — non uno strumento che va prima acquistato o imparato, solo un sistema che è già in funzione. Il modo in cui respiri in questo momento non è un fatto neutro: frequenza, profondità e ritmo del respiro cambiano con lo stato del tuo sistema nervoso, e a sua volta il respiro modella di ritorno il sistema.",
+        "Sotto stress la maggior parte delle persone respira più velocemente, più superficialmente, più con il torace che con il diaframma. L'espirazione si accorcia, a volte compare un breve trattenimento tra i respiri. Un respiro a riposo normale è tra 10 e 14 atti al minuto — da circa 15 in su, la ricerca lo considera un possibile indicatore di maggiore attivazione.",
+        "Questo legame va in entrambe le direzioni. Non puoi abbassare il polso a volontà, ma puoi respirare consapevolmente più lentamente — e il resto segue spesso da sé."
+      ],
+      "question": "Come stai respirando in questo momento — veloce e alto, o calmo e profondo?"
+    },
+    "11": {
+      "title": "Perché l'espirazione dovrebbe essere più lunga dell'inspirazione",
+      "paragraphs": [
+        "Molte tecniche di respirazione puntano sul controllo: inspirare profondamente, espandere al massimo la pancia, trattenere il respiro. Sembra plausibile, ma l'effetto è spesso opposto. Chi, sotto tensione, comincia a respirare il più profondamente possibile può innescare una reazione paradossa — il corpo registra lo sforzo respiratorio inconsueto come un ulteriore segnale d'allarme.",
+        "La via più efficace è di solito l'opposto: non inspirare sotto controllo, ma lasciare che l'espirazione avvenga in modo sciolto, un po' più lunga dell'inspirazione. Il motivo è puramente fisiologico: in inspirazione la frequenza cardiaca sale leggermente, il simpatico prende brevemente più peso. In espirazione scende di nuovo, il parasimpatico si prende più spazio.",
+        "Una struttura di partenza semplice: 4 secondi di inspirazione, 6 di espirazione; con più esperienza anche 4 a 8. Più importante dei numeri esatti è il principio — espirazione più lunga dell'inspirazione, ritmo regolare, senza forzare."
+      ],
+      "question": "Noti una differenza se, alla prossima espirazione, la prolunghi consapevolmente di due o tre secondi?"
+    },
+    "12": {
+      "title": "Freddo, movimento, contatto — leve corporee",
+      "paragraphs": [
+        "Non ogni accesso alla regolazione passa dal respiro. Freddo, movimento e contatto sono leve corporee a sé — diverse per effetto, ma tutte pensate per rivolgersi al corpo direttamente invece che attraverso i pensieri.",
+        "Il freddo agisce dapprima attivando, non calmando: i vasi si restringono, polso e respiro salgono brevemente. L'effetto regolatore vero e proprio compare dopo, nel recupero — un'esposizione al freddo ripetuta e ben dosata allena proprio questo passaggio dall'attivazione al ritorno alla calma.",
+        "Il movimento agisce più direttamente: l'attività muscolare consuma gli ormoni dello stress che il corpo ha reso disponibili proprio a questo scopo. Anche un breve movimento può scaricare in modo evidente un'attivazione accumulata.",
+        "Il contatto, sia attraverso il tapping ritmico sia con una semplice pressione, è uno dei più antichi segnali di sicurezza che il tuo sistema nervoso conosce."
+      ],
+      "question": "Quale di queste tre leve ti sembra più accessibile, proprio ora?"
+    },
+    "13": {
+      "title": "Orientarsi nello spazio come trucco di ancoraggio",
+      "paragraphs": [
+        "L'ancoraggio suona come un grande concetto, ma in sostanza è semplice: percepire consapevolmente il contatto con il suolo, il proprio peso, il legame tra piedi e superficie. Nessun rituale mistico, solo un semplice principio sensoriale.",
+        "I tuoi piedi forniscono di continuo informazioni — durezza, temperatura, irregolarità del terreno. Questi segnali danno al tuo sistema nervoso orientamento nel momento presente e possono riportare l'attenzione da un vortice di pensieri al corpo.",
+        "Camminare a piedi nudi su terreni diversi fornisce al sistema nervoso ricche informazioni sensoriali e conta tra gli ancoraggi corporei più diretti disponibili nel quotidiano, senza alcuna preparazione.",
+        "Il trucco funziona perché sposta il focus: da ciò che succede nella testa a ciò che il corpo sta effettivamente sentendo in questo momento."
+      ],
+      "question": "Quando hai sentito consapevolmente per l'ultima volta ciò su cui sei in piedi?"
+    },
+    "14": {
+      "title": "Perché la vicinanza agli altri calma il tuo sistema nervoso",
+      "paragraphs": [
+        "Il tuo sistema nervoso non impara la regolazione da solo, ma attraverso la relazione. Presto nello sviluppo, le figure di riferimento vi partecipano: con la voce, il contatto, il ritmo, la sola presenza. Questo meccanismo — chiamato co-regolazione — resta attivo per tutta la vita.",
+        "In presenza di una persona calma e affidabile, il tuo stesso sistema nervoso può stabilizzarsi, spesso senza una sola parola. Le persone con relazioni strette e affidabili mostrano, in media, livelli più bassi di ormoni dello stress e una finestra di tolleranza più ampia.",
+        "Ciò che conta qui non è il numero dei contatti, ma la loro qualità: connessione senza pressione di essere giudicati. Una sola relazione affidabile può già bastare. L'isolamento cronico, al contrario, è misurabilmente gravoso."
+      ],
+      "question": "Chi nel tuo entourage aiuta più affidabilmente il tuo sistema nervoso a ritrovare la calma?"
+    },
+    "15": {
+      "title": "Riconoscere la co-regolazione, anche senza parole",
+      "paragraphs": [
+        "La co-regolazione non ha bisogno di linguaggio. Passa per canali che il tuo sistema nervoso conosceva ben prima che tu sapessi parlare: tono di voce, ritmo, mimica, postura, la semplice presenza di un'altra persona.",
+        "Un tono calmo, movimenti lenti, un'espressione rilassata del viso segnalano al tuo sistema, a un livello molto basilare: qui ora non c'è pericolo. È un'elaborazione automatica dei segnali — la stessa neurocezione che riconosce anche la minaccia.",
+        "Ecco perché il solo stare seduti accanto a qualcuno di familiare può avere un effetto regolatore. Ed ecco perché la tensione in una stanza può essere contagiosa prima che qualcuno dica una parola.",
+        "Riconoscere la co-regolazione significa percepire consapevolmente questo scambio non verbale, invece di subirlo soltanto in modo inconsapevole."
+      ],
+      "question": "La cui presenza ti rende più calmo/a, solo per il modo in cui quella persona c'è?"
+    },
+    "16": {
+      "title": "Allenare quotidianamente il sistema nervoso invece di reagire solo nell'emergenza",
+      "paragraphs": [
+        "La resilienza non è un programma che si segue una volta e poi si possiede. È piuttosto una direzione in cui il quotidiano può evolvere nel tempo — sostenuta da fattori ricorrenti piuttosto piccoli, più che da un unico grande cambiamento.",
+        "Una sfida dosata ne fa parte: sopportare e elaborare piccoli carichi regolari, con sufficiente recupero dopo. È proprio questo principio che allena il tuo sistema nervoso a passare più agilmente tra attivazione e calma.",
+        "Movimento, sonno e legame sociale rientrano tra i mattoni meglio documentati. Nessuno di questi fattori è particolarmente potente da solo — insieme fanno una differenza netta.",
+        "Chi regola il proprio sistema nervoso solo nell'emergenza non allena nulla. Una regolazione che diventa abitudine cambia la stessa condizione di partenza."
+      ],
+      "question": "Quale piccolo mattone ricorrente ti manca di più in questo momento?"
+    },
+    "17": {
+      "title": "Sonno e sistema nervoso",
+      "paragraphs": [
+        "Il tuo corpo ha un orologio interno — un programma biologico di circa 24 ore, guidato da un piccolo nucleo nell'ipotalamo. Questo orologio regola la temperatura corporea, i livelli ormonali, la digestione e la facilità con cui il tuo sistema nervoso si regola.",
+        "La luce ne è il segnale più forte. Guida il rilascio della melatonina, che è meno un ormone del sonno che un segnale di oscurità. La luce degli schermi la sera può ritardare questo segnale e spostare in avanti il momento dell'addormentamento.",
+        "Il cortisolo segue un proprio profilo giornaliero: un forte aumento dopo il risveglio, poi un calo graduale. Lo stress cronico e un sonno irregolare possono appiattire questo profilo — con conseguenze sulla capacità di recupero il giorno dopo.",
+        "Il sonno non è quindi un dettaglio della regolazione, ma uno dei suoi fondamenti biologici."
+      ],
+      "question": "Quanto è davvero regolare il tuo ritmo sonno-veglia in una settimana tipica?"
+    },
+    "18": {
+      "title": "Le ricadute sono normali — ritrovare la strada dopo una fase disregolata",
+      "paragraphs": [
+        "I vecchi schemi non sono mai veramente cancellati, solo sovrapposti. Sotto stress possono riattivarsi — un apparente passo indietro, proprio quando pensavi di aver fatto un passo avanti. È prevedibile, non un segnale che nulla è cambiato.",
+        "Ciò che è decisivo è come interpreti quel momento. Leggere una ricaduta come fallimento personale amplifica proprio l'attivazione che andrebbe regolata. Ciò di cui il tuo sistema nervoso ha bisogno invece è un inquadramento: è stata una ricaduta nel vecchio schema, il mio sistema era sovraccarico.",
+        "Gli studi sull'auto-compassione lo mostrano: trattarsi con la stessa gentilezza che offriresti a un buon amico è collegato a una migliore regolazione emotiva — l'autocritica agisce, al massimo, solo a breve termine.",
+        "Una ricaduta mostra che sotto carico il tuo sistema si aggrappa al familiare. È il prevedibile, non il fallimento."
+      ],
+      "question": "Come parli di solito a te stesso/a quando ti accorgi di essere ricaduto/a in un vecchio schema?"
+    }
+  }
+}
