@@ -148,7 +148,13 @@ function Shell() {
 
       <OrbitNav active={tab} onChange={handleTabChange} />
 
-      {showPaywall && <PaywallScreen onClose={() => setShowPaywall(false)} />}
+      {showPaywall && (
+        <PaywallScreen
+          onClose={() => setShowPaywall(false)}
+          onOpenPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+          onOpenTerms={() => setShowTerms(true)}
+        />
+      )}
       {showLektionen && (
         <LektionenOverlay
           onClose={() => setShowLektionen(false)}

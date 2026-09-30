@@ -7,6 +7,8 @@ import { useT } from '../i18n';
 
 interface Props {
   onClose: () => void;
+  onOpenPrivacyPolicy: () => void;
+  onOpenTerms: () => void;
 }
 
 const FEATURE_KEYS = [
@@ -39,7 +41,7 @@ const secondaryBtnStyle: CSSProperties = {
   boxShadow: `inset 0 0 0 1px ${white(0.7)}`,
 };
 
-export default function PaywallScreen({ onClose }: Props) {
+export default function PaywallScreen({ onClose, onOpenPrivacyPolicy, onOpenTerms }: Props) {
   const { t } = useT();
   const { offering, purchasingUnavailableReason, purchasing, purchaseError, purchase, restore, isSubscribed } = useSubscription();
   const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
@@ -103,6 +105,11 @@ export default function PaywallScreen({ onClose }: Props) {
         </div>
       </div>
 
+      {/* Apple/EU rules require the two legal links to be reachable from the
+          paywall itself, not only from Settings — rendered at the bottom of
+          the screen regardless of subscription state so an existing subscriber
+          who opens the paywall can still reach them. Same Datenschutz/AGB
+          overlays the Settings screen opens (see App.tsx). */}
       {isSubscribed ? (
         <div style={glassCard()}>
           <p style={{ ...type.body, color: palette.ink, margin: 0, padding: '12px 0', textAlign: 'center' }}>{t('paywall.subscribed')}</p>
@@ -167,6 +174,25 @@ export default function PaywallScreen({ onClose }: Props) {
           </div>
         </>
       )}
+
+      {/* Legal links — always visible, per Apple's paywall rules. Small,
+          centred, subtle; a dot separator instead of two full pill buttons so
+          it doesn't compete with the primary/secondary CTAs above. */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 4 }}>
+        <button
+          style={{ ...type.small, color: palette.tertiary, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+          onClick={onOpenPrivacyPolicy}
+        >
+          {t('settings.legal.privacy')}
+        </button>
+        <span style={{ ...type.small, color: palette.tertiary }}>·</span>
+        <button
+          style={{ ...type.small, color: palette.tertiary, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+          onClick={onOpenTerms}
+        >
+          {t('settings.legal.terms')}
+        </button>
+      </div>
     </OverlayScreen>
   );
 }
