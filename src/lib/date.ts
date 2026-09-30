@@ -21,14 +21,40 @@ export function fromDateKey(key: string): Date {
   return new Date(y, m - 1, d);
 }
 
-export const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-export const MONTH_LABELS = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-];
+/**
+ * Locale-aware short weekday label for a given date key ("Mo", "Mon", "lun.",
+ * "lun"…). Delegates entirely to Intl.DateTimeFormat so the browser's own
+ * locale data — same source Apple's system settings uses on-device — decides
+ * abbreviation style. Locale defaults to German for legacy callers.
+ */
+export function weekdayShortLabel(key: string, locale: string = 'de-DE'): string {
+  return fromDateKey(key).toLocaleDateString(locale, { weekday: 'short' });
+}
 
-export function weekdayLabel(key: string): string {
-  return WEEKDAY_LABELS[(fromDateKey(key).getDay() + 6) % 7];
+/**
+ * Seven Monday-first short weekday labels for a calendar header row. Uses
+ * 2024-01-01 (a Monday) as the anchor so index 0 = Monday regardless of the
+ * locale's own week start (which some locales — e.g. en-US — put on Sunday
+ * by default). Independent of Intl.Locale's weekInfo (Firefox: not exposed;
+ * Safari on older iOS: not exposed either).
+ */
+export function weekdayHeaderLabels(locale: string = 'de-DE'): string[] {
+  const anchor = new Date(2024, 0, 1); // Monday
+  const labels: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(anchor);
+    d.setDate(d.getDate() + i);
+    labels.push(d.toLocaleDateString(locale, { weekday: 'short' }));
+  }
+  return labels;
+}
+
+/**
+ * "January 2024" / "Januar 2024" / "janvier 2024" — long month + year in the
+ * given locale, for the ritual-calendar heading.
+ */
+export function monthYearLabel(year: number, month: number, locale: string = 'de-DE'): string {
+  return new Date(year, month, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 /**

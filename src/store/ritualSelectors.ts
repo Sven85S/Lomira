@@ -1,5 +1,5 @@
 import type { RitualEntry, RitualState } from '../types';
-import { MONTH_LABELS, dateKeyMinusDays, toDateKey, todayKey, weekdayLabel } from '../lib/date';
+import { dateKeyMinusDays, monthYearLabel, toDateKey, todayKey, weekdayShortLabel } from '../lib/date';
 
 export const STATE_COLORS: Record<RitualState, string> = {
   angespannt: '#B0532B',
@@ -48,13 +48,13 @@ export interface WeekStripDay {
   state: RitualState | null;
 }
 
-export function buildWeekStrip(entries: RitualEntry[]): WeekStripDay[] {
+export function buildWeekStrip(entries: RitualEntry[], locale: string = 'de-DE'): WeekStripDay[] {
   const byDate = entryByDate(entries);
   const days: WeekStripDay[] = [];
   for (let i = 6; i >= 0; i--) {
     const key = dateKeyMinusDays(todayKey(), i);
     const entry = byDate.get(key);
-    days.push({ label: weekdayLabel(key), hasEntry: !!entry, state: entry ? entry.state : null });
+    days.push({ label: weekdayShortLabel(key, locale), hasEntry: !!entry, state: entry ? entry.state : null });
   }
   return days;
 }
@@ -71,7 +71,7 @@ export interface CalendarMonth {
 }
 
 /** Monday-first month grid; each day cell carries the ritual entry state landing on it, if any. */
-export function buildCalendar(entries: RitualEntry[], monthOffset: number): CalendarMonth {
+export function buildCalendar(entries: RitualEntry[], monthOffset: number, locale: string = 'de-DE'): CalendarMonth {
   const byDate = entryByDate(entries);
   const base = new Date();
   const target = new Date(base.getFullYear(), base.getMonth() + monthOffset, 1);
@@ -87,5 +87,5 @@ export function buildCalendar(entries: RitualEntry[], monthOffset: number): Cale
     const entry = byDate.get(key);
     cells.push({ hasDay: true, dayNum: day, state: entry ? entry.state : null });
   }
-  return { cells, label: `${MONTH_LABELS[month]} ${year}` };
+  return { cells, label: monthYearLabel(year, month, locale) };
 }

@@ -14,6 +14,7 @@ import {
 } from '../store/ritualSelectors';
 import { buildPulseChart, type PulseChart } from '../store/pulseSelectors';
 import { buildWeeklyMinutesChart, type WeeklyMinutesBar } from '../store/practiceSelectors';
+import { toBcp47, useT } from '../i18n';
 
 interface DataContextValue {
   loading: boolean;
@@ -61,6 +62,8 @@ function uid(): string {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const { language, t } = useT();
+  const locale = toBcp47(language);
   const [loading, setLoading] = useState(true);
   const [ritualEntries, setRitualEntries] = useState<RitualEntry[]>([]);
   const [ankerSessionCount, setAnkerSessionCount] = useState(0);
@@ -186,8 +189,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       todayEntry: ritualEntries.find((e) => e.date === todayKey()),
       streak: currentStreak(ritualEntries),
       reguliertPercent: reguliertPct(ritualEntries),
-      weekStrip: buildWeekStrip(ritualEntries),
-      calendarForOffset: (monthOffset: number) => buildCalendar(ritualEntries, monthOffset),
+      weekStrip: buildWeekStrip(ritualEntries, locale),
+      calendarForOffset: (monthOffset: number) => buildCalendar(ritualEntries, monthOffset, locale),
       completeRitual,
       updateRitualEntry,
       deleteRitualEntry,
@@ -198,7 +201,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       hrvMeasurements: withoutImplausibleRmssd(hrvMeasurements),
       recordHrvMeasurement,
       practiceSessions,
-      weeklyMinutesChart: buildWeeklyMinutesChart(practiceSessions),
+      weeklyMinutesChart: buildWeeklyMinutesChart(practiceSessions, t('fortschritt.weekBar.current')),
       recordExerciseSession,
     };
   }, [
@@ -214,6 +217,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     pulseEntries,
     hrvMeasurements,
     recordHrvMeasurement,
+    locale,
+    t,
   ]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

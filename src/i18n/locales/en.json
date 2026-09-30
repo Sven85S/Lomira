@@ -121,6 +121,7 @@
   "fortschritt.stats.streak": "Current streak",
   "fortschritt.stats.reguliertPercent": "Regulated share",
   "fortschritt.week.title": "This week",
+  "fortschritt.weekBar.current": "This week",
   "fortschritt.minutes.title": "Practised minutes (4 weeks)",
   "fortschritt.minutes.empty": "No practised minutes yet — try a breath or exercise session.",
   "fortschritt.pulse.title": "Pulse trend",
@@ -237,5 +238,18 @@
   "lektionen.title": "Lessons",
   "lektionen.info.body": "These lessons build directly on the book 'Warum dein Nervensystem dich zurückhält' — presented as short, self-contained units for everyday life.",
   "lektionen.info.disclaimer": "They convey knowledge about your nervous system but do not replace a diagnosis or treatment. For persistent distress, professional support is part of the picture.",
-  "lektionen.unlockAll": "Unlock all lessons"
+  "lektionen.unlockAll": "Unlock all lessons",
+
+  "hrvDashboard.locked.body": "HRV measurement is part of Lomira Plus — start your free 7-day trial to unlock it.",
+  "hrvDashboard.locked.cta": "Unlock HRV measurement",
+  "hrvDashboard.title": "Pulse & HRV",
+  "hrvDashboard.rmssd.title": "Heart rate variability (RMSSD)",
+  "hrvDashboard.rmssd.last": "last",
+  "hrvDashboard.rmssd.tooFew": "Not enough days with HRV values yet for a trend.",
+  "hrvDashboard.rmssd.none": "No reliable HRV value yet — measure again for a current value.",
+  "hrvDashboard.restingPulse": "Resting pulse",
+  "hrvDashboard.coherence": "Coherence",
+  "hrvDashboard.coherence.footnote": "*Coherence is a rough estimate from the signal quality of your last measurement, not a measurement of its own.",
+  "hrvDashboard.empty": "No measurement yet — start your first HRV measurement.",
+  "hrvDashboard.cta": "Measure now"
 }

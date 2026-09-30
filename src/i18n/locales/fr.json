@@ -121,6 +121,7 @@
   "fortschritt.stats.streak": "Série actuelle",
   "fortschritt.stats.reguliertPercent": "Part régulée",
   "fortschritt.week.title": "Cette semaine",
+  "fortschritt.weekBar.current": "Cette sem.",
   "fortschritt.minutes.title": "Minutes pratiquées (4 semaines)",
   "fortschritt.minutes.empty": "Aucune minute pratiquée pour l'instant — essayez une session de souffle ou d'exercice.",
   "fortschritt.pulse.title": "Évolution du pouls",
@@ -237,5 +238,18 @@
   "lektionen.title": "Leçons",
   "lektionen.info.body": "Ces leçons s'appuient directement sur le livre « Warum dein Nervensystem dich zurückhält » — proposées en unités courtes et autonomes pour le quotidien.",
   "lektionen.info.disclaimer": "Elles transmettent des connaissances sur votre système nerveux, mais ne remplacent ni un diagnostic ni un traitement. En cas de détresse persistante, un soutien professionnel a toute sa place.",
-  "lektionen.unlockAll": "Débloquer toutes les leçons"
+  "lektionen.unlockAll": "Débloquer toutes les leçons",
+
+  "hrvDashboard.locked.body": "La mesure VFC fait partie de Lomira Plus — démarrez votre essai gratuit de 7 jours pour la débloquer.",
+  "hrvDashboard.locked.cta": "Débloquer la mesure VFC",
+  "hrvDashboard.title": "Pouls & VFC",
+  "hrvDashboard.rmssd.title": "Variabilité de la fréquence cardiaque (RMSSD)",
+  "hrvDashboard.rmssd.last": "dernière",
+  "hrvDashboard.rmssd.tooFew": "Pas encore assez de jours avec valeurs VFC pour un historique.",
+  "hrvDashboard.rmssd.none": "Aucune valeur VFC fiable pour l'instant — mesurez à nouveau pour une valeur actuelle.",
+  "hrvDashboard.restingPulse": "Pouls au repos",
+  "hrvDashboard.coherence": "Cohérence",
+  "hrvDashboard.coherence.footnote": "*La cohérence est une estimation approximative à partir de la qualité du signal de votre dernière mesure, et non une mesure à part entière.",
+  "hrvDashboard.empty": "Aucune mesure pour l'instant — démarrez votre première mesure VFC.",
+  "hrvDashboard.cta": "Mesurer maintenant"
 }

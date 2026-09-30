@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { fonts, gearButton, glassCard, layout, listCard, listRow, palette, pillSegment, pillTrack, statusDot, type, white } from '../styles/himmel';
 import { useData } from '../context/DataContext';
 import { STATE_COLORS } from '../store/ritualSelectors';
-import { formatEntryDate } from '../lib/date';
+import { formatEntryDate, weekdayHeaderLabels } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { RitualState } from '../types';
 import { useLocale, useT } from '../i18n';
@@ -121,8 +121,8 @@ export default function RitualScreen({ showInfo }: Props) {
             </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 4 }}>
-            {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((wd) => (
-              <div key={wd} style={{ ...type.small, textAlign: 'center', color: palette.tertiary }}>
+            {weekdayHeaderLabels(locale).map((wd, i) => (
+              <div key={i} style={{ ...type.small, textAlign: 'center', color: palette.tertiary }}>
                 {wd}
               </div>
             ))}

@@ -121,6 +121,7 @@
   "fortschritt.stats.streak": "Serie attuale",
   "fortschritt.stats.reguliertPercent": "Quota regolata",
   "fortschritt.week.title": "Questa settimana",
+  "fortschritt.weekBar.current": "Questa sett.",
   "fortschritt.minutes.title": "Minuti praticati (4 settimane)",
   "fortschritt.minutes.empty": "Ancora nessun minuto praticato — prova una sessione di respiro o di esercizi.",
   "fortschritt.pulse.title": "Andamento del polso",
@@ -237,5 +238,18 @@
   "lektionen.title": "Lezioni",
   "lektionen.info.body": "Queste lezioni si basano direttamente sul libro «Warum dein Nervensystem dich zurückhält» — presentate come brevi unità autonome per la vita quotidiana.",
   "lektionen.info.disclaimer": "Trasmettono conoscenze sul tuo sistema nervoso, ma non sostituiscono una diagnosi né un trattamento. In caso di sofferenza persistente, il supporto professionale ha il suo posto.",
-  "lektionen.unlockAll": "Sblocca tutte le lezioni"
+  "lektionen.unlockAll": "Sblocca tutte le lezioni",
+
+  "hrvDashboard.locked.body": "La misurazione HRV fa parte di Lomira Plus — inizia la tua prova gratuita di 7 giorni per sbloccarla.",
+  "hrvDashboard.locked.cta": "Sblocca misurazione HRV",
+  "hrvDashboard.title": "Polso & HRV",
+  "hrvDashboard.rmssd.title": "Variabilità della frequenza cardiaca (RMSSD)",
+  "hrvDashboard.rmssd.last": "ultima",
+  "hrvDashboard.rmssd.tooFew": "Ancora troppo pochi giorni con valori HRV per un andamento.",
+  "hrvDashboard.rmssd.none": "Ancora nessun valore HRV affidabile — misura di nuovo per un valore attuale.",
+  "hrvDashboard.restingPulse": "Polso a riposo",
+  "hrvDashboard.coherence": "Coerenza",
+  "hrvDashboard.coherence.footnote": "*La coerenza è una stima approssimativa dalla qualità del segnale della tua ultima misurazione, non un valore misurato a sé.",
+  "hrvDashboard.empty": "Ancora nessuna misurazione — inizia la tua prima misurazione HRV.",
+  "hrvDashboard.cta": "Misura ora"
 }

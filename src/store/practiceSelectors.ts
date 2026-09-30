@@ -22,9 +22,14 @@ function formatWeekLabel(weekStartKey: string): string {
 /**
  * Last 4 Monday-start calendar weeks (oldest first, current week last),
  * summing PracticeSession minutes per week — Anker and Übungen sessions
- * both count, regardless of source.
+ * both count, regardless of source. `currentWeekLabel` gets slotted into the
+ * current-week bar; the caller passes the localised string so this selector
+ * stays free of the i18n import.
  */
-export function buildWeeklyMinutesChart(sessions: PracticeSession[]): WeeklyMinutesBar[] {
+export function buildWeeklyMinutesChart(
+  sessions: PracticeSession[],
+  currentWeekLabel: string = 'Diese Woche',
+): WeeklyMinutesBar[] {
   const currentWeekStart = mondayOf(todayKey());
   const weekStarts: string[] = [];
   for (let i = 3; i >= 0; i--) {
@@ -38,7 +43,7 @@ export function buildWeeklyMinutesChart(sessions: PracticeSession[]): WeeklyMinu
   }
 
   return weekStarts.map((wk) => ({
-    label: wk === currentWeekStart ? 'Diese Woche' : formatWeekLabel(wk),
+    label: wk === currentWeekStart ? currentWeekLabel : formatWeekLabel(wk),
     minutes: Math.round(totals.get(wk) ?? 0),
     isCurrent: wk === currentWeekStart,
   }));

@@ -121,6 +121,7 @@
   "fortschritt.stats.streak": "Aktuelle Serie",
   "fortschritt.stats.reguliertPercent": "Reguliert-Anteil",
   "fortschritt.week.title": "Diese Woche",
+  "fortschritt.weekBar.current": "Diese Woche",
   "fortschritt.minutes.title": "Geübte Minuten (4 Wochen)",
   "fortschritt.minutes.empty": "Noch keine geübten Minuten erfasst — probiere eine Atem- oder Übungen-Session.",
   "fortschritt.pulse.title": "Puls-Verlauf",
@@ -237,5 +238,18 @@
   "lektionen.title": "Lektionen",
   "lektionen.info.body": "Diese Lektionen bauen direkt auf dem Buch 'Warum dein Nervensystem dich zurückhält' auf — aufbereitet in kurzen, in sich abgeschlossenen Einheiten für den Alltag.",
   "lektionen.info.disclaimer": "Sie vermitteln Wissen über dein Nervensystem, ersetzen aber keine Diagnose oder Behandlung. Bei anhaltender Belastung gehört professionelle Unterstützung dazu.",
-  "lektionen.unlockAll": "Alle Lektionen freischalten"
+  "lektionen.unlockAll": "Alle Lektionen freischalten",
+
+  "hrvDashboard.locked.body": "Die HRV-Messung ist Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um sie freizuschalten.",
+  "hrvDashboard.locked.cta": "HRV-Messung freischalten",
+  "hrvDashboard.title": "Puls & HRV",
+  "hrvDashboard.rmssd.title": "Herzratenvariabilität (RMSSD)",
+  "hrvDashboard.rmssd.last": "zuletzt",
+  "hrvDashboard.rmssd.tooFew": "Noch zu wenige Tage mit HRV-Werten für einen Verlauf.",
+  "hrvDashboard.rmssd.none": "Noch kein zuverlässiger HRV-Wert — miss erneut für einen aktuellen Wert.",
+  "hrvDashboard.restingPulse": "Ruhepuls",
+  "hrvDashboard.coherence": "Kohärenz",
+  "hrvDashboard.coherence.footnote": "*Kohärenz ist eine grobe Schätzung aus der Signalqualität deiner letzten Messung, kein eigener Messwert.",
+  "hrvDashboard.empty": "Noch keine Messung — starte deine erste HRV-Messung.",
+  "hrvDashboard.cta": "Jetzt messen"
 }
