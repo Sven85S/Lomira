@@ -5,20 +5,17 @@ import { STATE_COLORS } from '../store/ritualSelectors';
 import { formatEntryDate } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { RitualState } from '../types';
-import { useLocale } from '../i18n';
+import { useLocale, useT } from '../i18n';
 
-const QUESTIONS = [
-  'Was hat dich heute besonders bewegt?', 'Wodurch hast du dich heute sicher gefühlt?', 'Was hat dir heute gutgetan?',
-  'Wo in deinem Körper hast du heute Anspannung gespürt?', 'Was hat dir geholfen, wieder zur Ruhe zu kommen?',
-  'Gab es einen Moment heute, der sich stimmig angefühlt hat?', 'Was brauchst du gerade am meisten?',
-  'Woran hast du heute gemerkt, dass du dich reguliert hast?', 'Was möchtest du morgen mit dir mitnehmen?', 'Was war heute leichter, als du dachtest?',
-];
+// 10 daily reflection questions — indexed 1..10 in locale files (not 0..9)
+// so the keys read naturally when scanning a de.json diff.
+const QUESTION_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `ritual.question.${n}`);
 
-const STATE_LABELS: { key: RitualState; label: string }[] = [
-  { key: 'angespannt', label: 'Angespannt' },
-  { key: 'neutral', label: 'Neutral' },
-  { key: 'reguliert', label: 'Reguliert' },
-  { key: 'entspannt', label: 'Entspannt' },
+const STATE_KEYS: { key: RitualState; labelKey: string }[] = [
+  { key: 'angespannt', labelKey: 'ritual.state.angespannt' },
+  { key: 'neutral', labelKey: 'ritual.state.neutral' },
+  { key: 'reguliert', labelKey: 'ritual.state.reguliert' },
+  { key: 'entspannt', labelKey: 'ritual.state.entspannt' },
 ];
 
 // Kleine Knöpfe (Monat vor/zurück, Bearbeiten, Löschen) — gearButton in 32px
@@ -29,6 +26,7 @@ interface Props {
 }
 
 export default function RitualScreen({ showInfo }: Props) {
+  const { t } = useT();
   const locale = useLocale();
   const { ritualEntries, todayEntry, streak, completeRitual, updateRitualEntry, deleteRitualEntry, calendarForOffset } = useData();
 
@@ -41,7 +39,7 @@ export default function RitualScreen({ showInfo }: Props) {
 
   const isDone = !!todayEntry;
   const state = todayEntry?.state ?? selectedState;
-  const dayIndex = Math.floor(Date.now() / 86400000) % QUESTIONS.length;
+  const dayIndex = Math.floor(Date.now() / 86400000) % QUESTION_KEYS.length;
   const cal = calendarForOffset(calMonthOffset);
 
   return (
@@ -50,31 +48,29 @@ export default function RitualScreen({ showInfo }: Props) {
         <div style={listCard()}>
           <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.5, margin: 0 }}>
-              Eine Emotion zu benennen, beruhigt nachweislich das Nervensystem — Studien zeigen, dass allein das In-Worte-Fassen eines
-              Gefühlszustands die Stressreaktion im Gehirn messbar dämpft.
+              {t('ritual.info.body1')}
             </p>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.5, margin: 0 }}>
-              Deshalb geht es beim täglichen Ritual nicht darum, jeden Tag etwas Besonderes zu erleben, sondern darum, regelmäßig kurz
-              hinzuschauen — kleine Verschiebungen fallen so früher auf, bevor sie sich aufstauen.
+              {t('ritual.info.body2')}
             </p>
             <p style={{ ...type.hintText, color: palette.hint, lineHeight: 1.5, margin: 0 }}>
-              Das ersetzt keine Therapie oder Diagnostik. Bei anhaltender Belastung gehört professionelle Unterstützung dazu.
+              {t('ritual.info.disclaimer')}
             </p>
           </div>
         </div>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-        <p style={{ ...type.body, color: palette.ink, textAlign: 'center', margin: 0 }}>Wie fühlst du dich gerade?</p>
+        <p style={{ ...type.body, color: palette.ink, textAlign: 'center', margin: 0 }}>{t('ritual.mood')}</p>
         <div style={pillTrack}>
-          {STATE_LABELS.map(({ key, label }) => (
+          {STATE_KEYS.map(({ key, labelKey }) => (
             <button
               key={key}
               disabled={isDone}
               onClick={() => setSelectedState(key)}
               style={{ ...pillSegment(state === key), whiteSpace: 'nowrap', cursor: isDone ? 'default' : 'pointer' }}
             >
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
@@ -82,7 +78,7 @@ export default function RitualScreen({ showInfo }: Props) {
 
       <textarea
         rows={3}
-        placeholder={QUESTIONS[dayIndex]}
+        placeholder={t(QUESTION_KEYS[dayIndex])}
         value={isDone ? (todayEntry?.note ?? '') : noteDraft}
         disabled={isDone}
         onChange={(e) => setNoteDraft(e.target.value)}
@@ -94,16 +90,16 @@ export default function RitualScreen({ showInfo }: Props) {
         onClick={() => state && completeRitual(state, noteDraft.trim())}
         style={state ? { cursor: isDone ? 'default' : 'pointer' } : { background: white(0.7), color: palette.tertiary, boxShadow: 'none', cursor: 'default' }}
       >
-        {isDone ? 'Heute erledigt ✓' : 'Ritual abschließen'}
+        {isDone ? t('ritual.cta.done') : t('ritual.cta.finish')}
       </PrimaryButton>
 
       <div style={glassCard()}>
         <div style={{ padding: '12px 0', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <span style={{ ...type.body, color: palette.ink }}>Serie</span>
+          <span style={{ ...type.body, color: palette.ink }}>{t('ritual.streak.title')}</span>
           <span>
             <span style={{ fontFamily: fonts.serif, fontSize: 22, color: palette.accent }}>{streak}</span>
             <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary, marginLeft: 4 }}>
-              {streak === 1 ? 'Tag in Folge' : 'Tage in Folge'}
+              {streak === 1 ? t('ritual.streak.singular') : t('ritual.streak.plural')}
             </span>
           </span>
         </div>
@@ -112,13 +108,13 @@ export default function RitualScreen({ showInfo }: Props) {
       <div style={glassCard()}>
         <div style={{ padding: '12px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <button style={smallIconBtn} onClick={() => setCalMonthOffset((v) => v - 1)} aria-label="Vorheriger Monat">
+            <button style={smallIconBtn} onClick={() => setCalMonthOffset((v) => v - 1)} aria-label={t('ritual.calendar.prevMonth.aria')}>
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
             <span style={{ ...type.cardTitle, color: palette.ink }}>{cal.label}</span>
-            <button style={smallIconBtn} onClick={() => setCalMonthOffset((v) => v + 1)} aria-label="Nächster Monat">
+            <button style={smallIconBtn} onClick={() => setCalMonthOffset((v) => v + 1)} aria-label={t('ritual.calendar.nextMonth.aria')}>
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
@@ -182,7 +178,7 @@ export default function RitualScreen({ showInfo }: Props) {
                           setEditingId(entry.id);
                           setEditDraft(entry.note);
                         }}
-                        aria-label="Bearbeiten"
+                        aria-label={t('ritual.entry.edit.aria')}
                       >
                         <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 20h9" />
@@ -196,7 +192,7 @@ export default function RitualScreen({ showInfo }: Props) {
                           deleteRitualEntry(entry.id);
                           setExpandedId((cur) => (cur === entry.id ? null : cur));
                         }}
-                        aria-label="Löschen"
+                        aria-label={t('ritual.entry.delete.aria')}
                       >
                         <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={palette.low} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="3 6 5 6 21 6" />
@@ -227,7 +223,7 @@ export default function RitualScreen({ showInfo }: Props) {
                           setEditingId(null);
                         }}
                       >
-                        Speichern
+                        {t('ritual.entry.save')}
                       </button>
                       <button
                         style={{ ...pillSegment(false), boxShadow: `inset 0 0 0 1px ${white(0.7)}`, color: palette.tertiary }}
@@ -236,7 +232,7 @@ export default function RitualScreen({ showInfo }: Props) {
                           setEditingId(null);
                         }}
                       >
-                        Abbrechen
+                        {t('ritual.entry.cancel')}
                       </button>
                     </div>
                   </>

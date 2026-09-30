@@ -12,6 +12,7 @@ import yintangImage from '../assets/beruehren/yintang.webp';
 import eftImage from '../assets/beruehren/eft.webp';
 import anmianImage from '../assets/beruehren/anmian.webp';
 import neiguanImage from '../assets/beruehren/neiguan.webp';
+import { useT } from '../i18n';
 
 /**
  * Illustration-only fills for the body/ear outline drawings below — these
@@ -26,135 +27,105 @@ const illustration = {
 type SilhouetteType = 'hand' | 'torso' | 'shoulders' | 'yintang' | 'eft' | 'anmian' | 'neiguan' | 'ear';
 type Category = 'tapping' | 'akupressur';
 
+// Point coordinates + a stable index the locale key resolves against
+// (exercise.<id>.point.<1..N>). Fixed 1-based to match how the JSON reads.
 interface ExercisePoint {
-  name: string;
+  index: number;
   x: number;
   y: number;
 }
 
+// Language-neutral exercise definition. Text-bearing fields (name, subtitle,
+// duration, instruction, per-point labels) resolve via t() at render time
+// from the exercise.<id>.* namespace in the locale files; this file only
+// holds the layout data (coordinates, tick interval, silhouette choice, mode).
 interface Exercise {
   id: string;
-  name: string;
   category: Category;
-  subtitle: string;
-  duration: string;
   silhouette: SilhouetteType;
   mode: 'sequence' | 'alternate' | 'single';
   tickMs?: number;
   points: ExercisePoint[];
-  instruction: string;
 }
 
 const exercises: Exercise[] = [
   {
     id: 'eft',
-    name: 'EFT-Grundsequenz',
     category: 'tapping',
-    subtitle: '8 Punkte, rhythmisch klopfen',
-    duration: '2 Min',
     silhouette: 'eft',
     mode: 'sequence',
     tickMs: 1600,
     points: [
-      { name: 'Scheitel', x: 240, y: 68 },
-      { name: 'Augenbraue', x: 240, y: 129 },
-      { name: 'Schläfe', x: 198, y: 184 },
-      { name: 'Unter dem Auge', x: 280, y: 184 },
-      { name: 'Unter der Nase', x: 240, y: 200 },
-      { name: 'Kinn', x: 240, y: 270 },
-      { name: 'Schlüsselbein', x: 199, y: 324 },
-      { name: 'Achsel', x: 127, y: 373 },
+      { index: 1, x: 240, y: 68 },
+      { index: 2, x: 240, y: 129 },
+      { index: 3, x: 198, y: 184 },
+      { index: 4, x: 280, y: 184 },
+      { index: 5, x: 240, y: 200 },
+      { index: 6, x: 240, y: 270 },
+      { index: 7, x: 199, y: 324 },
+      { index: 8, x: 127, y: 373 },
     ],
-    instruction: 'Klopfe jeden Punkt 5–7 Mal leicht mit zwei Fingerspitzen, dann weiter zum nächsten. Zwei Runden.',
   },
   {
     id: 'bilateral',
-    name: 'Bilaterales Tapping',
     category: 'tapping',
-    subtitle: '2 Punkte, abwechselnd',
-    duration: '1–2 Min',
     silhouette: 'shoulders',
     mode: 'alternate',
     tickMs: 900,
     points: [
-      { name: 'Linke Schulter', x: 115, y: 436 },
-      { name: 'Rechte Schulter', x: 363, y: 433 },
+      { index: 1, x: 115, y: 436 },
+      { index: 2, x: 363, y: 433 },
     ],
-    instruction: 'Abwechselnd linke und rechte Schulter sanft klopfen. Rhythmisch, mit offenen oder geschlossenen Augen.',
   },
   {
     id: 'yintang',
-    name: 'Yintang',
     category: 'akupressur',
-    subtitle: '1 Punkt, sanfter Druck',
-    duration: '1 Min',
     silhouette: 'yintang',
     mode: 'single',
-    points: [{ name: 'Yintang', x: 241, y: 125 }],
-    instruction: 'Sanften Druck mit der Fingerspitze zwischen den Augenbrauen halten. Ruhig weiteratmen.',
+    points: [{ index: 1, x: 241, y: 125 }],
   },
   {
     id: 'butterfly',
-    name: 'Butterfly Hug',
     category: 'tapping',
-    subtitle: '2 Punkte, abwechselnd',
-    duration: '30 Sek – 2 Min',
     silhouette: 'torso',
     mode: 'alternate',
     tickMs: 900,
     points: [
-      { name: 'Linke Hand', x: 113, y: 276 },
-      { name: 'Rechte Hand', x: 375, y: 317 },
+      { index: 1, x: 113, y: 276 },
+      { index: 2, x: 375, y: 317 },
     ],
-    instruction: 'Hände überkreuzt auf der Brust, abwechselnd sanft klopfen.',
   },
   {
     id: 'hand',
-    name: 'Handpunkte',
     category: 'akupressur',
-    subtitle: 'Shenmen & Laogong',
-    duration: '1 Min',
     silhouette: 'hand',
     mode: 'alternate',
     tickMs: 1400,
     points: [
-      { name: 'Laogong, Handflächenmitte', x: 279, y: 463 },
-      { name: 'Shenmen, Handgelenk', x: 284, y: 632 },
+      { index: 1, x: 279, y: 463 },
+      { index: 2, x: 284, y: 632 },
     ],
-    instruction: 'Abwechselnd Handflächenmitte und Handgelenk sanft drücken oder reiben.',
   },
   {
     id: 'ear',
-    name: 'Ohr-Shenmen',
     category: 'akupressur',
-    subtitle: '1 Punkt, sanfter Druck',
-    duration: '1 Min',
     silhouette: 'ear',
     mode: 'single',
-    points: [{ name: 'Ohr-Shenmen', x: 100, y: 60 }],
-    instruction: 'Sanften Druck am oberen Ohrmuschelbereich halten oder langsam kneten.',
+    points: [{ index: 1, x: 100, y: 60 }],
   },
   {
     id: 'anmian',
-    name: 'Anmian',
     category: 'akupressur',
-    subtitle: '1 Punkt, sanfter Druck',
-    duration: '1 Min',
     silhouette: 'anmian',
     mode: 'single',
-    points: [{ name: 'Anmian', x: 214, y: 235 }],
-    instruction: 'Sanften Druck in der Vertiefung hinter dem Ohrläppchen halten oder langsam kreisen.',
+    points: [{ index: 1, x: 214, y: 235 }],
   },
   {
     id: 'neiguan',
-    name: 'Neiguan',
     category: 'akupressur',
-    subtitle: '1 Punkt, sanfter Druck',
-    duration: '1 Min',
     silhouette: 'neiguan',
     mode: 'single',
-    points: [{ name: 'Neiguan', x: 258, y: 396 }],
-    instruction: 'Sanften Druck zwei bis drei Fingerbreit oberhalb der Handgelenksfalte halten, mittig zwischen den Sehnen.',
+    points: [{ index: 1, x: 258, y: 396 }],
   },
 ];
 
@@ -232,6 +203,7 @@ function Silhouette({ type, points, activeIndex }: { type: SilhouetteType; point
 }
 
 function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () => void }) {
+  const { t } = useT();
   const { recordExerciseSession } = useData();
   const [playing, setPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -293,25 +265,25 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
   return (
     <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', gap: layout.blockGap }}>
       <div>
-        <BackButton label="Berühren" onClick={onBack} />
+        <BackButton label={t('beruehren.back')} onClick={onBack} />
       </div>
 
       <div style={{ padding: `0 ${layout.headingInset}px` }}>
-        <h2 style={{ ...type.subpageTitle, color: palette.ink, margin: 0 }}>{exercise.name}</h2>
-        <p style={{ ...type.body, color: palette.secondary, margin: `${layout.overlineToTitle}px 0 0` }}>{exercise.duration}</p>
+        <h2 style={{ ...type.subpageTitle, color: palette.ink, margin: 0 }}>{t(`exercise.${exercise.id}.name`)}</h2>
+        <p style={{ ...type.body, color: palette.secondary, margin: `${layout.overlineToTitle}px 0 0` }}>{t(`exercise.${exercise.id}.duration`)}</p>
       </div>
 
       <div style={glassCard()}>
         <div style={{ padding: '12px 0' }}>
           <Silhouette type={exercise.silhouette} points={exercise.points} activeIndex={activeIndex} />
           <p style={{ ...type.body, fontWeight: 500, textAlign: 'center', color: palette.accent, marginTop: 12 }}>
-            {exercise.points[activeIndex]?.name || exercise.points[0].name}
+            {t(`exercise.${exercise.id}.point.${(exercise.points[activeIndex] ?? exercise.points[0]).index}`)}
           </p>
         </div>
       </div>
 
       <div style={listCard()}>
-        <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0, padding: '12px 0' }}>{exercise.instruction}</p>
+        <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0, padding: '12px 0' }}>{t(`exercise.${exercise.id}.instruction`)}</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -322,7 +294,7 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
         )}
         <PrimaryButton onClick={toggle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {playing ? <Pause size={16} /> : <Play size={16} />}
-          {playing ? 'Pause' : 'Übung starten'}
+          {playing ? t('beruehren.play.pause') : t('beruehren.play.start')}
         </PrimaryButton>
       </div>
     </div>
@@ -330,6 +302,7 @@ function ExerciseDetail({ exercise, onBack }: { exercise: Exercise; onBack: () =
 }
 
 function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (exercise: Exercise) => void }) {
+  const { t } = useT();
   const [category, setCategory] = useState<Category>('tapping');
 
   return (
@@ -338,36 +311,31 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
         <div style={listCard()}>
           <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0 }}>
-              Berührung ist eines der ältesten Signale für Sicherheit, die unser Nervensystem kennt – noch bevor wir sprechen
-              konnten, hat der Körper schon auf sie reagiert. Rhythmisches Klopfen oder sanfter Druck kann diesen Effekt
-              gezielt nutzen.
+              {t('beruehren.info.body1')}
             </p>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.6, margin: 0 }}>
-              Klopfen-Übungen stammen direkt aus dem Buch und sind in Studien zu Stress und Angst untersucht.
-              Akupressur-Punkte stammen aus der traditionellen chinesischen Medizin – hier ist die Studienlage dünner, sie
-              können beruhigend wirken, ohne dass wir ihnen ein Wirkversprechen geben.
+              {t('beruehren.info.body2')}
             </p>
             <p style={{ ...type.hintText, color: palette.hint, lineHeight: 1.6, margin: 0 }}>
-              Bei schwerer Traumatisierung oder akuten psychischen Erkrankungen ersetzen diese Übungen keine Behandlung.
-              Professionelle Unterstützung gehört in professionelle Hände.
+              {t('beruehren.info.disclaimer')}
             </p>
           </div>
         </div>
       )}
 
       <p style={{ ...type.body, color: palette.secondary, margin: `0 ${layout.headingInset}px`, lineHeight: 1.5 }}>
-        Sanfte Berührung als Signal für Sicherheit. Kurze Übungen, keine Verarbeitung.
+        {t('beruehren.subtitle')}
       </p>
 
       <div style={{ ...pillTrack, alignSelf: 'flex-start' }}>
         {(
           [
-            { key: 'tapping', label: 'Klopfen' },
-            { key: 'akupressur', label: 'Akupressur' },
-          ] as { key: Category; label: string }[]
+            { key: 'tapping', labelKey: 'beruehren.category.tapping' },
+            { key: 'akupressur', labelKey: 'beruehren.category.akupressur' },
+          ] as { key: Category; labelKey: string }[]
         ).map((tab) => (
           <button key={tab.key} onClick={() => setCategory(tab.key)} style={pillSegment(category === tab.key)}>
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -404,9 +372,9 @@ function ExerciseList({ showInfo, onSelect }: { showInfo: boolean; onSelect: (ex
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ ...type.body, color: palette.ink, margin: 0 }}>{ex.name}</p>
+                <p style={{ ...type.body, color: palette.ink, margin: 0 }}>{t(`exercise.${ex.id}.name`)}</p>
                 <p style={{ ...type.small, color: palette.secondary, margin: '2px 0 0' }}>
-                  {ex.subtitle} &middot; {ex.duration}
+                  {t(`exercise.${ex.id}.subtitle`)} &middot; {t(`exercise.${ex.id}.duration`)}
                 </p>
               </div>
             </button>
@@ -434,6 +402,7 @@ interface Props {
 }
 
 export default function BeruehrenScreen({ showInfo, onOpenPaywall }: Props) {
+  const { t } = useT();
   const { isSubscribed } = useSubscription();
   const [view, setView] = useState<'list' | 'detail'>('list');
   const [selected, setSelected] = useState<Exercise | null>(null);
@@ -443,9 +412,9 @@ export default function BeruehrenScreen({ showInfo, onOpenPaywall }: Props) {
       <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
         <LockIcon />
         <p style={{ ...type.body, color: palette.ink, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
-          Übungen sind Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um sie freizuschalten.
+          {t('beruehren.locked.body')}
         </p>
-        <PrimaryButton onClick={onOpenPaywall}>Übungen freischalten</PrimaryButton>
+        <PrimaryButton onClick={onOpenPaywall}>{t('beruehren.locked.cta')}</PrimaryButton>
       </div>
     );
   }

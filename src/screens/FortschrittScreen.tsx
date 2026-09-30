@@ -6,7 +6,7 @@ import { STATE_COLORS } from '../store/ritualSelectors';
 import { formatEntryDate } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { SignalQuality } from '../ppg/types';
-import { useLocale } from '../i18n';
+import { useLocale, useT } from '../i18n';
 
 interface Props {
   showInfo: boolean;
@@ -35,6 +35,7 @@ function LockIcon() {
 }
 
 export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
+  const { t } = useT();
   const locale = useLocale();
   const { isSubscribed } = useSubscription();
   const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements, weeklyMinutesChart } = useData();
@@ -46,9 +47,9 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
       <div style={{ padding: `0 ${layout.screenX}px`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
         <LockIcon />
         <p style={{ ...type.body, color: palette.ink, textAlign: 'center', lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
-          Fortschritt ist Teil von Lomira Plus — starte deine kostenlose 7-tägige Testphase, um ihn freizuschalten.
+          {t('fortschritt.locked.body')}
         </p>
-        <PrimaryButton onClick={onOpenPaywall}>Fortschritt freischalten</PrimaryButton>
+        <PrimaryButton onClick={onOpenPaywall}>{t('fortschritt.locked.cta')}</PrimaryButton>
       </div>
     );
   }
@@ -59,12 +60,10 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
         <div style={glassCard()}>
           <div style={{ ...cardInner, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <p style={{ ...type.body, color: palette.ink, lineHeight: 1.5, margin: 0 }}>
-              Hier siehst du deine Entwicklung über Zeit — keine einzelnen Einträge, die findest du unter Ritual, sondern zusammengefasste
-              Zahlen und Verläufe.
+              {t('fortschritt.info.body')}
             </p>
             <p style={{ ...type.hintText, color: palette.hint, lineHeight: 1.5, margin: 0 }}>
-              Die Puls-Werte sind ein grober Trend aus freiwilligen Messungen, keine medizinische Messung. Bei gesundheitlichen Fragen wende
-              dich an eine Ärztin oder einen Arzt.
+              {t('fortschritt.info.disclaimer')}
             </p>
           </div>
         </div>
@@ -72,9 +71,9 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
         {[
-          { value: ankerSessionCount, label: 'Sessions gesamt' },
-          { value: streak, label: 'Aktuelle Serie' },
-          { value: `${reguliertPercent}%`, label: 'Reguliert-Anteil' },
+          { value: ankerSessionCount, label: t('fortschritt.stats.sessions') },
+          { value: streak, label: t('fortschritt.stats.streak') },
+          { value: `${reguliertPercent}%`, label: t('fortschritt.stats.reguliertPercent') },
         ].map((stat) => (
           <div key={stat.label} style={{ ...glassCard(), padding: '16px 8px', textAlign: 'center' }}>
             <div style={{ ...type.sectionTitle, color: palette.ink }}>{stat.value}</div>
@@ -85,7 +84,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
 
       <div style={glassCard()}>
         <div style={cardInner}>
-          <div style={{ ...type.cardTitle, color: palette.ink, marginBottom: 12 }}>Diese Woche</div>
+          <div style={{ ...type.cardTitle, color: palette.ink, marginBottom: 12 }}>{t('fortschritt.week.title')}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {weekStrip.map((d, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -104,7 +103,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
 
       <div style={glassCard()}>
         <div style={cardInner}>
-          <div style={{ ...type.cardTitle, color: palette.ink, marginBottom: 12 }}>Geübte Minuten (4 Wochen)</div>
+          <div style={{ ...type.cardTitle, color: palette.ink, marginBottom: 12 }}>{t('fortschritt.minutes.title')}</div>
           {hasAnyPracticeMinutes ? (
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 90 }}>
               {weeklyMinutesChart.map((w) => (
@@ -124,7 +123,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
             </div>
           ) : (
             <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
-              Noch keine geübten Minuten erfasst — probiere eine Atem- oder Übungen-Session.
+              {t('fortschritt.minutes.empty')}
             </p>
           )}
         </div>
@@ -133,16 +132,16 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
       <div style={glassCard()}>
         <div style={cardInner}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ ...type.cardTitle, color: palette.ink }}>Puls-Verlauf</span>
+            <span style={{ ...type.cardTitle, color: palette.ink }}>{t('fortschritt.pulse.title')}</span>
             {pulseChart && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...type.small, display: 'flex', alignItems: 'center', gap: 4, color: palette.tertiary }}>
                   <span style={statusDot(PULSE_BEFORE)} />
-                  Vorher
+                  {t('fortschritt.pulse.before')}
                 </span>
                 <span style={{ ...type.small, display: 'flex', alignItems: 'center', gap: 4, color: palette.tertiary }}>
                   <span style={statusDot(PULSE_AFTER)} />
-                  Nachher
+                  {t('fortschritt.pulse.after')}
                 </span>
               </div>
             )}
@@ -160,20 +159,20 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
                 ))}
               </svg>
               <div style={{ ...type.small, display: 'flex', justifyContent: 'space-between', color: palette.tertiary, marginTop: 2 }}>
-                <span>Früheste Messung</span>
-                <span>Heute</span>
+                <span>{t('fortschritt.pulse.earliest')}</span>
+                <span>{t('fortschritt.pulse.today')}</span>
               </div>
             </>
           ) : (
             <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px', margin: 0 }}>
-              Noch keine Messungen — miss deinen Puls vor/nach der nächsten Atemübung.
+              {t('fortschritt.pulse.empty')}
             </p>
           )}
         </div>
       </div>
 
       <div style={glassCard()}>
-        <div style={{ ...type.cardTitle, color: palette.ink, padding: '12px 0 0' }}>Puls &amp; HRV (Kamera-Messung)</div>
+        <div style={{ ...type.cardTitle, color: palette.ink, padding: '12px 0 0' }}>{t('fortschritt.hrv.title')}</div>
         {hrvMeasurements.length > 0 ? (
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '10px 0 12px', borderBottom: `1px solid ${palette.divider}` }}>
@@ -181,9 +180,9 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
               <span style={{ fontFamily: fonts.sans, fontSize: 12, color: palette.secondary }}>
                 bpm
                 {hrvMeasurements[0].rmssd != null
-                  ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms${hrvMeasurements[0].rmssdEstimated ? ' (geschätzt)' : ''}`
+                  ? ` · RMSSD ${Math.round(hrvMeasurements[0].rmssd)}ms${hrvMeasurements[0].rmssdEstimated ? ' ' + t('fortschritt.hrv.rmssdEstimated') : ''}`
                   : ''}{' '}
-                · zuletzt {formatEntryDate(hrvMeasurements[0].date, locale)}
+                · {t('fortschritt.hrv.last')} {formatEntryDate(hrvMeasurements[0].date, locale)}
               </span>
               <span style={{ ...statusDot(QUALITY_COLOR[hrvMeasurements[0].quality]), marginLeft: 'auto', alignSelf: 'center' }} />
             </div>
@@ -208,7 +207,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
                   </span>
                   {m.rmssd != null && (
                     <span style={{ ...type.small, color: palette.secondary }}>
-                      RMSSD {Math.round(m.rmssd)}ms{m.rmssdEstimated ? ' (geschätzt)' : ''}
+                      RMSSD {Math.round(m.rmssd)}ms{m.rmssdEstimated ? ' ' + t('fortschritt.hrv.rmssdEstimated') : ''}
                     </span>
                   )}
                 </span>
@@ -217,7 +216,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
           </>
         ) : (
           <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '16px 8px 16px', margin: 0 }}>
-            Noch keine Kamera-Messung — probiere &quot;Puls messen&quot; über den Atmen-Bereich.
+            {t('fortschritt.hrv.empty')}
           </p>
         )}
       </div>
