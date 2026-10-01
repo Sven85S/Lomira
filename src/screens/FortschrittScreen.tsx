@@ -3,6 +3,7 @@ import { accentA, fonts, glassCard, layout, listRow, palette, statusDot, type } 
 import { useData } from '../context/DataContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { STATE_COLORS } from '../store/ritualSelectors';
+import { buildHrvHistoryChart } from '../store/hrvSelectors';
 import { formatEntryDate } from '../lib/date';
 import PrimaryButton from '../components/PrimaryButton';
 import type { SignalQuality } from '../ppg/types';
@@ -19,6 +20,11 @@ const QUALITY_COLOR: Record<SignalQuality, string> = { good: palette.reached, fa
 // einem Akzent wären Vorher/Nachher nicht mehr unterscheidbar.
 const PULSE_BEFORE = '#C8A84B';
 const PULSE_AFTER = '#6E7D66';
+
+// HRV-Verlauf: BPM nutzt dieselbe Farbe wie die "nachher"-Linie oben
+// (Puls-Thema), RMSSD übernimmt die Akzent-Farbe aus der Palette.
+const HISTORY_BPM = '#6E7D66';
+const HISTORY_RMSSD = '#41607E';
 
 const cardInner: CSSProperties = { padding: '12px 0' };
 
@@ -41,6 +47,7 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
   const { ankerSessionCount, streak, reguliertPercent, weekStrip, pulseChart, hrvMeasurements, weeklyMinutesChart } = useData();
   const maxWeeklyMinutes = Math.max(1, ...weeklyMinutesChart.map((w) => w.minutes));
   const hasAnyPracticeMinutes = weeklyMinutesChart.some((w) => w.minutes > 0);
+  const hrvHistory = buildHrvHistoryChart(hrvMeasurements);
 
   if (!isSubscribed) {
     return (
@@ -170,6 +177,75 @@ export default function FortschrittScreen({ showInfo, onOpenPaywall }: Props) {
           )}
         </div>
       </div>
+
+      {hrvMeasurements.length > 0 && (
+        <div style={glassCard()}>
+          <div style={cardInner}>
+            <div style={{ ...type.cardTitle, color: palette.ink, marginBottom: 2 }}>{t('fortschritt.hrvHistory.title')}</div>
+            <div style={{ ...type.small, color: palette.tertiary, marginBottom: 12 }}>{t('fortschritt.hrvHistory.subtitle')}</div>
+            {hrvHistory ? (
+              <>
+                {/* BPM-Linie oben */}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ ...type.small, color: palette.secondary, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={statusDot(HISTORY_BPM)} />
+                    {t('fortschritt.hrvHistory.bpmLabel')}
+                  </span>
+                  <span style={{ ...type.small, color: palette.tertiary }}>{hrvHistory.bpmMin}–{hrvHistory.bpmMax}</span>
+                </div>
+                <svg width="100%" height={70} viewBox="0 0 280 70" preserveAspectRatio="none" style={{ display: 'block' }}>
+                  <polyline
+                    points={hrvHistory.bpmPts}
+                    fill="none"
+                    stroke={HISTORY_BPM}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
+
+                {/* RMSSD-Linie unten — nur rendern wenn an mindestens zwei
+                    Tagen ein RMSSD-Wert vorliegt, sonst Hinweis */}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 12, marginBottom: 4 }}>
+                  <span style={{ ...type.small, color: palette.secondary, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={statusDot(HISTORY_RMSSD)} />
+                    {t('fortschritt.hrvHistory.rmssdLabel')}
+                  </span>
+                  {hrvHistory.rmssdMin != null && hrvHistory.rmssdMax != null && (
+                    <span style={{ ...type.small, color: palette.tertiary }}>{hrvHistory.rmssdMin}–{hrvHistory.rmssdMax}</span>
+                  )}
+                </div>
+                {hrvHistory.rmssdPts ? (
+                  <svg width="100%" height={70} viewBox="0 0 280 70" preserveAspectRatio="none" style={{ display: 'block' }}>
+                    <polyline
+                      points={hrvHistory.rmssdPts}
+                      fill="none"
+                      stroke={HISTORY_RMSSD}
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                ) : (
+                  <p style={{ ...type.hintText, color: palette.tertiary, margin: '4px 0 0' }}>{t('fortschritt.hrvHistory.rmssdMissing')}</p>
+                )}
+
+                {/* Zeitachse: früheste und späteste Messung des Fensters */}
+                <div style={{ ...type.small, display: 'flex', justifyContent: 'space-between', color: palette.tertiary, marginTop: 6 }}>
+                  <span>{formatEntryDate(hrvHistory.earliestDate, locale)}</span>
+                  <span>{formatEntryDate(hrvHistory.latestDate, locale)}</span>
+                </div>
+              </>
+            ) : (
+              <p style={{ ...type.body, color: palette.tertiary, textAlign: 'center', padding: '8px 8px 4px', margin: 0 }}>
+                {t('fortschritt.hrvHistory.empty')}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div style={glassCard()}>
         <div style={{ ...type.cardTitle, color: palette.ink, padding: '12px 0 0' }}>{t('fortschritt.hrv.title')}</div>

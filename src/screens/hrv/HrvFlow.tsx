@@ -5,6 +5,7 @@ import { useSubscription } from '../../context/SubscriptionContext';
 import { writeHrvSample } from '../../health/appleHealth';
 import { STORAGE_KEYS, readJSON } from '../../lib/storage';
 import { PpgCamera, isPpgCameraSupported, type CameraPermissionState } from '../../native/ppgCamera';
+import { hapticSuccess } from '../../native/haptics';
 import { filterRROutliers } from '../../ppg/outlierFilter';
 import { createPpgService } from '../../ppg/ppgService';
 import { computeRmssd } from '../../ppg/rmssd';
@@ -245,6 +246,11 @@ export default function HrvFlow({ onClose, onOpenFortschritt, onOpenPaywall }: P
         window.clearInterval(id);
         void (async () => {
           console.log('[HrvFlow] stopCapture called from: measurement countdown finished', { elapsed, totalMs });
+          // Short haptic to signal "measurement done" — the user has been
+          // holding still for 60 s with the screen face-down against a finger
+          // and may not be watching. Fired first so iOS actually schedules it
+          // before the stopCapture/compute block briefly pins the main thread.
+          void hapticSuccess();
           await PpgCamera.stopCapture();
           const bpmSamples = bpmSamplesRef.current;
 
