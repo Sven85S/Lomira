@@ -41,18 +41,21 @@ class MainViewController: CAPBridgeViewController {
         // this app's WKWebView — Capacitor itself only sets isInspectable
         // automatically for Debug builds, and this API needs iOS 16.4+
         // (below the app's own 15.0 deployment target, hence the guard).
-        // Unconditional here, NOT `#if DEBUG`-gated: this project is
-        // currently only ever tested as a Release build (see the Debug/JIT
-        // Flutter-engine crash earlier commits on this branch root-caused,
-        // which is why Release became the only build actually run on
-        // device) — gating this behind DEBUG would make it useless for
-        // exactly the build that needs inspecting. Remove or gate behind
-        // `#if DEBUG` before an actual App Store/TestFlight submission —
-        // isInspectable on a shipped Release build lets anyone with
-        // physical USB access and Xcode attach the Web Inspector.
+        // Gated behind the custom LOMIRA_WEB_INSPECTOR flag so TestFlight and
+        // App Store builds never ship with it on, which would let anyone with
+        // physical USB access and Xcode attach the Web Inspector. Earlier on
+        // this branch the project was only ever tested as a Release build
+        // (Debug/JIT Flutter-engine crash, root-caused), so DEBUG alone would
+        // disable this for the only build actually used. Toggle the flag
+        // temporarily via Xcode (Build Settings → Swift Compiler - Custom
+        // Flags → Active Compilation Conditions: add LOMIRA_WEB_INSPECTOR) or
+        // comment out the `#if` lines when inspection is needed; always off
+        // for the Release build that goes to App Store Connect.
+        #if LOMIRA_WEB_INSPECTOR
         if #available(iOS 16.4, *) {
             webView?.isInspectable = true
-            print("[MainViewController] webView.isInspectable = true")
+            print("[MainViewController] webView.isInspectable = true (LOMIRA_WEB_INSPECTOR)")
         }
+        #endif
     }
 }
